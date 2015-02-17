@@ -1,0 +1,48 @@
+apply plugin: 'com.android.application'
+
+dependencies {
+    compile project(':facebook')
+    compile fileTree(dir: '../../bin/', include: 'getsocial-android-sdk.jar')
+    compile 'com.google.android.gms:play-services:6.1.71'
+}
+
+android {
+    compileSdkVersion Integer.parseInt(project.ANDROID_BUILD_SDK_VERSION)
+    buildToolsVersion project.ANDROID_BUILD_TOOLS_VERSION
+
+    defaultConfig {
+        applicationId "im.getsocial.testapp"
+        minSdkVersion Integer.parseInt(project.ANDROID_BUILD_MIN_SDK_VERSION)
+        targetSdkVersion Integer.parseInt(project.ANDROID_BUILD_TARGET_SDK_VERSION)
+        versionCode 1
+        versionName "1.0"
+    }
+
+    sourceSets {
+        main {
+            manifest.srcFile 'AndroidManifest.xml'
+            java.srcDirs = ['src']
+            resources.srcDirs = ['src']
+            aidl.srcDirs = ['src']
+            renderscript.srcDirs = ['src']
+            res.srcDirs = ['res']
+            assets.srcDirs = ['assets']
+        }
+
+        debug.setRoot('build-types/debug')
+        release.setRoot('build-types/release')
+    }
+
+    signingConfigs {
+        debug {
+            storeFile file("${projectDir}/../debug.keystore")
+        }
+    }
+
+    buildTypes {
+        all {
+            minifyEnabled false
+            proguardFile 'proguard-project.txt'
+        }
+    }
+}
