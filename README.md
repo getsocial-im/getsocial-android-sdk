@@ -2,9 +2,9 @@
 
 
 
-Build and manage the community within your games with **GetSocial** .
+Build and manage the community within your games with **GetSocial**.
 
-GetSocial provides the whole social layer stack that powers **engagement** , **retention** , **acquisition** and **revenue tools** .
+GetSocial provides the whole social layer stack that powers **engagement**, **retention**, **acquisition** and **revenue tools**.
 
 
 
@@ -59,7 +59,7 @@ To manage the integration of the GetSocial SDK, [login to your developer account
   * [Specifying colors](#specifying-colors)
   * [Specifying images](#specifying-images)
   * [Specifying dimensions](#specifying-dimensions)
-  * [Specifying text styles](#specifying-text-style)
+  * [Specifying text styles](#specifying-text-styles)
   * [Using custom fonts](#using-custom-fonts)
   * [UI Reference Table](#ui-reference-table)
 
@@ -345,7 +345,7 @@ You will see several options to invite friends, depending on what applications y
 
 # Notification Center
 
-Activity feed and Chat features are incomplete without having the Notification Center  that provides in-app notifications to users when someone likes or comments on their activities or when they receive chat messages. 
+Activity feed and Chat features are incomplete without having the Notification Center that provides in-app notifications to users when someone likes or comments on their activities or when they receive chat messages. 
 
 
 ```java
@@ -661,11 +661,8 @@ The scale mode and factor can be used conditionally to create different styles b
 
 
 
-
 ```java
-
 configuration.setAnimationStyle(Property.WINDOW, GetSocial.ANIMATION_FADE);
-
 ```
 
 
@@ -681,16 +678,6 @@ The available animations styles are:
 
 
 Need a custom animation style? Please [contact us](mailto:info@getsocial.im).
-
-
-
-
-
-
-```java
-Configuration configuration = GetSocial.getInstance().getConfiguration();
-
-```
 
 
 
@@ -762,9 +749,7 @@ configuration.setDimension(Property.HEADER, 38);
 
 
 ```java
-
 configuration.setTextStyle(Property.HEADER, Typeface.DEFAULT, 26, 0xffffc000, 0xff371c00, 5f, 0, 1);
-
 ```
 
 
@@ -805,7 +790,7 @@ configuration.setTextStyle(Property.HEADER, typeface, 26, 0xffffc000, 0xff371c00
 | <sub>1                                    </sub>| <sub>TITLE_MARGIN_TOP                     </sub>| <sub>                                     </sub>| <sub>                                     </sub>| <sub>X                                    </sub>| <sub>                                     </sub> |
 | <sub>2                                    </sub>| <sub>HEADER                               </sub>| <sub>X                                    </sub>| <sub>X                                    </sub>| <sub>X                                    </sub>| <sub>                                     </sub> |
 | <sub>3                                    </sub>| <sub>FLOAT                                </sub>| <sub>                                     </sub>| <sub>X                                    </sub>| <sub>                                     </sub>| <sub>                                     </sub> |
-| <sub>4                                    </sub>| <sub>HINT                                 </sub>| <sub>X                                    </sub>| <sub>                                     </sub>| <sub>                                     </sub>| <sub>                                     </sub> |
+| <sub>4                                    </sub>| <sub>HINT                                 </sub>| <sub>                                     </sub>| <sub>X                                    </sub>| <sub>                                     </sub>| <sub>                                     </sub> |
 | <sub>5                                    </sub>| <sub>AVATAR_BORDER_SIZE                   </sub>| <sub>                                     </sub>| <sub>                                     </sub>| <sub>X                                    </sub>| <sub>                                     </sub> |
 | <sub>6                                    </sub>| <sub>AVATAR_BORDER_COLOR                  </sub>| <sub>                                     </sub>| <sub>X                                    </sub>| <sub>                                     </sub>| <sub>                                     </sub> |
 | <sub>7                                    </sub>| <sub>AVATAR_RADIUS                        </sub>| <sub>                                     </sub>| <sub>                                     </sub>| <sub>X                                    </sub>| <sub>                                     </sub> |
@@ -946,5 +931,4 @@ Assets
 
 
 ![image alt text](images/img_13.png)
-
 
