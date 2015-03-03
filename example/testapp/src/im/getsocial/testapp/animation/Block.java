@@ -20,7 +20,6 @@ public class Block extends BlockBase
 		faces.add(R.drawable.adam);
 		faces.add(R.drawable.arangel);
 		faces.add(R.drawable.barbara);
-		faces.add(R.drawable.chirag);
 		faces.add(R.drawable.damjan);
 		faces.add(R.drawable.demian);
 		faces.add(R.drawable.jon);

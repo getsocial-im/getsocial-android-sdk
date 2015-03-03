@@ -2,9 +2,9 @@
 
 
 
-Build and manage the community within your games with **GetSocial**.
+Build and manage the community within your games with **GetSocial** .
 
-GetSocial provides the whole social layer stack that powers **engagement**, **retention**, **acquisition** and **revenue tools**.
+GetSocial provides the whole social layer stack that powers **engagement** , **retention** , **acquisition** and **revenue tools** .
 
 
 
@@ -23,7 +23,10 @@ GetSocial provides the whole social layer stack that powers **engagement**, **re
 * Localised to 12 languages
 * In-app Notification Center
 * Socially triggered push notifications
-* And more...
+* And more…
+
+
+
 
 
 
@@ -31,7 +34,7 @@ For more information on GetSocial, visit our [website](http://www.getsocial.im/)
 
 
 
-To manage the integration of the GetSocial SDK, [login to your developer account](http://developers.gramble.com).
+To manage the integration of the GetSocial SDK, [login to your developer account](https://developers.getsocial.im).
 
 
 
@@ -50,7 +53,11 @@ To manage the integration of the GetSocial SDK, [login to your developer account
 * [Integration with facebook](#integration-with-facebook)
   * [User Authentication](#user-authentication)
   * [Smart Invites](#smart-invites)
+
+
 * [Invite and install tracking](#invite-and-install-tracking)
+
+
 * [Customizing the appearance](#customizing-the-appearance)
   * [Getting the current configuration](#getting-the-current-configuration)
   * [Specifying window width and height](#specifying-window-width-and-height)
@@ -93,6 +100,8 @@ Add the reference to the “getsocial-android-sdk.jar” in the build.gradle.
 
 
 The GetSocial SDK requires that you build your project with Android Developers Tools (ADT) version 19 or above.
+
+
 
 
 
@@ -145,7 +154,7 @@ getSocial.authenticateGame("AppKey", new GetSocial.OperationObserver()
 });
 ```
 
-Your App Key can be found in the GetSocial Developer Portal or obtained from your GetSocial Developers Relations Manager.
+Your App Key can be found in the [GetSocial Developer Portal](https://developers.getsocial.im) or obtained from your GetSocial Developers Relations Manager.
 
 
 
@@ -197,7 +206,7 @@ You can also register a listener to be notified every time one of our views is o
 
 
 ```java
-getSocial.setOnLayerStateChangedListener(new GetSocial.OnLayerStateChangedListener()
+getSocial.setOnLayerStateChangeListener(new GetSocial.OnLayerStateChangeListener()
 {
 	@Override
 	public void onOpen()
@@ -212,7 +221,6 @@ getSocial.setOnLayerStateChangedListener(new GetSocial.OnLayerStateChangedListen
 	}
 });
 ```
-
 
 
 
@@ -270,11 +278,14 @@ getSocial.setLanguage("it");
 
 
 
+
+
+
 Please note that you can always call this method, but the UI needs to be reloaded to reflect the changes.
 
-# 
 
-# 
+
+
 
 # Activities
 
@@ -304,83 +315,176 @@ Map<String, String> properties = new HashMap<String, String>();
 properties.put(GetSocial.PROPERTY_TITLE, "Level 1");
 ```
 
+
+
+
 Do you need more control on what to show on the Activity Feed or maybe have different Activity feeds per level, per clan or a custom attribute?
 
+
+
 [Contact us](mailto:info@getsocial.im) and we will show you how to do it easily.
-![image alt text](images/img_0.png)
+
+![image alt text](images/img_1.png)
+
 # Chat
 
-Chat is integrated into your game the moment you integrate the GetSocial SDK. Every time a user taps on another user’s avatar, a chat conversation is started between the two.
 
-You can link to the chat views that enable your users to view their active conversations and also start new conversations with their friends.
+
+Chat is integrated into your game the moment you integrate the GetSocial SDK. Every time a user taps on another user’s avatar, a chat conversation is started between the two
+
+
+
+You can link to the chat views that enable your users to view their active conversations and also start new conversations with their friends:
+
+
+
+
 
 
 ```java
 getSocial.open(GetSocial.VIEW_CHAT);
+
 ```
+
+
+
+
+
 
 You can also directly open a chat conversation from user’s avatar within the game using their User ID on supported Social Providers.
 
 
+
+
+
 ```java
 Map<String, String> properties = new HashMap<String, String>();
+
 properties.put(GetSocial.PROPERTY_PROVIDER_ID, "facebook");
+
 properties.put(GetSocial.PROPERTY_USER_ID, "0123456789");
 
+
+
 getSocial.open(GetSocial.VIEW_CHAT, properties);
+
 ```
+
+
+
+
+
+
+
 
 
 # Smart Invites
 
+
+
 Using Smart Invites users can easily invite their friends to join and play the game. To open the smart invite view you should call:
+
+
+
 
 
 ```java
 getSocial.open(GetSocial.VIEW_INVITE);
+
 ```
 
-You will see several options to invite friends, depending on what applications you have currently installed on your and which providers you enabled on the GetSocial Developer Portal.
+
+
+
+
+
+You will see several options to invite friends, depending on what applications you have currently installed on your and which providers you enabled in the [GetSocial Developer Portal](https://developers.getsocial.im).
+
+
+
 
 
 # Notification Center
 
+
+
 Activity feed and Chat features are incomplete without having the Notification Center that provides in-app notifications to users when someone likes or comments on their activities or when they receive chat messages. 
+
+
+
+
 
 
 ```java
 getSocial.open(GetSocial.VIEW_NOTIFICATIONS);
+
 ```
+
+
+
+
+
+
+
 
 It is highly recommended that you link this to a UI element with a notifications count badge. The SDK provides a block that allows getting count of the unread chats and activity notifications.
 
 
+
+
+
+
 ```java
-getSocial.setOnNotificationsChangedListener(new GetSocial.OnNotificationsChangedListener()
+getSocial.setOnNotificationsChangeListener(new GetSocial.OnNotificationsChangeListener()
+
 {
+
 	@Override
-	public void onNotificationsChanged(int numberOfUnreadNotifications, int numberOfUnreadConversations)
+
+	public void onNotificationsChange(int numberOfUnreadNotifications, int numberOfUnreadConversations)
+
 	{
+
 		//code to handle changes on Notifications/Conversations counts 
+
 	}
+
 });
 ```
-# 
+
+
+
+
+
+
 # Push Notifications
 
 
+
+
+
+
 To enable Google Cloud Messaging (GCM) for Android, you will first need to turn on the Google Cloud Messaging Services from [Google's API Console](https://code.google.com/apis/console) page.
+
+
 
 1. First select "APIs & auth" from the left-hand navigation and click on "APIs". 
 2. Then find "Google Cloud Messaging for Android" in the list and turn it on by clicking the switch in the "Status" column.
 3. Finally create a Google API key from the "Credentials" panel. Please use the generated value to obtain a Sender ID in the Google Play Developer Portal for your game.
 
 
-In order for GetSocial to send push notifications on your behalf, you need to upload the Google API key and the Sender ID in our Developer portal.
 
-![image alt text](images/img_1.png)
+In order for GetSocial to send push notifications on your behalf, you need to upload the Google API key and the Sender ID in the [GetSocial [Developer porta](https://developers.getsocial.im)l](https://developers.getsocial.im).
+
+
+
+![image alt text](images/img_2.png)
+
+
 
 You need to add the following permissions to your AndroidManifest.xml to allow the application to receive and display Google Cloud Messaging notifications from GetSocial.
+
+
 
 ```xml
 <uses-permission android:name="android.permission.GET_ACCOUNTS" />
@@ -388,15 +492,22 @@ You need to add the following permissions to your AndroidManifest.xml to allow t
 <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
 ```
 
+
 This custom permission is also required for Google Cloud Messaging. The permission name is YOUR_PACKAGE_NAME.gcm.permission.C2D_MESSAGE where YOUR_PACKAGE_NAME is the package name declared in your AndroidManifest.xml.
+
+
 
 ```xml
 <permission android:name="YOUR_PACKAGE_NAME.gcm.permission.C2D_MESSAGE" android:protectionLevel="signature" />
 <uses-permission android:name="YOUR_PACKAGE_NAME.gcm.permission.C2D_MESSAGE" />
 ```
 
+
 The Intent Filter for the action "getsocial.intent.action.NOTIFICATION_RECEIVE" should be added to the activity that integrates the GetSocial SDK.
+
 This GcmBroadcastReceiver will allow your application to register for and receive GetSocial push notifications.
+
+
 
 ```xml
 <application ...>
@@ -422,122 +533,257 @@ This GcmBroadcastReceiver will allow your application to register for and receiv
 
 
 
+
+
+
+
 # User Authentication
-# 
+
+
+
 GetSocial SDK needs to integrate with the Game login to enable chat, posting activities, comments, liking activities and install attribution. 
 
+
+
 Whenever a user performs an action that requires login, the SDK calls the login request handler which allows the game to show it’s own login UI.
-# 
+
+
+
+
+
 
 ```java
 getSocial.setOnLoginRequestListener(new GetSocial.OnLoginRequestListener()
+
 {
+
 	@Override
+
 	public void onLoginRequest()
+
 	{
+
 		// Show Game login UI
+
 	}
+
 });
 ```
-# 
-# 
-# 
+
+
+
+
+
+
+
+
+
+
+
+
 # Integration with Facebook
+
+
 
 The GetSocial SDK can easily interact with the Facebook social features using one of the latest versions of the Facebook SDK.
 
 
+
+
+
+
 Make sure you follow the [Facebook SDK integration for Android](https://developers.facebook.com/docs/android/getting-started).
+
+
+
+
+
+
 ## User Authentication
+
+
 
 Whenever a user performs an action that requires login, the SDK calls the login request handler which allows the game to show the FB Login UI. You could use FB default UI or implement your own.
 
 
 
+
+
+
+
+
 ```java
 getSocial.setOnLoginRequestListener(new GetSocial.OnLoginRequestListener()
+
 {
+
 	@Override
+
 	public void onLoginRequest()
+
 	{
+
 		logInWithFacebook();
+
 	}
+
 });
 ```
 
+
+
 Where logInWithFacebook is the method responsible to open a new Facebook Session.
+
+
 
 ```java
 private List<String> FACEBOOK_PERMISSIONS = Arrays.asList("public_profile", "email", "user_friends");
 
+
+
 private void logInWithFacebook()
+
 {
+
 	Session session = Session.getActiveSession();
+
 	
+
 	if(session != null && (session.isOpened() || session.getState().equals(SessionState.CREATED_TOKEN_LOADED)))
+
 	{
+
 		Session.NewPermissionsRequest newPermissionsRequest = new Session.NewPermissionsRequest(this, FACEBOOK_PERMISSIONS);
+
 		session.requestNewReadPermissions(newPermissionsRequest);
+
 	}
+
 	else
+
 	{
+
 		Session.setActiveSession((session = new Session(this)));
+
 		
+
 		Session.OpenRequest openRequest = new Session.OpenRequest(this);
+
 		openRequest.setPermissions(FACEBOOK_PERMISSIONS);
+
 		session.openForRead(openRequest);
+
 	}
+
 }
 ```
 
-If you are using the Facebook LoginButton, you need to also implement the Session.StatusCallback to get the state changes and sync the GetSocialSDK.
+
+
+If you are using the Facebook LoginButton, you need to also implement the Session.StatusCallback to get the state changes and sync the GetSocial SDK.
+
+
 
 ```java
 private View initializeFacebookLoginButton()
+
 {
+
 	LoginButton loginButton = new LoginButton(this);
+
 	loginButton.setReadPermissions(FACEBOOK_PERMISSIONS);
+
 	loginButton.setSessionStatusCallback(new Session.StatusCallback()
+
 	{
+
 		@Override
+
 		public void call(Session session, SessionState state, Exception exception)
+
 		{
+
 			FacebookUtils.getInstance().updateSessionState();
+
 		}
+
 	});
+
 		
+
 	return loginButton;
+
 }
 ```
+
+
 
 If you are not using the Facebook LoginButton, make sure you call `FacebookUtils.getInstance().updateSessionState();` whenever you receive an update of the state of the Facebook active session.
 
 
+
+
+
+
 ## Smart Invites
+
+
+
+
+
+
 
 You can enable the Smart Invites for Facebook by registering our invite plugin.
 
 
 ```java
 getSocial.registerPlugin("facebook", new FacebookInvitePlugin(this)
+
 {
+
 	@Override
+
 	public void authenticateUser()
+
 	{
+
 		logInWithFacebook();
+
 	}
+
 });
 ```
 
 
-The `loginWithFacebook` method is the same you use to authenticate users with Facebook and we explained before and it is required to be able to authenticate users with Facebook before showing the invite UI.
+
+The `loginWithFacebook` method is the same you use to authenticate users with Facebook and we explained before and it is required to be able to authenticate users with Facebook before showing the invite UI. You can find the script implementation in `GetSocialSDK Demo/Scripts/` folder.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
 # 
 Invite and install tracking
 
+
+
 To allow the GetSocial SDK to track installations you have to copy the following lines in your Manifest file.
+
+
 
 ```xml
 <receiver
@@ -585,6 +831,9 @@ Configuration configuration = GetSocial.getInstance().getConfiguration();
 
 
 
+
+
+
 ## Specifying window width and height
 
 
@@ -599,9 +848,12 @@ configuration.setPreferredWindowHeight(400);
 
 
 
+
+
+
 If you are also setting a background image, then you don’t need to specify both values. You can specify just one of the dimensions and the other will be calculated to maintain the aspect ratio of the image.
 
-## 
+
 
 ## Scaling the content
 
@@ -621,13 +873,14 @@ The scale mode can be set as follows:
 
 
 
-
-
 ```java
 configuration.setScaleMode(GetSocial.SCALE_MODE_PIXEL_PERFECT);
+```
 
+or
+
+```java
 configuration.setScaleMode(GetSocial.SCALE_MODE_FIXED_RATIO);
-
 ```
 
 
@@ -635,15 +888,9 @@ configuration.setScaleMode(GetSocial.SCALE_MODE_FIXED_RATIO);
 Irrespective of the scaling mode, the UI elements, fonts and margins can be scaled up or down by scale factor. The scale factor only affects the contents of the GetSocial UI and not it’s size.
 
 
-
-
-
-
 ```java
 // scaleFactor 2.0 means everything will be twice as big as the default scale
-
 configuration.setScaleFactor(2.0f);
-
 ```
 
 
@@ -651,18 +898,15 @@ configuration.setScaleFactor(2.0f);
 The scale mode and factor can be used conditionally to create different styles based on your preference. 
 
 
-
-
-
-
 ## Specifying the animation
 
 
 
 
-
 ```java
+
 configuration.setAnimationStyle(Property.WINDOW, GetSocial.ANIMATION_FADE);
+
 ```
 
 
@@ -672,6 +916,11 @@ The available animations styles are:
 * GetSocial.ANIMATION_SCALE: Animation scales the element In and Out
 * GetSocial.ANIMATION_FADE: Animation fades the element In and Out
 * GetSocial.ANIMATION_FADE_AND_SCALE: Animation fades and scales the element In and Out
+
+
+
+
+
 
 
 
@@ -697,6 +946,7 @@ configuration.setColor(Property.HEADER, Color.RED);
 
 
 
+
 ## Specifying images
 
 You can specify images for several elements. Please refer to the Property table to see which ones can be changed. 
@@ -710,6 +960,9 @@ You can specify images for several elements. Please refer to the Property table 
 configuration.setImagePath(Property.WINDOW, resourcePath + "window.png");
 
 ```
+
+
+
 
 
 
@@ -727,6 +980,9 @@ configuration.setBasePathForImages(resourcePath);
 
 
 
+
+
+
 ## Specifying dimensions
 
 
@@ -741,6 +997,9 @@ configuration.setDimension(Property.HEADER, 38);
 
 
 
+
+
+
 ## Specifying text styles
 
 
@@ -749,12 +1008,15 @@ configuration.setDimension(Property.HEADER, 38);
 
 
 ```java
+
 configuration.setTextStyle(Property.HEADER, Typeface.DEFAULT, 26, 0xffffc000, 0xff371c00, 5f, 0, 1);
+
 ```
 
 
 
-## Using custom fonts
+
+
 
 
 
@@ -780,12 +1042,13 @@ configuration.setTextStyle(Property.HEADER, typeface, 26, 0xffffc000, 0xff371c00
 
 
 
+
 # UI Reference Table
 
 
 
 
-| <sub>**#**                                </sub>| <sub>**Property**                         </sub>| <sub>**TextStyle**                        </sub>| <sub>**Color**                            </sub>| <sub>**Dimension**                        </sub>| <sub>**Drawable**                         </sub> |
+| <sub>**#**                                </sub>| <sub>**Propert** **y**                    </sub>| <sub>**TextStyle**                        </sub>| <sub>**Color**                            </sub>| <sub>**Dimension**                        </sub>| <sub>**Drawable**                         </sub> |
 |--------------------------------------|--------------------------------------|--------------------------------------|--------------------------------------|--------------------------------------|---------------------------------------|
 | <sub>1                                    </sub>| <sub>TITLE_MARGIN_TOP                     </sub>| <sub>                                     </sub>| <sub>                                     </sub>| <sub>X                                    </sub>| <sub>                                     </sub> |
 | <sub>2                                    </sub>| <sub>HEADER                               </sub>| <sub>X                                    </sub>| <sub>X                                    </sub>| <sub>X                                    </sub>| <sub>                                     </sub> |
@@ -856,33 +1119,26 @@ configuration.setTextStyle(Property.HEADER, typeface, 26, 0xffffc000, 0xff371c00
 | <sub>67                                   </sub>| <sub>PLACEHOLDER_CHAT                     </sub>| <sub>                                     </sub>| <sub>                                     </sub>| <sub>                                     </sub>| <sub>X                                    </sub> |
 | <sub>68                                   </sub>| <sub>PLACEHOLDER_NETWORK                  </sub>| <sub>                                     </sub>| <sub>                                     </sub>| <sub>                                     </sub>| <sub>X                                    </sub> |
 | <sub>69                                   </sub>| <sub>DEFAULT_INVITE_PROVIDER              </sub>| <sub>                                     </sub>| <sub>                                     </sub>| <sub>                                     </sub>| <sub>X                                    </sub> |
+| <sub>70                                   </sub>| <sub>                                     </sub>| <sub>                                     </sub>| <sub>                                     </sub>| <sub>                                     </sub>| <sub>                                     </sub> |
 
 
 
-
-
-
-![image alt text](images/img_2.png)
-
-
-
-![image alt text](images/img_3.png)
 
 
 
 ![image alt text](images/img_4.png)
 
+
+
 ![image alt text](images/img_5.png)
+
+
 
 ![image alt text](images/img_6.png)
 
 ![image alt text](images/img_7.png)
 
-
-
 ![image alt text](images/img_8.png)
-
-
 
 ![image alt text](images/img_9.png)
 
@@ -891,6 +1147,16 @@ configuration.setTextStyle(Property.HEADER, typeface, 26, 0xffffc000, 0xff371c00
 
 
 ![image alt text](images/img_11.png)
+
+
+
+![image alt text](images/img_12.png)
+
+![image alt text](images/img_13.png)
+
+
+
+![image alt text](images/img_14.png)
 
 
 
@@ -926,9 +1192,9 @@ Assets
 
 
 
-![image alt text](images/img_12.png)
+![image alt text](images/img_15.png)
 
 
 
-![image alt text](images/img_13.png)
+![image alt text](images/img_16.png)
 

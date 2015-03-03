@@ -32,7 +32,6 @@ import android.widget.Toast;
 
 import com.facebook.Session;
 import com.facebook.SessionState;
-
 import com.facebook.widget.LoginButton;
 
 public class MainActivity extends Activity
@@ -79,7 +78,7 @@ public class MainActivity extends Activity
 			}
 		});
 		
-		getSocial.setOnLayerStateChangedListener(new GetSocial.OnLayerStateChangedListener()
+		getSocial.setOnLayerStateChangeListener(new GetSocial.OnLayerStateChangeListener()
 		{
 			@Override
 			public void onOpen()
