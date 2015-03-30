@@ -2,6 +2,10 @@
 
 ## Version History
 
+### v3.3.0
+---
+- Global Chat Room
+
 ### v3.2.0
 ---
 - Updated chat engine

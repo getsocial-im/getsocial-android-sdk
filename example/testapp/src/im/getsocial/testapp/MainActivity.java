@@ -165,7 +165,19 @@ public class MainActivity extends Activity
 		
 		addRow(notification, smartInvites);
 		
-		addRow(initializeFacebookLoginButton(), null);
+		Button globalChatRoom = createButton("Global chat room", true, new View.OnClickListener()
+		{
+			@Override
+			public void onClick(View view)
+			{
+				Map<String, String> properties = new HashMap<String, String>();
+				properties.put(GetSocial.PROPERTY_ROOM_NAME, "global");
+				
+				GetSocial.getInstance().open(GetSocial.VIEW_CHAT, properties);
+			}
+		});
+		
+		addRow(globalChatRoom, initializeFacebookLoginButton());
 		
 		try
 		{
@@ -173,7 +185,7 @@ public class MainActivity extends Activity
 		}
 		catch(PackageManager.NameNotFoundException e)
 		{
-		
+			
 		}
 	}
 	
