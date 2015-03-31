@@ -47,6 +47,7 @@ To manage the integration of the GetSocial SDK, [login to your developer account
   * [Localization](#localization)
 * [Activities](#activities)
 * [Chat](#chat)
+  * [Chat rooms](#chat-rooms)
 * [Smart Invites](#smart-invites)
 * [Notification Center](#notification-center)
 * [Push Notifications](#push-notifications)
@@ -370,6 +371,26 @@ getSocial.open(GetSocial.VIEW_CHAT, properties);
 
 ```
 
+
+
+
+
+
+
+
+## Chat rooms
+
+Chat rooms are magical constructs where kind spirits from your community come together to chat about life, the universe, and everything. As a developer you are in full control of which users are able to participate in these rooms, and the number of rooms is unlimited.
+
+
+```java
+
+Map<String, String> properties = new HashMap<String, String>();
+properties.add(GetSocial.PROPERTY_ROOM_NAME, “roomName”);
+properties.add(GetSocial.PROPERTY_TITLE, “(localised) Room name”);
+getSocial.open(GetSocial.VIEW_CHAT);
+
+```
 
 
 
@@ -1197,4 +1218,3 @@ Assets
 
 
 ![image alt text](images/img_16.png)
-
