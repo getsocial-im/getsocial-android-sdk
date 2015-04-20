@@ -54,11 +54,7 @@ To manage the integration of the GetSocial SDK, [login to your developer account
 * [Integration with facebook](#integration-with-facebook)
   * [User Authentication](#user-authentication)
   * [Smart Invites](#smart-invites)
-
-
 * [Invite and install tracking](#invite-and-install-tracking)
-
-
 * [Customizing the appearance](#customizing-the-appearance)
   * [Getting the current configuration](#getting-the-current-configuration)
   * [Specifying window width and height](#specifying-window-width-and-height)
@@ -70,7 +66,7 @@ To manage the integration of the GetSocial SDK, [login to your developer account
   * [Specifying text styles](#specifying-text-styles)
   * [Using custom fonts](#using-custom-fonts)
   * [UI Reference Table](#ui-reference-table)
-
+* [Register Webhook on Dashboard](#register-webhook-on-dashboard)
 
 
 # Adding the SDK to your game
