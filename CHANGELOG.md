@@ -2,6 +2,14 @@
 
 ## Version History
 
+### v3.4.0
+---
+- Support for activities with image, button, action
+- onGameAvatarClick handler
+- onActivityActionClick handler
+- Leaderboard data exposed to developer
+- Chat Kill switch
+
 ### v3.3.0
 ---
 - Global Chat Room
