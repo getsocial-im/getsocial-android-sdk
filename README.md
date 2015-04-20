@@ -69,7 +69,7 @@ To manage the integration of the GetSocial SDK, [login to your developer account
 * [Webhooks](#webhooks)
   * [Webhook Syntax](#webhook-syntax)
   * [Register Webhook on Dashboard](#register-webhook-on-dashboard)
-  * [Using Requestb.in to test the webhook](#using-requestb.in-to-test-the-webhook)
+  * [Using Requestb.in to test the webhook](#using-requestbin-to-test-the-webhook)
 
 
 # Adding the SDK to your game
