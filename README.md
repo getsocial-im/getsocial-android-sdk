@@ -66,7 +66,10 @@ To manage the integration of the GetSocial SDK, [login to your developer account
   * [Specifying text styles](#specifying-text-styles)
   * [Using custom fonts](#using-custom-fonts)
   * [UI Reference Table](#ui-reference-table)
-* [Register Webhook on Dashboard](#register-webhook-on-dashboard)
+* [Webhooks](#webhooks)
+  * [Webhook Syntax](#webhook-syntax)
+  * [Register Webhook on Dashboard](#register-webhook-on-dashboard)
+  * [Using Requestb.in to test the webhook](#using-requestb.in-to-test-the-webhook)
 
 
 # Adding the SDK to your game
