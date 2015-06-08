@@ -49,18 +49,14 @@ To manage the integration of the GetSocial SDK, [login to your developer account
   * [Chat rooms](#chat-rooms)
   * [Invite Friends](#invite-friends)
 * [Content Moderation](#content-moderation)
-* [Smart Invites](#smart-invites)
 * [Leaderboards](#leaderboards)
 * [Notification Center](#notification-center)
 * [Push Notifications](#push-notifications)
 * [Integration with facebook](#integration-with-facebook)
   * [User Authentication](#user-authentication)
-  * [Smart Invites](#smart-invites)
-
-
-* [Invite and install tracking](#invite-and-install-tracking)
-
-
+* [Smart Invites](#smart-invites)
+  * [Referral Data](#referral-data)
+  * [Install tracking](#install-tracking)
   * [Deep Linking](#deep-linking)
 * [Customizing the appearance](#customizing-the-appearance)
   * [Getting the current configuration](#getting-the-current-configuration)
@@ -634,7 +630,7 @@ getSocial.open(GetSocial.VIEW_INVITE, properties);
 
 
 
-**Referral data**
+## Referral data
 
 
 
@@ -713,7 +709,7 @@ Be also sure to have the Google Play Services enabled in your Manifest:
 
 
 
-**Deep Linking**
+## Deep Linking
 
 When a user clicks on an smart invite link, he should be redirected to the app if the app is already installed on his device. 
 
