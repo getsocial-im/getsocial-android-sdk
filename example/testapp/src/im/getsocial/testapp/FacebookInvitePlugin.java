@@ -34,7 +34,7 @@ public abstract class FacebookInvitePlugin extends InvitePlugin
 	}
 	
 	@Override
-	public void inviteFriends(Context context, String subject, String text, Bitmap image, InviteFriendsObserver callback)
+	public void inviteFriends(Context context, String subject, String text, String referralDataUrl, Bitmap image, InviteFriendsObserver callback)
 	{
 		showFBRequestDialog("", "Invite your friends", null, callback);
 	}

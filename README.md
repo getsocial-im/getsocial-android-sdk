@@ -47,6 +47,8 @@ To manage the integration of the GetSocial SDK, [login to your developer account
 * [Activities](#activities)
 * [Chat](#chat)
   * [Chat rooms](#chat-rooms)
+  * [Invite Friends](#invite-friends)
+* [Content Moderation](#content-moderation)
 * [Smart Invites](#smart-invites)
 * [Leaderboards](#leaderboards)
 * [Notification Center](#notification-center)
@@ -54,7 +56,12 @@ To manage the integration of the GetSocial SDK, [login to your developer account
 * [Integration with facebook](#integration-with-facebook)
   * [User Authentication](#user-authentication)
   * [Smart Invites](#smart-invites)
+
+
 * [Invite and install tracking](#invite-and-install-tracking)
+
+
+  * [Deep Linking](#deep-linking)
 * [Customizing the appearance](#customizing-the-appearance)
   * [Getting the current configuration](#getting-the-current-configuration)
   * [Specifying window width and height](#specifying-window-width-and-height)
@@ -72,6 +79,7 @@ To manage the integration of the GetSocial SDK, [login to your developer account
   * [Using Requestb.in to test the webhook](#using-requestbin-to-test-the-webhook)
 
 
+
 # Adding the SDK to your game
 
 
@@ -86,15 +94,15 @@ Download the GetSocial SDK from [here](https://github.com/getsocial-im/getsocial
 
 In **Eclipse** , create a directory called "libs" in your project, if it does not exist already.
 
-Copy the “getsocial-android-sdk.jar” file into the libs directory. 
+Copy the "getsocial-android-sdk.jar" file into the libs directory. 
 
 Right-click on it and then click on ‘Add to Build Path’ in the Build Path submenu.
 
 In **Android Studio** , create a directory called "libs" in your project, if it does not exist already.
 
-Copy the “getsocial-android-sdk.jar” file into the libs directory.
+Copy the "getsocial-android-sdk.jar" file into the libs directory.
 
-Add the reference to the “getsocial-android-sdk.jar” in the build.gradle.
+Add the reference to the "getsocial-android-sdk.jar" in the build.gradle.
 
 
 
@@ -296,7 +304,6 @@ Showing activities for your game is quite easy
 
 ```java
 getSocial.open(GetSocial.VIEW_ACTIVITIES);
-
 ```
 
 
@@ -327,7 +334,7 @@ Do you need more control on what to show on the Activity Feed or maybe have diff
 
 You can also post different activities directly from the game on behalf of the authenticated user.
 
-Posted activities can include text, image, button and an action. For more information about the action see “Handling Actions”.
+Posted activities can include text, image, button and an action. For more information about the action see "Handling Actions".
 
 
 
@@ -335,7 +342,8 @@ Posted activities can include text, image, button and an action. For more inform
 
 
 ```java
-getSocial.postActivity("I have just bought an extra life",
+getSocial.postActivity(
+	"I have just bought an extra life",
 	imageByteArray, 
 	"Get one!",
 	"buy-extra-life",
@@ -353,7 +361,8 @@ getSocial.postActivity("I have just bought an extra life",
 		{
 			// A generic error occurred or the user was not authenticated
 		}
-	});
+	}
+);
 ```
 
 
@@ -408,12 +417,9 @@ getSocial.setOnGameAvatarClickHandler(new GetSocial.OnGameAvatarClickHandler()
 	public boolean onGameAvatarClick()
 	{
 		// Custom code to handle the game avatar click
-
 		return true;
 	}
 });
-
-
 
 getSocial.setOnUserAvatarClickHandler(new GetSocial.OnUserAvatarClickHandler()
 {
@@ -421,7 +427,6 @@ getSocial.setOnUserAvatarClickHandler(new GetSocial.OnUserAvatarClickHandler()
 	public boolean onUserAvatarClick(String userGuid)
 	{
 		// Custom code to handle the user avatar click
-
 		return true;
 	}
 });
@@ -450,7 +455,6 @@ You can enable or disable the chat functionality per country from the developer 
 
 ```java
 getSocial.isChatEnabled();
-
 ```
 
 
@@ -466,7 +470,6 @@ You can link to the chat views that enable your users to view their active conve
 
 ```java
 getSocial.open(GetSocial.VIEW_CHAT);
-
 ```
 
 
@@ -481,20 +484,11 @@ You can also directly open a chat conversation from user’s avatar within the g
 
 ```java
 Map<String, String> properties = new HashMap<String, String>();
-
 properties.put(GetSocial.PROPERTY_PROVIDER_ID, "facebook");
-
 properties.put(GetSocial.PROPERTY_USER_ID, "0123456789");
 
-
-
 getSocial.open(GetSocial.VIEW_CHAT, properties);
-
 ```
-
-
-
-
 
 
 
@@ -511,18 +505,70 @@ Chat rooms are magical constructs where kind spirits from your community come to
 
 
 ```java
-
 Map<String, String> properties = new HashMap<String, String>();
+properties.add(GetSocial.PROPERTY_ROOM_NAME, "roomName");
+properties.add(GetSocial.PROPERTY_TITLE, "(localised) Room name");
 
-properties.add(GetSocial.PROPERTY_ROOM_NAME, “roomName”);
-
-properties.add(GetSocial.PROPERTY_TITLE, “(localised) Room name”);
 getSocial.open(GetSocial.VIEW_CHAT);
-
 ```
 
 
 
+
+
+## Invite Friends
+
+
+
+The GetSocialSDK UI for Chat has embedded entry points to invite new friends using Smart Invites. If you want to customize or override this behaviour you can register this handler.
+
+
+
+
+
+
+```java
+getSocial.setOnInviteButtonClickHandler(new GetSocial.OnInviteButtonClickHandler()
+{
+	@Override
+	public boolean OnInviteButtonClick()
+	{
+		// Custom code to handle the invite button click
+		return true;
+	}
+});
+```
+
+
+# Content Moderation
+
+To allow you to moderate the content that users generate inside your game, you can register for a callback. This callback will be called everytime a user wants to post some content to the activity feed or via chat (private, group or open rooms).
+
+Implementing this callback allows you to verify that the content adheres to your standards or modify/refuse the content if it does not.
+
+Content can be evaluated differently according the ContentType. For example, you might want to moderate messages on an Open Room, but allow any kind of messages on Private chats.
+
+```java
+getSocial.setOnUserGeneratedContentListener(new GetSocial.OnUserGeneratedContentListener()
+{
+	@Override
+	public String onUserGeneratedContent(int type, String content)
+	{
+		if(content.contains("HardBadWord"))
+		{
+			return null;
+		}
+		else
+		{
+			return content.replace("SoftBadWord", "*****");
+		}
+	}
+});
+```
+
+We can also enable out-of-the-box Content Moderation for your game in several languages.
+
+Please [Contact us](mailto:info@getsocial.im) if you are interested in getting more information about this service.
 
 
 
@@ -539,7 +585,6 @@ Using Smart Invites users can easily invite their friends to join and play the g
 
 ```java
 getSocial.open(GetSocial.VIEW_INVITE);
-
 ```
 
 
@@ -550,7 +595,11 @@ You will see several options to invite friends, depending on what applications y
 
 
 
-In case you’ll decide to implement your own UI for smart invites, we expose methods to get list of supported invite providers on current device and perform invite with selected provider.
+In case you decide to implement your own UI for smart invites, we expose methods to get list of supported invite providers on current device and perform invite with a specific provider.
+
+
+
+You can also attach any custom data inside the Smart Invite. This data will be accessible by the receiver of the Smart Invite once the app is installed, if it wasn’t before, or open, if it was already on the device.
 
 
 
@@ -558,12 +607,66 @@ In case you’ll decide to implement your own UI for smart invites, we expose me
 
 
 ```java
-String[] inviteProviderIds = getSocial.getSupportedInviteProviders();
+Map<String, String> data = new HashMap<String, String>();
+data.put("level", 1);
+data.put("stars", 20);
+data.put("reward", true);
+data.put("source", "topRightButton");
 
-...
+getSocial.inviteFriendsUsingProvider("whatsapp", subject, text, image, data);
 
-getSocial.inviteFriendsUsingProvider(inviteProviderId, subject, text, image);
+//Or show the UI to the user
+Map<String, String> properties = new HashMap<String, String>();
+properties.put(GetSocial.PROPERTY_INVITE_SUBJECT, "A subject");
+properties.put(GetSocial.PROPERTY_INVITE_TEXT, "A message with [APP_INVITE_URL]");
 
+JSONObject referralData = new JSONObject();
+referralData.put("level", 1);
+referralData.put("stars", 20);
+referralData.put("reward", true);
+referralData.put("source", "topRightButton");
+properties.put(GetSocial.PROPERTY_INVITE_REFERRAL_DATA, referralData.toString());
+
+getSocial.open(GetSocial.VIEW_INVITE, properties);
+```
+
+
+
+
+
+**Referral data**
+
+
+
+To retrieve the custom data embedded to the Smart Invite you need to register for a callback:
+
+
+
+
+
+
+
+```java
+getSocial.setOnReferralDataReceivedListener(new GetSocial.OnReferralDataReceivedListener()
+{
+  @Override
+  public void onReferralDataReceived(JSONArray referralData)
+  {
+     //Process referral Data
+  }
+});
+```
+
+
+
+To make Smart Invite feature properly working be also sure to have the Google Play Services enabled in your Manifest:
+
+
+
+```xml
+<meta-data
+    android:name="com.google.android.gms.version"
+    android:value="@integer/google_play_services_version"/>
 ```
 
 
@@ -572,6 +675,64 @@ getSocial.inviteFriendsUsingProvider(inviteProviderId, subject, text, image);
 
 
 
+This callback will be called after the game is authenticated and if we match the install or open with a previous click on a Smart Invite link.
+
+
+
+
+## Install tracking
+
+
+
+To allow the GetSocial SDK to track installations you have to copy the following lines in your Manifest file.
+
+
+
+```xml
+<receiver
+    android:name="im.getsocial.sdk.gms.InstallReferrerReceiver"
+    android:exported="true">
+    <intent-filter>
+        <action android:name="com.android.vending.INSTALL_REFERRER" />
+    </intent-filter>
+</receiver>
+```
+
+
+
+Be also sure to have the Google Play Services enabled in your Manifest:
+
+
+
+```xml
+<meta-data
+    android:name="com.google.android.gms.version"
+    android:value="@integer/google_play_services_version"/>
+```
+
+
+
+
+**Deep Linking**
+
+When a user clicks on an smart invite link, he should be redirected to the app if the app is already installed on his device. 
+
+
+
+
+
+For this to work properly, you will need to add the following lines in your Manifest file inside the main activity definition.
+
+
+
+```xml
+<intent-filter>
+    <action android:name="android.intent.action.VIEW" />
+    <category android:name="android.intent.category.DEFAULT" />
+    <category android:name="android.intent.category.BROWSABLE"/>
+    <data android:scheme="getsocial" android:host="YOUR_APP_ID" />
+</intent-filter>
+```
 
 
 
@@ -579,14 +740,11 @@ getSocial.inviteFriendsUsingProvider(inviteProviderId, subject, text, image);
 
 
 
+You can find the [YOUR_APP_ID] in the App Information section of the [GetSocial Developer Portal](https://developers.getsocial.im).
 
+# 
 
-
-
-
-
-
-
+# 
 
 # Leaderboards
 
@@ -600,28 +758,17 @@ From the [GetSocial Developer Portal](https://developers.getsocial.im) you can c
 
 
 ```java
-
 // Gets single leaderboard by ID
-
-getSocial.getLeaderboard(“leaderboardId”, new OnOperationResultListener<Leaderboard>() { … });
-
-
+getSocial.getLeaderboard("leaderboardId", new OnOperationResultListener<Leaderboard>() { … });
 
 // Gets list of leaderboards by IDs
-
-getSocial.getLeaderboards(Arrays.asList(“leaderboardIdOne”, “leaderboardIdTwo”), new OnOperationResultListener<List<Leaderboard>>() { … });
-
-
+getSocial.getLeaderboards(Arrays.asList("leaderboardIdOne", "leaderboardIdTwo"), new OnOperationResultListener<List<Leaderboard>>() { … });
 
 // Gets list of leaderboards by specifying the offset and the count you wish to retrieve
-
 getSocial.getLeaderboards(0, 10, new OnOperationResultListener<List<Leaderboard>>() { … });
 
-
-
 // Gets the score for a leaderboard with a specific ID
-getSocial.getLeaderboardScores(“leaderboardId”, 0, 10, new OnOperationResultListener<List<LeaderboardScore>>() { … });
-
+getSocial.getLeaderboardScores("leaderboardId", 0, 10, new OnOperationResultListener<List<LeaderboardScore>>() { … });
 ```
 
 
@@ -636,7 +783,7 @@ From the SDK you can also submit a score to any leaderboard you want. The leader
 
 
 ```java
-getSocial.submitLeaderboardScore(“leaderboardId”, 10, new OnOperationResultListener<Integer> { … });
+getSocial.submitLeaderboardScore("leaderboardId", 10, new OnOperationResultListener<Integer> { … });
 ```
 
 
@@ -649,19 +796,9 @@ getSocial.submitLeaderboardScore(“leaderboardId”, 10, new OnOperationResultL
 
 For more detail information about the methods, please check the reference guide.
 
+# 
 
-
-
-
-
-
-
-
-
-
-
-
-
+# 
 
 # Notification Center
 
@@ -676,7 +813,6 @@ Activity feed and Chat features are incomplete without having the In-app Notific
 
 ```java
 getSocial.open(GetSocial.VIEW_NOTIFICATIONS);
-
 ```
 
 
@@ -706,6 +842,10 @@ getSocial.setOnNotificationsChangeListener(new GetSocial.OnNotificationsChangeLi
 
 
 
+
+# 
+
+# 
 
 # Push Notifications
 
@@ -875,17 +1015,13 @@ private void logInWithFacebook()
 	if(session != null && (session.isOpened() || session.getState().equals(SessionState.CREATED_TOKEN_LOADED)))
 	{
 		Session.NewPermissionsRequest newPermissionsRequest = new Session.NewPermissionsRequest(this, FACEBOOK_PERMISSIONS);
-
 		session.requestNewReadPermissions(newPermissionsRequest);
 	}
 	else
 	{
 		Session.setActiveSession((session = new Session(this)));
-		
 		Session.OpenRequest openRequest = new Session.OpenRequest(this);
-
 		openRequest.setPermissions(FACEBOOK_PERMISSIONS);
-
 		session.openForRead(openRequest);
 	}
 }
@@ -910,7 +1046,7 @@ private View initializeFacebookLoginButton()
 			FacebookUtils.getInstance().updateSessionState();
 		}
 	});
-		
+
 	return loginButton;
 }
 ```
@@ -954,53 +1090,6 @@ The `loginWithFacebook` method is the same you use to authenticate users with Fa
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-# 
-Invite and install tracking
-
-
-
-To allow the GetSocial SDK to track installations you have to copy the following lines in your Manifest file.
-
-
-
-```xml
-<receiver
-    android:name="im.getsocial.sdk.gms.InstallReferrerReceiver"
-    android:exported="true">
-    <intent-filter>
-        <action android:name="com.android.vending.INSTALL_REFERRER" />
-    </intent-filter>
-</receiver>
-```
-
-
-
-Be also sure to have the Google Play Services enabled in your Manifest:
-
-
-
-```xml
-<meta-data
-    android:name="com.google.android.gms.version"
-    android:value="@integer/google_play_services_version"/>
-```
-
-
-
-
-
-
 # Customizing the appearance
 
 You are able to customize the GetSocial SDK to match the look and feel of your game. 
@@ -1014,7 +1103,6 @@ You are able to customize the GetSocial SDK to match the look and feel of your g
 
 ```java
 Configuration configuration = GetSocial.getInstance().getConfiguration();
-
 ```
 
 
@@ -1028,9 +1116,7 @@ Configuration configuration = GetSocial.getInstance().getConfiguration();
 
 ```java
 configuration.setPreferredWindowWidth(320);
-
 configuration.setPreferredWindowHeight(400);
-
 ```
 
 
@@ -1087,9 +1173,7 @@ The scale mode and factor can be used conditionally to create different styles b
 
 
 ```java
-
 configuration.setAnimationStyle(Property.WINDOW, GetSocial.ANIMATION_FADE);
-
 ```
 
 
@@ -1123,7 +1207,6 @@ You can specify colors for backgrounds and borders. Please refer to the Property
 
 ```java
 configuration.setColor(Property.HEADER, Color.RED);
-
 ```
 
 
@@ -1139,7 +1222,6 @@ You can specify images for several elements. Please refer to the Property table 
 
 ```java
 configuration.setImagePath(Property.WINDOW, resourcePath + "window.png");
-
 ```
 
 
@@ -1155,7 +1237,6 @@ If your images are located in the same folder, you can set a base path:
 
 ```java
 configuration.setBasePathForImages(resourcePath);
-
 ```
 
 
@@ -1171,7 +1252,6 @@ configuration.setBasePathForImages(resourcePath);
 
 ```java
 configuration.setDimension(Property.HEADER, 38);
-
 ```
 
 
@@ -1186,9 +1266,7 @@ configuration.setDimension(Property.HEADER, 38);
 
 
 ```java
-
 configuration.setTextStyle(Property.HEADER, Typeface.DEFAULT, 26, 0xffffc000, 0xff371c00, 5f, 0, 1);
-
 ```
 
 
@@ -1207,7 +1285,6 @@ You can use custom fonts if they are correctly added as assets in your project.
 String typeface = resourcePath + "HelveticaNeue.ttf";
 
 configuration.setTextStyle(Property.HEADER, typeface, 26, 0xffffc000, 0xff371c00, 5f, 0, 1);
-
 ```
 
 
@@ -1414,12 +1491,12 @@ Content-Type: application/json
 
     // the referrer who originated the event if is set
     referring_user_id: {
-	facebook: “Facebook Id”,
+	facebook: "Facebook Id",
     }
 
     // the receiver who is the recipient of the event if it's set
     user_id: {
-	facebook: “Facebook Id”,
+	facebook: "Facebook Id",
     }
 }
 ```
@@ -1430,7 +1507,7 @@ Content-Type: application/json
 
 
 
-To register a webhook on the dashboard, open up developers.getsocial.im, login with your account and click on the ‘Webhooks’ option.
+To register a webhook on the dashboard, open up [GetSocial Developer Portal](https://developers.getsocial.im), login with your account and click on the ‘Webhooks’ option.
 
 ![image alt text](images/img_20.png)
 
@@ -1450,9 +1527,13 @@ Now you should have a dedicated URL that you can use to simulate your server.
 
 
 
-The next step is to set up your webhook with GetSocial. Navigate to the [developers dashboard](http://developers.getsocial.im) and click "Webhooks".
+The next step is to set up your webhook with GetSocial. Navigate to the [GetSocial Developer Portal](https://developers.getsocial.im) and click "Webhooks".
+
+
 
 Now you should copy your URL from RequestBin into the textfield with the label "URL" and save the changes.
+
+
 
 Now every time someone installs the app using our smart invite, the webhook you've configured on GetSocial will send a request to your RequestBin, give it a try.
 

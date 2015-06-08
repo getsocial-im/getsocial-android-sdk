@@ -18,7 +18,6 @@ public class Block extends BlockBase
 	private void loadCubeFaces()
 	{
 		faces.add(R.drawable.adam);
-		faces.add(R.drawable.arangel);
 		faces.add(R.drawable.barbara);
 		faces.add(R.drawable.damjan);
 		faces.add(R.drawable.demian);
@@ -31,7 +30,6 @@ public class Block extends BlockBase
 		faces.add(R.drawable.queralt);
 		faces.add(R.drawable.reinout);
 		faces.add(R.drawable.remco);
-		faces.add(R.drawable.sergio);
 		faces.add(R.drawable.snupi);
 		faces.add(R.drawable.tsvetomir);
 		faces.add(R.drawable.viral);

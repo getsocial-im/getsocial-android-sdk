@@ -119,6 +119,50 @@ public class MainActivity extends Activity
 			}
 		});
 		
+		getSocial.setOnActivityActionClickListener(new GetSocial.OnActivityActionClickListener()
+		{
+			@Override
+			public void onActivityActionClick(String action)
+			{
+				showToast("GetSocial activity action clicked: " + action);
+			}
+		});
+		
+		getSocial.setOnInviteButtonClickListener(new GetSocial.OnInviteButtonClickListener()
+		{
+			@Override
+			public boolean onInviteButtonClick()
+			{
+				showToast("GetSocial invite button clicked");
+				
+				return false;
+			}
+		});
+		
+		getSocial.setOnReferralDataReceivedListener(new GetSocial.OnReferralDataReceivedListener()
+		{
+			@Override
+			public void onReferralDataReceived(List<Map<String, String>> referralData)
+			{
+				String message = "";
+				
+				for(Map<String, String> map : referralData)
+				{
+					for(Map.Entry<String, String> entry : map.entrySet())
+					{
+						String key = entry.getKey();
+						String value = entry.getValue();
+						
+						message += key + ": " + value + "\n";
+					}
+					
+					message += "---";
+				}
+				
+				showDialog("ReferralDataReceived", message);
+			}
+		});
+		
 		setContentView();
 		
 		Button activities = createButton("Standard Activities", true, new View.OnClickListener()
@@ -384,6 +428,22 @@ public class MainActivity extends Activity
 			public void run()
 			{
 				Toast.makeText(MainActivity.this, message, Toast.LENGTH_SHORT).show();
+			}
+		});
+	}
+	
+	private void showDialog(final String title, final String message)
+	{
+		runOnUiThread(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				new AlertDialog.Builder(MainActivity.this)
+						.setTitle(title)
+						.setMessage(message)
+						.setPositiveButton(android.R.string.ok, null)
+						.show();
 			}
 		});
 	}
