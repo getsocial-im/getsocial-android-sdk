@@ -980,11 +980,9 @@ Make sure you follow the [Facebook SDK integration for Android](https://develope
 Whenever a user performs an action that requires login, the SDK calls the login request handler which allows the game to show the FB Login UI. You could use FB default UI or implement your own.
 
 
+###Facebook SDK 3.x
 
-
-
-
-
+The first step to integrate Facebook with our SDK is to define how to handle an authentication request.
 
 ```java
 getSocial.setOnLoginRequestListener(new GetSocial.OnLoginRequestListener()
@@ -997,11 +995,7 @@ getSocial.setOnLoginRequestListener(new GetSocial.OnLoginRequestListener()
 });
 ```
 
-
-
 Where logInWithFacebook is the method responsible to open a new Facebook Session.
-
-
 
 ```java
 private void logInWithFacebook()
@@ -1023,11 +1017,7 @@ private void logInWithFacebook()
 }
 ```
 
-
-
 If you are using the Facebook LoginButton, you need to also implement the Session.StatusCallback to get the state changes and sync the GetSocial SDK.
-
-
 
 ```java
 private View initializeFacebookLoginButton()
@@ -1047,23 +1037,67 @@ private View initializeFacebookLoginButton()
 }
 ```
 
-
-
 If you are not using the Facebook LoginButton, make sure you call `FacebookUtils.getInstance().updateSessionState();` whenever you receive an update of the state of the Facebook active session.
 
 
+###Facebook SDK 4.x
 
+To keep in sync with the GetSocial SDK the state of the Facebook access token, you have to call the start tracking method of our FacebookUtils class. Remember to stop the tracking calling the relative method.
 
+```java
+@Override
+protected void onCreate(Bundle savedInstanceState)
+{
+	super.onCreate(savedInstanceState);
+	
+	getSocial = GetSocial.getInstance(this);
+	
+	FacebookSdk.sdkInitialize(getApplicationContext());
+	callbackManager = CallbackManager.Factory.create();
+
+	FacebookUtils.getInstance().startTracking();
+
+	[...]
+}
+
+@Override
+protected void onDestroy()
+{
+	super.onDestroy();
+	
+	FacebookUtils.getInstance().stopTracking();
+}
+```
+
+To integrate Facebook with our SDK you need to define how to handle an authentication request.
+
+```java
+getSocial.setOnLoginRequestListener(new GetSocial.OnLoginRequestListener()
+{
+	@Override
+	public void onLoginRequest()
+	{
+		logInWithFacebook();
+	}
+});
+```
+
+Where logInWithFacebook is the method responsible to open a new Facebook Session.
+
+```java
+private void logInWithFacebook()
+{
+	LoginManager.getInstance().logInWithReadPermissions(this, FACEBOOK_PERMISSIONS);
+}
+```
 
 ## Smart Invites
 
 
-
-
-
-
-
 You can enable the Smart Invites for Facebook by registering our invite plugin.
+
+
+###Facebook SDK 3.x
 
 ```java
 getSocial.registerPlugin("facebook", new FacebookInvitePlugin(this)
@@ -1076,14 +1110,20 @@ getSocial.registerPlugin("facebook", new FacebookInvitePlugin(this)
 });
 ```
 
+The 'loginWithFacebook' method is the same you use to authenticate users with Facebook and we explained before and it is required to be able to authenticate users with Facebook before showing the invite UI.
+You can find the full implementation of our plugin in 'plugins/facebook-v3.x' folder.
 
 
-The `loginWithFacebook` method is the same you use to authenticate users with Facebook and we explained before and it is required to be able to authenticate users with Facebook before showing the invite UI. You can find the script implementation in `GetSocialSDK Demo/Scripts/` folder.
+###Facebook SDK 4.x
 
+```java
+getSocial.registerPlugin("facebook", new FacebookInvitePlugin(this, callbackManager));
+```
 
+The 'callbackManager' is a reference to the Facebook callback manager used for the integration in your app.
+You can find the full implementation of our plugin in 'plugins/facebook-v4.x' folder.
 
-
-
+Please nothe that with the Facebook SDK v4.x the app needs to be approved by Facebook to be able to see the invites sent. Only administrators, developers and testers are authorized to receive invites if the app is not approved.
 
 
 # Customizing the appearance
