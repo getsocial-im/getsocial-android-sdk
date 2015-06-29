@@ -1,15 +1,5 @@
 package im.getsocial.testapp;
 
-import im.getsocial.sdk.GetSocial;
-import im.getsocial.sdk.UI.DefaultConfiguration;
-import im.getsocial.testapp.animation.Block;
-import im.getsocial.testapp.animation.Renderer;
-
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -30,9 +20,20 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.facebook.Session;
-import com.facebook.SessionState;
-import com.facebook.widget.LoginButton;
+import com.facebook.CallbackManager;
+import com.facebook.FacebookSdk;
+import com.facebook.login.LoginManager;
+import com.facebook.login.widget.LoginButton;
+
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import im.getsocial.sdk.GetSocial;
+import im.getsocial.sdk.UI.DefaultConfiguration;
+import im.getsocial.testapp.animation.Block;
+import im.getsocial.testapp.animation.Renderer;
 
 public class MainActivity extends Activity
 {
@@ -45,6 +46,8 @@ public class MainActivity extends Activity
 	private LinearLayout linearLayout;
 	private TextView footer;
 	
+	private CallbackManager callbackManager;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
 	{
@@ -52,22 +55,17 @@ public class MainActivity extends Activity
 		
 		getSocial = GetSocial.getInstance(this);
 		
-		getSocial.registerPlugin("facebook", new FacebookInvitePlugin(this)
-		{
-			@Override
-			public void authenticateUser()
-			{
-				logInWithFacebook();
-			}
-		});
+		FacebookSdk.sdkInitialize(getApplicationContext());
+		callbackManager = CallbackManager.Factory.create();
+		FacebookUtils.getInstance().startTracking();
+		
+		getSocial.registerPlugin("facebook", new FacebookInvitePlugin(this, callbackManager));
 		
 		getSocial.authenticateGame("4We9Uqq8SR04tNXqV10M0000000s8i7N997ga98n", new GetSocial.OperationObserver()
 		{
 			@Override
 			public void onSuccess(String data)
 			{
-				FacebookUtils.getInstance().updateSessionState();
-				
 				showToast("Game authenticated");
 			}
 			
@@ -239,64 +237,64 @@ public class MainActivity extends Activity
 		frameLayout.setLayoutParams(new FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
 		setContentView(frameLayout);
 		
-			final Renderer renderer = new Renderer(this, new Block());
-			GLSurfaceView surface = new GLSurfaceView(this)
+		final Renderer renderer = new Renderer(this, new Block());
+		GLSurfaceView surface = new GLSurfaceView(this)
+		{
+			private float lastX;
+			private float lastY;
+			
+			@Override
+			public boolean onTouchEvent(MotionEvent event)
 			{
-				private float lastX;
-				private float lastY;
-				
-				@Override
-				public boolean onTouchEvent(MotionEvent event)
+				switch(event.getActionMasked())
 				{
-					switch(event.getActionMasked())
-					{
-						case MotionEvent.ACTION_DOWN :
-							
-							renderer.animate = false;
-							
-							break;
-							
-						case MotionEvent.ACTION_MOVE :
-							
-							renderer.angleOnX += (event.getY() - lastY) / 10;
-							renderer.deltaOnX = (event.getY() - lastY) / 10;
-							
-							renderer.angleOnY += (event.getX() - lastX) / 10;
-							renderer.deltaOnY = (event.getX() - lastX) / 10;
-							
-							break;
-							
-						case MotionEvent.ACTION_UP :
-						case MotionEvent.ACTION_CANCEL :
-							
-							renderer.animate = true;
-							
-							break;
-					}
+					case MotionEvent.ACTION_DOWN:
+						
+						renderer.animate = false;
+						
+						break;
 					
-					lastX = event.getX();
-					lastY = event.getY();
+					case MotionEvent.ACTION_MOVE:
+						
+						renderer.angleOnX += (event.getY() - lastY) / 10;
+						renderer.deltaOnX = (event.getY() - lastY) / 10;
+						
+						renderer.angleOnY += (event.getX() - lastX) / 10;
+						renderer.deltaOnY = (event.getX() - lastX) / 10;
+						
+						break;
 					
-					return true;
+					case MotionEvent.ACTION_UP:
+					case MotionEvent.ACTION_CANCEL:
+						
+						renderer.animate = true;
+						
+						break;
 				}
-			};
-			surface.setLayoutParams(new FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
-			surface.setRenderer(renderer);
-			surface.onResume();
-			frameLayout.addView(surface);
-			
-			linearLayout = new LinearLayout(this);
-			linearLayout.setLayoutParams(new FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
-			linearLayout.setOrientation(LinearLayout.VERTICAL);
-			frameLayout.addView(linearLayout);
-			
-			FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
-			layoutParams.gravity = Gravity.BOTTOM;
-			footer = new TextView(this);
-			footer.setLayoutParams(layoutParams);
-			footer.setGravity(Gravity.CENTER_HORIZONTAL);
-			footer.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
-			frameLayout.addView(footer);
+				
+				lastX = event.getX();
+				lastY = event.getY();
+				
+				return true;
+			}
+		};
+		surface.setLayoutParams(new FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+		surface.setRenderer(renderer);
+		surface.onResume();
+		frameLayout.addView(surface);
+		
+		linearLayout = new LinearLayout(this);
+		linearLayout.setLayoutParams(new FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+		linearLayout.setOrientation(LinearLayout.VERTICAL);
+		frameLayout.addView(linearLayout);
+		
+		FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
+		layoutParams.gravity = Gravity.BOTTOM;
+		footer = new TextView(this);
+		footer.setLayoutParams(layoutParams);
+		footer.setGravity(Gravity.CENTER_HORIZONTAL);
+		footer.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
+		frameLayout.addView(footer);
 	}
 	
 	@Override
@@ -316,6 +314,14 @@ public class MainActivity extends Activity
 	}
 	
 	@Override
+	protected void onDestroy()
+	{
+		super.onDestroy();
+		
+		FacebookUtils.getInstance().stopTracking();
+	}
+	
+	@Override
 	public void onBackPressed()
 	{
 		if(!getSocial.handleBackButtonPressed())
@@ -329,7 +335,7 @@ public class MainActivity extends Activity
 	{
 		super.onActivityResult(requestCode, resultCode, data);
 		
-		Session.getActiveSession().onActivityResult(this, requestCode, resultCode, data);
+		callbackManager.onActivityResult(requestCode, resultCode, data);
 	}
 	
 	@Override
@@ -338,28 +344,14 @@ public class MainActivity extends Activity
 		super.onConfigurationChanged(newConfig);
 		
 		getSocial.close();
-
+		
 		GetSocial.getInstance().getConfiguration().clear();
 		DefaultConfiguration.load(this);
 	}
 	
 	private void logInWithFacebook()
 	{
-		Session session = Session.getActiveSession();
-		
-		if(session != null && (session.isOpened() || session.getState().equals(SessionState.CREATED_TOKEN_LOADED)))
-		{
-			Session.NewPermissionsRequest newPermissionsRequest = new Session.NewPermissionsRequest(this, FACEBOOK_PERMISSIONS);
-			session.requestNewReadPermissions(newPermissionsRequest);
-		}
-		else
-		{
-			Session.setActiveSession((session = new Session(this)));
-			
-			Session.OpenRequest openRequest = new Session.OpenRequest(this);
-			openRequest.setPermissions(FACEBOOK_PERMISSIONS);
-			session.openForRead(openRequest);
-		}
+		LoginManager.getInstance().logInWithReadPermissions(this, FACEBOOK_PERMISSIONS);
 	}
 	
 	private View initializeFacebookLoginButton()
@@ -367,14 +359,6 @@ public class MainActivity extends Activity
 		final LoginButton loginButton = new LoginButton(this);
 		loginButton.setLayoutParams(new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 0.5f));
 		loginButton.setReadPermissions(FACEBOOK_PERMISSIONS);
-		loginButton.setSessionStatusCallback(new Session.StatusCallback()
-		{
-			@Override
-			public void call(Session session, SessionState state, Exception exception)
-			{
-				FacebookUtils.getInstance().updateSessionState();
-			}
-		});
 		
 		return loginButton;
 	}
