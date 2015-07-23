@@ -55,11 +55,11 @@ public class FacebookUtils
 			@Override
 			protected void onCurrentAccessTokenChanged(AccessToken oldAccessToken, AccessToken newAccessToken)
 			{
-				if(oldAccessToken == null && newAccessToken != null)
+				if(newAccessToken != null)
 				{
 					login(newAccessToken);
 				}
-				else if(oldAccessToken != null && newAccessToken == null)
+				else if(oldAccessToken != null)
 				{
 					logout();
 				}
