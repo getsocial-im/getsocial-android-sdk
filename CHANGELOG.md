@@ -2,6 +2,11 @@
 
 ## Version History
 
+### v3.5.5
+- Bug fixes
+
+---
+
 ### v3.5.4
 - Bug fixes
 
