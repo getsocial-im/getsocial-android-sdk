@@ -2,6 +2,11 @@
 
 ## Version History
 
+### v3.5.6
+- FIXED issue with Cache.getInstance returned null when authenticating game.
+
+---
+
 ### v3.5.5
 - Bug fixes
 
