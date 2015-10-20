@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Published under the MIT License (MIT)
+  ~ Copyright: (c) 2015 GetSocial B.V.
+  -->
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="16dp">
+
+    <im.getsocial.testapp.ui.UserInfoView
+        android:id="@+id/detailedUserInfo_userInfo"
+        android:layout_width="wrap_content"
+        android:layout_height="48dp"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"/>
+    
+    <TextView
+        android:id="@+id/detailedUserInfo_detailedInfo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Lore Ipsum"
+        android:layout_below="@+id/detailedUserInfo_userInfo"
+        android:layout_marginTop="16dp"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"/>
+
+    <Button
+        android:id="@+id/detailedUserInfo_loginLogoutButton"
+        style="@style/Widget.AppCompat.Button.ButtonBar.AlertDialog"
+        android:visibility="gone"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/detailedUserInfo_closeButton"
+        android:layout_toLeftOf="@+id/detailedUserInfo_closeButton"
+        android:layout_toStartOf="@+id/detailedUserInfo_closeButton"
+        android:text="LOGIN"/>
+
+    <Button
+        android:id="@+id/detailedUserInfo_closeButton"
+        style="@style/Widget.AppCompat.Button.ButtonBar.AlertDialog"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:text="CLOSE"/>
+
+
+</RelativeLayout>

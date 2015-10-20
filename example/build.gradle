@@ -1,20 +1,72 @@
 buildscript {
     repositories {
+        maven { url 'https://maven.fabric.io/public' }
         mavenCentral()
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:1.0.0'
+        classpath 'com.android.tools.build:gradle:1.2.3'
+        classpath 'io.fabric.tools:gradle:1.+'
     }
 }
 
-task wrapper(type: Wrapper) {
-    gradleVersion = '1.12'
+repositories {
+    maven { url 'https://maven.fabric.io/public' }
+    mavenCentral()
 }
 
-allprojects {
-    repositories {
-        mavenCentral()
-        mavenLocal()
+task wrapper(type: Wrapper) {
+    gradleVersion = '2.4'
+}
+
+apply plugin: 'com.android.application'
+apply plugin: 'io.fabric'
+
+dependencies {
+    compile fileTree(dir: '../bin/', include: 'getsocial-android-sdk-core.jar')
+    compile fileTree(dir: '../bin/', include: 'getsocial-android-sdk-chat.jar')
+    
+    compile 'com.facebook.android:facebook-android-sdk:4.4.0'
+    
+    compile 'com.google.android.gms:play-services-gcm:7.8.0'
+    compile 'com.google.android.gms:play-services-ads:7.8.0'
+    compile 'com.google.android.gms:play-services-plus:7.8.0'
+    
+    compile 'com.android.support:appcompat-v7:22.1.1'
+    compile 'com.android.support:support-v4:22.1.1'
+
+    compile('com.crashlytics.sdk.android:crashlytics:2.2.3@aar') {
+        transitive = true;
+    }
+}
+
+android {
+    compileSdkVersion 22
+    buildToolsVersion '22.0.1'
+
+    defaultConfig {
+        applicationId "im.getsocial.testapp"
+        minSdkVersion 10
+        targetSdkVersion 22
+        versionCode 1
+        versionName "1.0"
+    }
+
+    signingConfigs {
+        debug {
+            storeFile file("${projectDir}/keystores/debug.keystore")
+        }
+    }
+
+    buildTypes {
+        all {
+            minifyEnabled false
+            proguardFile 'proguard-project.txt'
+        }
+    }
+    
+    productFlavors {
+        publicApp {
+        }
     }
 }

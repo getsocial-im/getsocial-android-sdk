@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Published under the MIT License (MIT)
+  ~ Copyright: (c) 2015 GetSocial B.V.
+  -->
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+    <ImageView
+        android:id="@+id/userInfo_avatar"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:layout_alignParentLeft="true"
+        android:layout_centerVertical="true"
+        android:layout_margin="4dp"
+        android:src="@drawable/avatar_default"/>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginLeft="4dp"
+        android:layout_toRightOf="@id/userInfo_avatar"
+        android:layout_centerVertical="true">
+
+        <TextView
+            android:id="@+id/userInfo_displayName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/logged_out"
+            android:textColor="@color/primary_text"
+            android:textAppearance="?android:attr/textAppearanceMedium"/>
+
+        <TextView
+            android:id="@+id/userInfo_extra"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/touch_to_login"
+            android:textColor="@color/secondary_text"
+            android:textAppearance="?android:attr/textAppearanceSmall"/>
+        
+    </LinearLayout>
+
+</RelativeLayout>

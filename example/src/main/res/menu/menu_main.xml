@@ -1,0 +1,15 @@
+<!--
+  ~ Published under the MIT License (MIT)
+  ~ Copyright: (c) 2015 GetSocial B.V.
+  -->
+
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:tools="http://schemas.android.com/tools"
+      xmlns:app="http://schemas.android.com/apk/res-auto"
+      tools:context="im.getsocial.testapp.MainActivity">
+    <item
+        android:id="@+id/action_console"
+        android:orderInCategory="100"
+        app:showAsAction="never"
+        android:title="@string/action_console"/>
+</menu>
