@@ -44,22 +44,22 @@ public class UserIdentityUtils
 
 	public static String getDisplayName(String userId)
 	{
-		String[] displayNames = new String[] {"Batman",
-				"Spiderman",
-				"Captain America",
-				"Green Lantern",
-				"Wolverine",
-				"Catwomen",
-				"Iron Man",
-				"Superman",
-				"Wonder Woman",
-				"Aquaman"
+		String[] displayNames = new String[] {
+			"Batman",
+			"Spiderman",
+			"Captain America",
+			"Green Lantern",
+			"Wolverine",
+			"Catwomen",
+			"Iron Man",
+			"Superman",
+			"Wonder Woman",
+			"Aquaman"
 		};
 
 		int hashCode = Math.abs(userId.hashCode());
 
-		return displayNames[hashCode % displayNames.length];
-
+		return displayNames[hashCode % displayNames.length] + " Android";
 	}
 
 	public static String getAvatar(String userId)

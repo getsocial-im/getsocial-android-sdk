@@ -32,5 +32,19 @@
 	<string name="save">Save</string>
 	<string name="enter_your_score">Enter your score</string>
 	<string name="submit">Submit</string>
+	<string name="label_text">Text</string>
+	<string name="label_subject">Subject</string>
+	<string name="title_custom_invite">Customize your invite subject and text (optional)</string>
+	<string name="direction_long_press_placeholder">Long press on the text fields to easily insert placeholders</string>
+	<string name="hint_subject">Subject</string>
+	<string name="hint_text">Text</string>
+	<string name="hint_key_1">Key1</string>
+	<string name="hint_value_1">Value1</string>
+	<string name="hint_key_2">Key2</string>
+	<string name="hint_value_2">Value2</string>
+	<string name="hint_key_3">Key3</string>
+	<string name="hint_value_3">Value3</string>
+	<string name="action_open_invite_view">Open invite view</string>
+	<string name="label_select_image">Image</string>
 
 </resources>

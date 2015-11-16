@@ -6,11 +6,8 @@
 package im.getsocial.testapp;
 
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.content.SharedPreferences.Editor;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.database.DataSetObserver;
@@ -18,6 +15,7 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -45,7 +43,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.UUID;
 
 import im.getsocial.sdk.chat.GetSocialChat;
 import im.getsocial.sdk.core.GetSocial;
@@ -55,6 +52,7 @@ import im.getsocial.sdk.core.UI.builder.UserListViewBuilder;
 import im.getsocial.sdk.core.UserIdentity;
 import im.getsocial.sdk.core.resources.Leaderboard;
 import im.getsocial.sdk.core.resources.LeaderboardScore;
+import im.getsocial.sdk.core.util.ConfigurationHelper;
 import im.getsocial.sdk.core.util.Log;
 import im.getsocial.testapp.ui.ActionableListViewMenu;
 import im.getsocial.testapp.ui.CheckboxListViewMenu;
@@ -73,7 +71,7 @@ public class MainActivity extends AppCompatActivity
 	/**
 	 * For development purposes you can load UI configuration json
 	 * hosted somewhere on the web (e.g. Dropbox).
-	 * <p>
+	 * <p/>
 	 * Modify this constant to avoid entering URL manually each time
 	 */
 	private static final String DEFAULT_CUSTOM_UI_CONFIGURATION_URL = "";
@@ -215,7 +213,7 @@ public class MainActivity extends AppCompatActivity
 					{
 						logInfoAndToast("GetSocial initialization successful");
 					}
-
+					
 					@Override
 					public void onFailure()
 					{
@@ -306,20 +304,20 @@ public class MainActivity extends AppCompatActivity
 					public void onReferralDataReceived(List<Map<String, String>> referralData)
 					{
 						String message = "";
-
+						
 						for(Map<String, String> map : referralData)
 						{
 							for(Map.Entry<String, String> entry : map.entrySet())
 							{
 								String key = entry.getKey();
 								String value = entry.getValue();
-
+								
 								message += key + ": " + value + "\n";
 							}
-
+							
 							message += "---";
 						}
-
+						
 						dialogOnUiThread("ReferralDataReceived", message);
 					}
 				}
@@ -355,7 +353,15 @@ public class MainActivity extends AppCompatActivity
 					@Override
 					public void onUnreadNotificationsCountChanged(int unreadNotificationsCount)
 					{
-						updatedNotificationsMenuSubtitle();
+						MainActivity.this.runOnUiThread(
+								new Runnable()
+								{
+									@Override
+									public void run()
+									{
+										updatedNotificationsMenuSubtitle();
+									}
+								});
 					}
 				}
 		);
@@ -1721,6 +1727,10 @@ public class MainActivity extends AppCompatActivity
 	private void updatedNotificationsMenuSubtitle()
 	{
 		notificationsMenu.setSubtitle(String.format("Unread notifications: %d", getSocial.getUnreadNotificationsCount()));
+		if(listViewMenuAdapter != null)
+		{
+			listViewMenuAdapter.notifyDataSetChanged();
+		}
 	}
 
 	private String moderateUserGeneratedContent(int type, String content)
@@ -1732,6 +1742,10 @@ public class MainActivity extends AppCompatActivity
 	private void updateChatMenuSubtitle()
 	{
 		chatMenu.setSubtitle(String.format("Unread conversations: %d", getSocialChat.getUnreadConversationsCount()));
+		if(listViewMenuAdapter != null)
+		{
+			listViewMenuAdapter.notifyDataSetChanged();
+		}
 	}
 
 	public void reloadUiConfiguration()
@@ -1766,7 +1780,10 @@ public class MainActivity extends AppCompatActivity
 			{
 				smartInviteViewBuilder.setReferralData((HashMap<String, String>) data.getSerializableExtra(InviteActivity.EXTRA_BUNDLE));
 			}
-
+			if(data.hasExtra(InviteActivity.EXTRA_IMAGE))
+			{
+				smartInviteViewBuilder.setImageUrl(data.getStringExtra(InviteActivity.EXTRA_IMAGE));
+			}
 			smartInviteViewBuilder.show();
 		}
 	}

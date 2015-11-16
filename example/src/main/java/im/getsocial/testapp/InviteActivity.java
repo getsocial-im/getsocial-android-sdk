@@ -8,11 +8,13 @@ package im.getsocial.testapp;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.ImageView;
 
 import java.util.HashMap;
 
@@ -23,6 +25,11 @@ public class InviteActivity extends AppCompatActivity implements View.OnLongClic
 	public static final String EXTRA_SUBJECT = "extra_subject";
 	public static final String EXTRA_TEXT = "extra_text";
 	public static final String EXTRA_BUNDLE = "extra_bundle";
+	public static final String EXTRA_IMAGE = "extra_image";
+	private static final int REQUEST_PICK_IMAGE_ACTIVITY = 1984;
+
+	private ImageView imageView;
+	private String imageUriString;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
@@ -35,6 +42,24 @@ public class InviteActivity extends AppCompatActivity implements View.OnLongClic
 
 		editText = (EditText) findViewById(R.id.text);
 		editText.setOnLongClickListener(this);
+
+		imageView = (ImageView) findViewById(R.id.image);
+		imageView.setOnClickListener(new View.OnClickListener()
+		                             {
+			                             @Override
+			                             public void onClick(View v)
+			                             {
+				                             pickImageFromDevice();
+			                             }
+		                             }
+		);
+	}
+
+	private void pickImageFromDevice()
+	{
+		Intent imagePickerIntent = new Intent(Intent.ACTION_PICK);
+		imagePickerIntent.setType("image/*");
+		startActivityForResult(imagePickerIntent, REQUEST_PICK_IMAGE_ACTIVITY);
 	}
 
 	public void onButtonClick(View view)
@@ -75,6 +100,11 @@ public class InviteActivity extends AppCompatActivity implements View.OnLongClic
 		intent.putExtra(EXTRA_TEXT, editText.getText().toString());
 
 		intent.putExtra(EXTRA_BUNDLE, buildBundle());
+
+		if(imageUriString != null && !TextUtils.isEmpty(imageUriString))
+		{
+			intent.putExtra(EXTRA_IMAGE, imageUriString);
+		}
 
 		setResult(RESULT_OK, intent);
 
@@ -128,5 +158,24 @@ public class InviteActivity extends AppCompatActivity implements View.OnLongClic
 		dialog.show();
 
 		return true;
+	}
+
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data)
+	{
+		if(requestCode == REQUEST_PICK_IMAGE_ACTIVITY)
+		{
+			if(resultCode == RESULT_OK)
+			{
+				handlePickedImage(data.getData());
+			}
+		}
+		super.onActivityResult(requestCode, resultCode, data);
+	}
+
+	private void handlePickedImage(Uri imageUri)
+	{
+		imageUriString = imageUri.toString();
+		imageView.setImageURI(imageUri);
 	}
 }

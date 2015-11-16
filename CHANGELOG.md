@@ -1,6 +1,15 @@
-# GetSocial SDK for Android
+# GetSocial Android SDK
 
 ## Version History
+
+### v4.0.2
+
++ ADDED ability to load json configuration file from absolute path
++ ADDED ability to specify absolute path as a base assets path from the code
++ IMPROVED behaviour of attached images on some Smart Invite providers
++ FIXED null pointer exception when opening chat view from notification on application cold start
+
+---
 
 ### v4.0.1
 
@@ -36,42 +45,44 @@ Release v4.0.0 brings a lot of new features, improvements and few breaking chang
 ---
 
 ### v3.5.5
+
 + Bug fixes
 
 ---
 
 ### v3.5.4
+
 + Bug fixes
 
 ---
 
-
 ### v3.5.3
+
 + ADDED support for FB SDK 4.x tracking of smart invites
 
 ---
 
-
 ### v3.5.2
+
 + Bug fixes
 
 ---
 
-
 ### v3.5.1
+
 + ADDED user content moderation callback
 
 ---
 
-
 ### v3.5.0
+
 + ADDED support for deeplinking
 + ADDED invite data bundling
 
 ---
 
-
 ### v3.4.0
+
 + Support for activities with image, button, action
 + onGameAvatarClick handler
 + onActivityActionClick handler
@@ -80,24 +91,25 @@ Release v4.0.0 brings a lot of new features, improvements and few breaking chang
 
 ---
 
-
 ### v3.3.0
+
 + Global Chat Room
 
 ---
 
-
 ### v3.2.0
+
 + Updated chat engine
 + Small improvements
 
 ---
 
-
 ### v3.1.1
+
 + Small bug fixes
 
 ---
 
 ### v3.1.0 
+
 + Initial GetSocial version
