@@ -2,6 +2,19 @@
 
 ## Version History
 
+
+### v4.0.3
+
++ ADDED 5 new languages: Icelandic, Korean, Japanese, Chinese Simplified, Chinese Traditional
+
++ IMPROVED invite flow via email. Now SDK shows only email clients
++ FIXED issue with being not possible to install two apps with GetSocial SDK v4.0.2 integrated
++ FIXED property ACTIVITY_ACTION_BUTTON_TEXT_Y_OFFSET_NORMAL and ACTIVITY_ACTION_BUTTON_TEXT_Y_OFFSET_PRESSED behaviour
+
+
+ 
+---
+
 ### v4.0.2
 
 + ADDED ability to load json configuration file from absolute path

@@ -1,1 +1,0 @@
-+ ADDED ability to load json configuration file from absolute path\n+ ADDED ability to specify absolute path as a base assets path from the code\n+ IMPROVED behaviour of attached images on some Smart Invite providers\n+ FIXED null pointer exception when opening chat view from notification on application cold start\n

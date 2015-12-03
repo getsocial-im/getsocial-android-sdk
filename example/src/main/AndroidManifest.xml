@@ -11,9 +11,8 @@
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
 
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.GET_ACCOUNTS"/>
     <uses-permission android:name="android.permission.USE_CREDENTIALS"/>
     <uses-permission android:name="android.permission.WAKE_LOCK"/>
     <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE"/>
@@ -82,6 +81,10 @@
             android:name="io.fabric.ApiKey"
             android:value="d17264f29ed88bb09608a1525b67b047f760af31"/>
 
+        <provider
+            android:name="im.getsocial.sdk.core.provider.ImageContentProvider"
+            android:authorities="${applicationId}.smartinvite.images.provider"
+            android:exported="true"/>
     </application>
 
 </manifest>

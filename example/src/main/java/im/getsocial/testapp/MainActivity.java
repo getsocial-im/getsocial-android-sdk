@@ -45,11 +45,10 @@ import java.util.Map;
 import java.util.Random;
 
 import im.getsocial.sdk.chat.GetSocialChat;
-import im.getsocial.sdk.core.GetSocial;
-import im.getsocial.sdk.core.IdentityInfo;
+import im.getsocial.sdk.core.*;
+import im.getsocial.sdk.core.BuildConfig;
 import im.getsocial.sdk.core.UI.builder.SmartInviteViewBuilder;
 import im.getsocial.sdk.core.UI.builder.UserListViewBuilder;
-import im.getsocial.sdk.core.UserIdentity;
 import im.getsocial.sdk.core.resources.Leaderboard;
 import im.getsocial.sdk.core.resources.LeaderboardScore;
 import im.getsocial.sdk.core.util.ConfigurationHelper;
@@ -967,7 +966,7 @@ public class MainActivity extends AppCompatActivity
 	//region GetSocial Settings
 	private void showLanguageSelectionDialog()
 	{
-		final String[] providers = {"da", "de", "en", "es", "fr", "it", "nb", "nl", "pt", "ru", "sv", "tr"};
+		final String[] providers = {"da", "de", "en", "es", "fr", "it", "nb", "nl", "pt", "ru", "sv", "tr", "is", "ja", "ko", "zh-Hans", "zh-Hant"};
 
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
 		builder.setTitle(R.string.select_language);
@@ -1744,7 +1743,16 @@ public class MainActivity extends AppCompatActivity
 		chatMenu.setSubtitle(String.format("Unread conversations: %d", getSocialChat.getUnreadConversationsCount()));
 		if(listViewMenuAdapter != null)
 		{
-			listViewMenuAdapter.notifyDataSetChanged();
+			runOnUiThread(
+					new Runnable()
+					{
+						@Override
+						public void run()
+						{
+							listViewMenuAdapter.notifyDataSetChanged();
+						}
+					}
+			);
 		}
 	}
 
