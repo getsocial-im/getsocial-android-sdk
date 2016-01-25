@@ -2,6 +2,11 @@
 
 ## Version History
 
+### v4.0.4
+
++ FIXED `GetSocial.getSupportedInviteProviders()` method call returning 0 providers when invoked from `GetSocial.init() onSuccess()` callback
+
+---
 
 ### v4.0.3
 
