@@ -1,6 +1,17 @@
 /*
- * Published under the MIT License (MIT)
- * Copyright: (c) 2015 GetSocial B.V.
+ *    	Copyright 2015-2016 GetSocial B.V.
+ *
+ *	Licensed under the Apache License, Version 2.0 (the "License");
+ *	you may not use this file except in compliance with the License.
+ *	You may obtain a copy of the License at
+ *
+ *    	http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *	Unless required by applicable law or agreed to in writing, software
+ *	distributed under the License is distributed on an "AS IS" BASIS,
+ *	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *	See the License for the specific language governing permissions and
+ *	limitations under the License.
  */
 
 package im.getsocial.testapp.ui;
@@ -15,21 +26,13 @@ import android.view.Window;
 import android.widget.Button;
 import android.widget.TextView;
 
-import java.util.Collection;
-
+import im.getsocial.sdk.core.CurrentUser;
 import im.getsocial.sdk.core.GetSocial;
-import im.getsocial.sdk.core.IdentityInfo;
-import im.getsocial.sdk.core.UserIdentity;
+import im.getsocial.sdk.core.User;
 import im.getsocial.testapp.R;
 
 public class UserInfoDialog extends DialogFragment
 {
-	private UserInfoView userInfoView;
-	private TextView detailsTextView;
-	//	private Button loginLogoutButton;
-	private Button closeButton;
-	
-	private GetSocial getSocial;
 	
 	public UserInfoDialog()
 	{
@@ -38,39 +41,23 @@ public class UserInfoDialog extends DialogFragment
 	
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
-							 Bundle savedInstanceState)
+	                         Bundle savedInstanceState)
 	{
 		getDialog().getWindow().requestFeature(Window.FEATURE_NO_TITLE);
 		
-		getSocial = GetSocial.getInstance();
-		UserIdentity user = getSocial.getLoggedInUser();
+		GetSocial getSocial = GetSocial.getInstance();
+		CurrentUser user = getSocial.getCurrentUser();
 		
 		View view = inflater.inflate(R.layout.fragment_detailed_user_info, container);
 		
-		userInfoView = (UserInfoView) view.findViewById(R.id.detailedUserInfo_userInfo);
+		UserInfoView userInfoView = (UserInfoView) view.findViewById(R.id.detailedUserInfo_userInfo);
 		userInfoView.setUser(user);
 		
-		detailsTextView = (TextView) view.findViewById(R.id.detailedUserInfo_detailedInfo);
-		detailsTextView.setText(printUserInfo(user));
+		TextView detailsTextView = (TextView) view.findViewById(R.id.detailedUserInfo_detailedInfo);
+		detailsTextView.setText(getUserInfo(user));
 		Linkify.addLinks(detailsTextView, Linkify.WEB_URLS);
-
-//		loginLogoutButton = (Button) view.findViewById(R.id.detailedUserInfo_loginLogoutButton);
-//		loginLogoutButton.setText(getSocial.isUserLoggedIn() ? "LOGOUT", "LOGIN");
-//		loginLogoutButton.setOnClickListener(
-//				new View.OnClickListener()
-//				{
-//					@Override
-//					public void onClick(View v)
-//					{
-//						if(getSocial.isUserLoggedIn())
-//						{
-//							getSocial.logout(null);
-//						}
-//					}
-//				}
-//		);
 		
-		closeButton = (Button) view.findViewById(R.id.detailedUserInfo_closeButton);
+		Button closeButton = (Button) view.findViewById(R.id.detailedUserInfo_closeButton);
 		closeButton.setOnClickListener(
 				new View.OnClickListener()
 				{
@@ -85,20 +72,26 @@ public class UserInfoDialog extends DialogFragment
 		return view;
 	}
 	
-	private String printUserInfo(UserIdentity user)
+	private String getUserInfo(User user)
 	{
 		StringBuilder sb = new StringBuilder();
 		
 		if(user != null)
 		{
+			sb.append("Anonymous: ");
+			sb.append(user.isAnonymous());
+			sb.append("\n\n");
 			sb.append("guid: ").append(user.getGuid()).append("\n");
 			sb.append("avatar: ").append(user.getAvatarUrl()).append("\n");
 			sb.append("\n\n");
 			sb.append("IDENTITIES:").append("\n\n");
 
-			for(String key : user.getIdentities().keySet())
+			if(user.getIdentities() != null)
 			{
-				sb.append(key).append(": ").append(user.getIdentities().get(key)).append("\n\n");
+				for(String key : user.getIdentities())
+				{
+					sb.append(key).append(": ").append(user.getUserIdForProvider(key)).append("\n\n");
+				}
 			}
 		}
 		return sb.toString();

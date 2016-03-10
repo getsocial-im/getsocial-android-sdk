@@ -1,6 +1,17 @@
 /*
- * Published under the MIT License (MIT)
- * Copyright: (c) 2015 GetSocial B.V.
+ *    	Copyright 2015-2016 GetSocial B.V.
+ *
+ *	Licensed under the Apache License, Version 2.0 (the "License");
+ *	you may not use this file except in compliance with the License.
+ *	You may obtain a copy of the License at
+ *
+ *    	http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *	Unless required by applicable law or agreed to in writing, software
+ *	distributed under the License is distributed on an "AS IS" BASIS,
+ *	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *	See the License for the specific language governing permissions and
+ *	limitations under the License.
  */
 
 package im.getsocial.testapp;
@@ -15,12 +26,13 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.os.Environment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.InputType;
+import android.text.TextUtils;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -35,6 +47,9 @@ import com.facebook.AccessToken;
 import com.facebook.AccessTokenTracker;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookSdk;
+import com.facebook.GraphRequest;
+import com.facebook.GraphResponse;
+import com.facebook.HttpMethod;
 import com.facebook.login.LoginManager;
 
 import java.io.ByteArrayOutputStream;
@@ -45,14 +60,19 @@ import java.util.Map;
 import java.util.Random;
 
 import im.getsocial.sdk.chat.GetSocialChat;
-import im.getsocial.sdk.core.*;
-import im.getsocial.sdk.core.BuildConfig;
+import im.getsocial.sdk.core.AddUserIdentityObserver;
+import im.getsocial.sdk.core.CurrentUser;
+import im.getsocial.sdk.core.GetSocial;
 import im.getsocial.sdk.core.UI.builder.SmartInviteViewBuilder;
 import im.getsocial.sdk.core.UI.builder.UserListViewBuilder;
+import im.getsocial.sdk.core.User;
+import im.getsocial.sdk.core.UserIdentity;
 import im.getsocial.sdk.core.resources.Leaderboard;
 import im.getsocial.sdk.core.resources.LeaderboardScore;
-import im.getsocial.sdk.core.util.ConfigurationHelper;
+import im.getsocial.sdk.core.util.InstanceCounter;
 import im.getsocial.sdk.core.util.Log;
+import im.getsocial.testapp.auth.google.GooglePlayLoginProviderHelper;
+import im.getsocial.testapp.auth.google.GooglePlusLoginProviderHelper;
 import im.getsocial.testapp.ui.ActionableListViewMenu;
 import im.getsocial.testapp.ui.CheckboxListViewMenu;
 import im.getsocial.testapp.ui.ListViewMenu;
@@ -77,12 +97,15 @@ public class MainActivity extends AppCompatActivity
 	private static final List<String> FACEBOOK_PERMISSIONS = Arrays.asList("email", "user_friends");
 
 	private static final int REQUEST_CODE_INVITE_ACTIVITY = 1983;
+
 	private static final String ACTIVITIES_TAG = "swamp";
 	private static final String ACTIVITIES_GROUP = "world1";
 
 	private GetSocial getSocial;
 	private GetSocialChat getSocialChat;
 	private CallbackManager callbackManager;
+	private GooglePlusLoginProviderHelper googlePlusLoginProviderHelper;
+	private GooglePlayLoginProviderHelper googlePlayLoginProviderHelper;
 
 	private ListViewMenuAdapter listViewMenuAdapter;
 	private Toolbar toolbar;
@@ -98,6 +121,9 @@ public class MainActivity extends AppCompatActivity
 	private boolean isAppAvatarClickHandlerCustom = false;
 	private boolean isActivityActionHandlerCustom = false;
 	private boolean isInviteButtonClickHandlerCustom = false;
+	private boolean isOnActionPerformListener = false;
+	private boolean isPreventAnonymousInteract = true;
+
 	private ListViewMenu chatMenu;
 
 	// /////////////////////////////////
@@ -124,6 +150,7 @@ public class MainActivity extends AppCompatActivity
 	protected void onResume()
 	{
 		super.onResume();
+		initGoogleServices();
 		getSocial.onResume(this);
 	}
 
@@ -139,6 +166,16 @@ public class MainActivity extends AppCompatActivity
 	{
 		super.onActivityResult(requestCode, resultCode, data);
 
+		if(googlePlusLoginProviderHelper.onActivityResult(requestCode, resultCode, data))
+		{
+			return;
+		}
+
+		if(googlePlayLoginProviderHelper.onActivityResult(requestCode, resultCode, data))
+		{
+			return;
+		}
+
 		if(requestCode == REQUEST_CODE_INVITE_ACTIVITY)
 		{
 			handleInviteActivityResult(resultCode, data);
@@ -147,6 +184,21 @@ public class MainActivity extends AppCompatActivity
 		{
 			callbackManager.onActivityResult(requestCode, resultCode, data);
 		}
+	}
+
+	@Override
+	public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults)
+	{
+		if(googlePlusLoginProviderHelper.onRequestPermissionsResult(requestCode, permissions, grantResults))
+		{
+			return;
+		}
+		if(googlePlayLoginProviderHelper.onRequestPermissionsResult(requestCode, permissions, grantResults))
+		{
+			return;
+		}
+
+		super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 	}
 
 	@Override
@@ -164,6 +216,8 @@ public class MainActivity extends AppCompatActivity
 		if(id == R.id.action_console)
 		{
 			UiConsole.showConsoleActivity(this);
+
+			InstanceCounter.printReferenceCounts();
 			return true;
 		}
 
@@ -194,7 +248,7 @@ public class MainActivity extends AppCompatActivity
 
 
 	// ////////////////////////////////////////
-	// region Interaction with GetSocial SDK 
+	// region Interaction with GetSocial SDK
 	// ////////////////////////////////////////
 
 	//region GetSocial initialization
@@ -210,39 +264,29 @@ public class MainActivity extends AppCompatActivity
 					@Override
 					public void onSuccess(String data)
 					{
+						updateUserInfoView();
 						logInfoAndToast("GetSocial initialization successful");
 					}
-					
+
 					@Override
-					public void onFailure()
+					public void onFailure(String errorMessage)
 					{
-						logErrorAndToast("GetSocial initialization failed");
+						logErrorAndToast(errorMessage);
 					}
 				}
 		);
 
-		getSocial.registerPlugin(IdentityInfo.PROVIDER_FACEBOOK, new FacebookInvitePlugin(this, callbackManager));
-
-		getSocial.setOnLoginRequestListener(
-				new GetSocial.OnLoginRequestListener()
-				{
-					@Override
-					public void onLoginRequest()
-					{
-						showLoginSelectionDialog();
-					}
-				}
-		);
+		getSocial.registerPlugin(UserIdentity.PROVIDER_FACEBOOK, new FacebookInvitePlugin(this, callbackManager));
 
 		getSocial.setOnUserAvatarClickHandler(
 				new GetSocial.OnUserAvatarClickHandler()
 				{
 					@Override
-					public boolean onUserAvatarClick(UserIdentity user, int source)
+					public boolean onUserAvatarClick(User user, int source)
 					{
 						if(isUserAvatarClickHandlerCustom)
 						{
-							logInfoAndToast(String.format("User %s avatar clicked from source %d", user.getDisplayName(), source));
+							logInfoAndToast(String.format("User %s avatar clicked", user.getDisplayName()));
 							return true; // event consumed
 						}
 						return false; // event should be processed by the SDK
@@ -303,45 +347,21 @@ public class MainActivity extends AppCompatActivity
 					public void onReferralDataReceived(List<Map<String, String>> referralData)
 					{
 						String message = "";
-						
+
 						for(Map<String, String> map : referralData)
 						{
 							for(Map.Entry<String, String> entry : map.entrySet())
 							{
 								String key = entry.getKey();
 								String value = entry.getValue();
-								
+
 								message += key + ": " + value + "\n";
 							}
-							
+
 							message += "---";
 						}
-						
-						dialogOnUiThread("ReferralDataReceived", message);
-					}
-				}
-		);
 
-		getSocial.setUserIdentityObserver(
-				new GetSocial.UserIdentityObserver()
-				{
-					@Override
-					public void onUserIdentityUpdated(final UserIdentity userIdentity)
-					{
-						runOnUiThread(
-								new Runnable()
-								{
-									@Override
-									public void run()
-									{
-										userInfoView.setUser(userIdentity);
-										if(userIdentity == null)
-										{
-											logInfoAndToast("Logged out");
-										}
-									}
-								}
-						);
+						dialogOnUiThread("ReferralDataReceived", message);
 					}
 				}
 		);
@@ -360,7 +380,8 @@ public class MainActivity extends AppCompatActivity
 									{
 										updatedNotificationsMenuSubtitle();
 									}
-								});
+								}
+						);
 					}
 				}
 		);
@@ -369,11 +390,11 @@ public class MainActivity extends AppCompatActivity
 				new GetSocial.OnUserGeneratedContentListener()
 				{
 					@Override
-					public String onUserGeneratedContent(int type, String content)
+					public String onUserGeneratedContent(GetSocial.ContentSource source, String content)
 					{
 						if(isContentModerated)
 						{
-							return moderateUserGeneratedContent(type, content);
+							return moderateUserGeneratedContent(source, content);
 						}
 						return content;
 					}
@@ -390,183 +411,289 @@ public class MainActivity extends AppCompatActivity
 					}
 				}
 		);
+		
+		getSocial.setInviteFriendsListener(
+				new GetSocial.InviteFriendsListener()
+				{
+					@Override
+					public void onInviteFriendsIntent()
+					{
+						Log.e("onInviteFriendsIntent friends intent invoked");
+					}
+					
+					@Override
+					public void onInvitedFriends(int friendsInvited)
+					{
+						Log.e("Invited %d friends", friendsInvited);
+					}
+				}
+		);
+
+		getSocial.setOnActionPerformListener(new GetSocial.OnActionPerformListener()
+											 {
+												 @Override
+												 public void onActionPerform(GetSocial.Action action,
+																			 final ActionFinalizer actionFinalizer)
+												 {
+													 if(isNonAnonymousUserAction(action) && isPreventAnonymousInteract && getSocial.getCurrentUser().isAnonymous())
+													 {
+
+														 runOnUiThread(new Runnable()
+																	   {
+																		   @Override
+																		   public void run()
+																		   {
+																			   AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+																			   builder.setTitle("Add identity in order to post");
+																			   builder.setItems(new CharSequence[]
+																							   {"Add FB identity", "Add Google+ identity", "Add GooglePlay identity", "Add Custom Identity", "Cancel"},
+																					   new DialogInterface.OnClickListener()
+																					   {
+																						   public void onClick(DialogInterface dialog, int which)
+																						   {
+
+																							   OnResultListener onResultListener = new OnResultListener()
+																							   {
+																								   @Override
+																								   public void onComplete()
+																								   {
+																									   MainActivity.this.runOnUiThread(new Runnable() {
+																										   @Override
+																										   public void run()
+																										   {
+																											   if(!getSocial.getCurrentUser().isAnonymous())
+																											   {
+																												   actionFinalizer.finalize(true);
+																											   }
+																											   else
+																											   {
+																												   actionFinalizer.finalize(false);
+																											   }
+																										   }
+																									   });
+																								   }
+
+																								   @Override
+																								   public void onError(Exception error)
+																								   {
+																									   actionFinalizer.finalize(false);
+																								   }
+																							   };
+
+																							   switch(which)
+																							   {
+																								   case 0:
+																									   addFbUserIdentity(onResultListener);
+																									   break;
+																								   case 1:
+																									   addGooglePlusUserIdentity(onResultListener);
+																									   break;
+																								   case 2:
+																									   addGooglePlayUserIdentity(onResultListener);
+																									   break;
+																								   case 3:
+																									   addCustomUserIdentity(onResultListener);
+																									   break;
+																								   case 4:
+																									   actionFinalizer.finalize(false);
+																									   break;
+																							   }
+																						   }
+																					   }
+																			   );
+																			   builder.create().show();
+																		   }
+																	   }
+														 );
+
+
+													 }
+													 else
+													 {
+														 if(isOnActionPerformListener)
+														 {
+															 onActionPerformDialog(action, actionFinalizer);
+														 }
+														 else
+														 {
+															 actionFinalizer.finalize(true);
+														 }
+													 }
+												 }
+											 }
+		);
+	}
+
+	private void onActionPerformDialog(final GetSocial.Action action, final GetSocial.OnActionPerformListener.ActionFinalizer actionFinalizer)
+	{
+
+		runOnUiThread(new Runnable()
+					  {
+						  @Override
+						  public void run()
+						  {
+							  new AlertDialog.Builder(MainActivity.this)
+									  .setTitle("Permission")
+									  .setMessage("Do you allow user to " + action.toString())
+									  .setPositiveButton("OK", new DialogInterface.OnClickListener()
+											  {
+												  public void onClick(DialogInterface dialog, int whichButton)
+												  {
+													  actionFinalizer.finalize(true);
+												  }
+											  }
+									  )
+									  .setNegativeButton("Cancel", new DialogInterface.OnClickListener()
+											  {
+												  public void onClick(DialogInterface dialog, int whichButton)
+												  {
+													  actionFinalizer.finalize(false);
+												  }
+											  }
+									  )
+									  .show();
+						  }
+					  }
+		);
+	}
+
+	//endregion
+
+	//region Update user information
+	private void changeDisplayName()
+	{
+		final View changeDisplayNameView = LayoutInflater.from(this).inflate(R.layout.dialog_change_display_name, null, false);
+		final EditText displayNameEditText = (EditText) changeDisplayNameView.findViewById(R.id.display_name);
+		displayNameEditText.setText(UserIdentityUtils.getRandomDisplayName());
+		displayNameEditText.setSelection(displayNameEditText.getText().length());
+		runOnUiThread(new Runnable()
+					  {
+						  @Override
+						  public void run()
+						  {
+							  new AlertDialog.Builder(MainActivity.this)
+									  .setView(changeDisplayNameView)
+									  .setPositiveButton("OK", new DialogInterface.OnClickListener()
+											  {
+												  public void onClick(DialogInterface dialog, int whichButton)
+												  {
+													  final String name = displayNameEditText.getText().toString();
+
+													  getSocial.getCurrentUser().setDisplayName(name, new CurrentUser.UpdateUserInfoObserver()
+															  {
+																  @Override
+																  public void onComplete()
+																  {
+																	  logInfoAndToast("User display name was changed to" + name);
+																	  updateUserInfoView();
+																  }
+
+																  @Override
+																  public void onError(Exception error)
+																  {
+																	  logInfoAndToast("Cannot change display name. Reason %@" + error.getMessage());
+																  }
+															  }
+													  );
+
+												  }
+											  }
+									  )
+									  .setNegativeButton("Cancel", new DialogInterface.OnClickListener()
+											  {
+												  public void onClick(DialogInterface dialog, int whichButton)
+												  {
+												  }
+											  }
+									  )
+									  .show();
+						  }
+					  }
+		);
+	}
+
+	private void changeUserAvatar()
+	{
+		final String avatarUrl = UserIdentityUtils.getRandomAvatar();
+
+		getSocial.getCurrentUser().setAvatarUrl(avatarUrl, new CurrentUser.UpdateUserInfoObserver()
+				{
+					@Override
+					public void onComplete()
+					{
+						logInfoAndToast("User avatar was changed to " + avatarUrl);
+						updateUserInfoView();
+					}
+
+					@Override
+					public void onError(Exception error)
+					{
+						logInfoAndToast("Cannot change avatar. Reason %@" + error.getMessage());
+					}
+
+				}
+		);
 	}
 	//endregion
 
 	//region Working with User Authentication
-	private void logInWithFacebook()
-	{
-		if(!getSocial.isUserLoggedIn())
-		{
-			final AccessTokenTracker accessTokenTracker = new AccessTokenTracker()
-			{
-				@Override
-				protected void onCurrentAccessTokenChanged(AccessToken oldAccessToken, AccessToken newAccessToken)
-				{
-					stopTracking();
-
-					IdentityInfo fbIdentityInfo = IdentityInfo.createWithSocialNetworkInfo(IdentityInfo.PROVIDER_FACEBOOK, newAccessToken.getToken(), newAccessToken.getUserId());
-
-					getSocial.login(
-							fbIdentityInfo,
-							new GetSocial.LoginObserver()
-							{
-								@Override
-								public void onComplete()
-								{
-									logInfoAndToast("Successfully logged in with Facebook");
-								}
-
-								@Override
-								public void onError(Exception error)
-								{
-									logErrorAndToast("Failed to log in with Facebook, error: " + error.getMessage());
-								}
-							}
-					);
-				}
-			};
-			accessTokenTracker.startTracking();
-
-			LoginManager.getInstance().logInWithReadPermissions(this, FACEBOOK_PERMISSIONS);
-		}
-		else
-		{
-			logWarningAndToast("User already logged in");
-		}
-	}
-
-	private void logInWithGenericProvider()
-	{
-		if(!getSocial.isUserLoggedIn())
-		{
-			String userId = UserIdentityUtils.getInstallationIdWithSuffix("L", this);
-			String displayName = UserIdentityUtils.getDisplayName(userId);
-			String avatar = UserIdentityUtils.getAvatar(userId);
-
-			IdentityInfo identityInfo = IdentityInfo.createWithGenericInfo(IdentityInfo.PROVIDER_GENERIC, userId, displayName, avatar);
-			getSocial.login(identityInfo, new GetSocial.LoginObserver()
-					{
-						@Override
-						public void onComplete()
-						{
-							logInfoAndToast("Logged in successfully with 'generic' provider");
-						}
-
-						@Override
-						public void onError(Exception error)
-						{
-							logErrorAndToast("Failed to login with 'generic' provider, error: " + error.getMessage());
-						}
-					}
-			);
-		}
-		else
-		{
-			logWarningAndToast("User already logged in");
-		}
-	}
-
-	private void addFbUserIdentity()
-	{
-		if(getSocial.isUserLoggedIn())
-		{
-			final AccessTokenTracker accessTokenTracker = new AccessTokenTracker()
-			{
-				@Override
-				protected void onCurrentAccessTokenChanged(AccessToken oldAccessToken, AccessToken newAccessToken)
-				{
-					stopTracking();
-
-					IdentityInfo fbIdentityInfo = IdentityInfo
-							.createWithSocialNetworkInfo(IdentityInfo.PROVIDER_FACEBOOK, newAccessToken.getToken(), newAccessToken.getUserId())
-							.setKeyValue(IdentityInfo.FLAG_UPDATE_AVATAR, true)
-							.setKeyValue(IdentityInfo.FLAG_UPDATE_DISPLAY_NAME, true);
-
-					getSocial.addUserIdentity(
-							fbIdentityInfo,
-							new GetSocial.UpdateIdentityInfoObserver()
-							{
-								@Override
-								public void onComplete()
-								{
-									logInfoAndToast("Successfully added Facebook user identity");
-								}
-
-								@Override
-								public void onError(Exception error)
-								{
-									logErrorAndToast("Failed to add Facebook user identity, error: " + error.getMessage());
-								}
-							}
-					);
-				}
-			};
-			accessTokenTracker.startTracking();
-
-			LoginManager.getInstance().logInWithReadPermissions(this, FACEBOOK_PERMISSIONS);
-		}
-		else
-		{
-			logWarningAndToast("User has to be logged in to add identity");
-		}
-	}
-
-	private void addCustomUserIdentity()
-	{
-		if(getSocial.isUserLoggedIn())
-		{
-			String userId = UserIdentityUtils.getInstallationIdWithSuffix("A", this);
-			String displayName = UserIdentityUtils.getDisplayName(userId);
-			String avatar = UserIdentityUtils.getAvatar(userId);
-
-			IdentityInfo identityInfo = IdentityInfo.createWithGenericInfo("GetSocial", userId, displayName, avatar);
-			getSocial.addUserIdentity(
-					identityInfo,
-					new GetSocial.UpdateIdentityInfoObserver()
-					{
-						@Override
-						public void onComplete()
-						{
-							logInfoAndToast("Successfully added user identity 'custom'");
-						}
-
-						@Override
-						public void onError(Exception error)
-						{
-							logErrorAndToast("Failed to add user identity 'custom', error: " + error.getMessage());
-						}
-					}
-			);
-		}
-		else
-		{
-			logWarningAndToast("User has to be logged in to add identity");
-		}
-	}
-
-	private void removeFbUserIdentity()
+	private void addFbUserIdentity(final OnResultListener resultListener)
 	{
 		final AccessTokenTracker accessTokenTracker = new AccessTokenTracker()
 		{
 			@Override
 			protected void onCurrentAccessTokenChanged(AccessToken oldAccessToken, AccessToken newAccessToken)
 			{
+				if(newAccessToken == null)
+				{
+					return;
+				}
 				stopTracking();
 
-				getSocial.removeUserIdentity(IdentityInfo.PROVIDER_FACEBOOK,
-						new GetSocial.UpdateIdentityInfoObserver()
+				UserIdentity fbIdentity = UserIdentity.createFacebookIdentity(newAccessToken.getToken());
+
+				getSocial.getCurrentUser().addUserIdentity(
+						fbIdentity,
+						new AddUserIdentityObserver()
 						{
 							@Override
-							public void onComplete()
+							public void onComplete(AddIdentityResult addIdentityResult)
 							{
-								logInfoAndToast("Successfully removed Facebook user identity");
+								updateUserInfoView();
+
+								//check if we continue with a user that has facebook identity
+								if(addIdentityResult==AddIdentityResult.CONFLICT_WAS_RESOLVED_WITH_CURRENT)
+								{
+									logInfoAndToast("Facebook identity is not added");
+									disconnectFromFacebook();
+								}
+								else
+								{
+									logInfoAndToast("Adding Facebook identity finished successfully");
+								}
+								updateUserInfoView();
+
+								if(resultListener != null)
+								{
+									resultListener.onComplete();
+								}
 							}
 
 							@Override
 							public void onError(Exception error)
 							{
-								logErrorAndToast("Failed to remove Facebook user identity, error: " + error.getMessage());
+								logErrorAndToast("Failed to add Facebook user identity, error: " + error.getMessage());
+
+								if(resultListener != null)
+								{
+									resultListener.onError(error);
+								}
+							}
+
+							@Override
+							public void onConflict(User currentUser, User remoteUser, UserIdentityResolver resolver)
+							{
+								showDialogToSolveIdentityConflict(currentUser, remoteUser, resolver);
 							}
 						}
 				);
@@ -574,56 +701,345 @@ public class MainActivity extends AppCompatActivity
 		};
 		accessTokenTracker.startTracking();
 
-		LoginManager.getInstance().logOut();
+		LoginManager.getInstance().logInWithReadPermissions(this, FACEBOOK_PERMISSIONS);
+	}
+
+	private void addGooglePlusUserIdentity(final OnResultListener resultListener)
+	{
+		googlePlusLoginProviderHelper.addUserIdentity(MainActivity.this, new AddUserIdentityObserver()
+				{
+					@Override
+					public void onComplete(AddIdentityResult addIdentityResult)
+					{
+						if(addIdentityResult==AddIdentityResult.CONFLICT_WAS_RESOLVED_WITH_CURRENT)
+						{
+							logInfoAndToast("Google+ identity is not added");
+						}
+						else
+						{
+							logInfoAndToast("Adding Google+ finished successfully");
+						}
+						updateUserInfoView();
+
+
+						if(resultListener != null)
+						{
+							resultListener.onComplete();
+						}
+					}
+
+					@Override
+					public void onError(Exception error)
+					{
+						logErrorAndToast("Failed to add Google+ user identity, error: " + error.getMessage());
+
+						if(resultListener != null)
+						{
+							resultListener.onError(error);
+						}
+					}
+
+					@Override
+					public void onConflict(User currentUser, User remoteUser, UserIdentityResolver resolver)
+					{
+						showDialogToSolveIdentityConflict(currentUser, remoteUser, resolver);
+					}
+				}
+		);
+	}
+
+	private void addGooglePlayUserIdentity(final OnResultListener resultListener)
+	{
+		googlePlayLoginProviderHelper.addUserIdentity(MainActivity.this, new AddUserIdentityObserver()
+				{
+					@Override
+					public void onComplete(AddIdentityResult addIdentityResult)
+					{
+						if(addIdentityResult==AddIdentityResult.CONFLICT_WAS_RESOLVED_WITH_CURRENT)
+						{
+							logInfoAndToast("GooglePlay identity is not added");
+						}
+						else
+						{
+							logInfoAndToast("Adding GooglePlay finished successfully");
+						}
+						updateUserInfoView();
+
+						if(resultListener != null)
+						{
+							resultListener.onComplete();
+						}
+					}
+
+					@Override
+					public void onError(Exception error)
+					{
+						logErrorAndToast("Failed to add Google Play user identity, error: " + error.getMessage());
+
+						if(resultListener != null)
+						{
+							resultListener.onError(error);
+						}
+					}
+
+					@Override
+					public void onConflict(User currentUser, User remoteUser, UserIdentityResolver resolver)
+					{
+						showDialogToSolveIdentityConflict(currentUser, remoteUser, resolver);
+					}
+				}
+		);
+	}
+
+	private void addCustomUserIdentity(final OnResultListener resultListener)
+	{
+
+		final View view = getLayoutInflater().inflate(R.layout.dialog_custom_identity, null, false);
+
+		final EditText userdIdEditText = (EditText) view.findViewById(R.id.user_id);
+
+		final EditText tokenEditText = (EditText) view.findViewById(R.id.user_token);
+
+		runOnUiThread(new Runnable()
+					  {
+						  @Override
+						  public void run()
+						  {
+							  AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this)
+									  .setView(view)
+									  .setPositiveButton("Add", new DialogInterface.OnClickListener()
+											  {
+												  @Override
+												  public void onClick(DialogInterface dialog, int which)
+												  {
+													  String usedId = userdIdEditText.getText().toString().trim();
+													  String token = tokenEditText.getText().toString().trim();
+													  addUserIdentity(usedId, token, resultListener);
+												  }
+											  }
+									  )
+									  .setNegativeButton("Cancel", new DialogInterface.OnClickListener()
+											  {
+												  @Override
+												  public void onClick(DialogInterface dialog, int which)
+												  {
+													  toast("Action cancelled");
+												  }
+											  }
+									  );
+							  builder.show();
+						  }
+					  }
+		);
+	}
+	
+	private void addUserIdentity(String userId, String token, final OnResultListener resultListener)
+	{
+		if(TextUtils.isEmpty(userId) || TextUtils.isEmpty(token))
+		{
+			logErrorAndToast("Failed to add User Identity, User Id and Token fields can't be empty");
+		}
+		else
+		{
+			UserIdentity identity = UserIdentity.create("Custom", userId, token);
+			getSocial.getCurrentUser().addUserIdentity(
+					identity,
+					new AddUserIdentityObserver()
+					{
+						@Override
+						public void onComplete(AddIdentityResult addIdentityResult)
+						{
+							if(addIdentityResult==AddIdentityResult.CONFLICT_WAS_RESOLVED_WITH_CURRENT)
+							{
+								logInfoAndToast("'custom identity' is not added");
+							}
+							else
+							{
+								logInfoAndToast("Adding 'custom identity' finished successfully");
+							}
+							updateUserInfoView();
+
+							
+							if(resultListener != null)
+							{
+								resultListener.onComplete();
+							}
+						}
+						
+						@Override
+						public void onError(Exception error)
+						{
+							logErrorAndToast("Failed to add user identity 'custom', error: " + error.getMessage());
+							
+							if(resultListener != null)
+							{
+								resultListener.onError(error);
+							}
+						}
+						
+						@Override
+						public void onConflict(User currentUser, User remoteUser, UserIdentityResolver resolver)
+						{
+							showDialogToSolveIdentityConflict(currentUser, remoteUser, resolver);
+						}
+					}
+			);
+		}
+	}
+
+	private void removeFbUserIdentity()
+	{
+		getSocial.getCurrentUser().removeUserIdentity(UserIdentity.PROVIDER_FACEBOOK,
+				new CurrentUser.UpdateUserInfoObserver()
+				{
+					@Override
+					public void onComplete()
+					{
+						updateUserInfoView();
+						logInfoAndToast("Successfully removed Facebook user identity");
+					}
+
+					@Override
+					public void onError(Exception error)
+					{
+						logErrorAndToast("Failed to remove Facebook user identity, error: " + error.getMessage());
+					}
+
+				}
+		);
+
+		disconnectFromFacebook();
+	}
+
+	private void removeGooglePlusUserIdentity()
+	{
+		getSocial.getCurrentUser().removeUserIdentity(UserIdentity.PROVIDER_GOOGLEPLUS,
+				new CurrentUser.UpdateUserInfoObserver()
+				{
+					@Override
+					public void onComplete()
+					{
+						googlePlusLoginProviderHelper.removeUserIdentity(MainActivity.this, new CurrentUser.UpdateUserInfoObserver()
+								{
+									@Override
+									public void onComplete()
+									{
+										updateUserInfoView();
+										logInfoAndToast("Successfully removed Google+ user identity");
+									}
+
+									@Override
+									public void onError(Exception error)
+									{
+										logErrorAndToast("Failed to remove Google+ user identity, error: " + error.getMessage());
+									}
+
+								}
+						);
+					}
+
+					@Override
+					public void onError(Exception error)
+					{
+						logErrorAndToast("Failed to remove Google+ user identity, error: " + error.getMessage());
+					}
+
+				}
+		);
+
+	}
+
+	private void removeGooglePlayUserIdentity()
+	{
+
+		getSocial.getCurrentUser().removeUserIdentity(UserIdentity.PROVIDER_GOOGLEPLAY,
+				new CurrentUser.UpdateUserInfoObserver()
+				{
+					@Override
+					public void onComplete()
+					{
+						googlePlayLoginProviderHelper.removeUserIdentity(MainActivity.this, new CurrentUser.UpdateUserInfoObserver()
+								{
+									@Override
+									public void onComplete()
+									{
+										updateUserInfoView();
+										logInfoAndToast("Successfully removed Google Play user identity");
+									}
+
+									@Override
+									public void onError(Exception error)
+									{
+										logErrorAndToast("Failed to remove Google Play user identity, error: " + error.getMessage());
+									}
+
+								}
+						);
+					}
+
+					@Override
+					public void onError(Exception error)
+					{
+						logErrorAndToast("Failed to remove Google Play user identity, error: " + error.getMessage());
+					}
+				}
+		);
 	}
 
 	private void removeUserIdentity(final String providerId)
 	{
-		if(getSocial.isUserLoggedIn())
-		{
-			getSocial.removeUserIdentity(
-					providerId,
-					new GetSocial.UpdateIdentityInfoObserver()
+		getSocial.getCurrentUser().removeUserIdentity(
+				providerId,
+				new CurrentUser.UpdateUserInfoObserver()
+				{
+					@Override
+					public void onComplete()
 					{
-						@Override
-						public void onComplete()
-						{
-							logInfoAndToast(String.format("Successfully removed user identity '%s'", providerId));
-						}
-
-						@Override
-						public void onError(Exception error)
-						{
-							logErrorAndToast(String.format("Failed to remove user identity '%s', error: %s", providerId, error.getMessage()));
-						}
+						updateUserInfoView();
+						logInfoAndToast(String.format("Successfully removed user identity '%s'", providerId));
 					}
-			);
-		}
-		else
-		{
-			logWarningAndToast("User has to be logged in to remove identity");
-		}
+
+					@Override
+					public void onError(Exception error)
+					{
+						logErrorAndToast(String.format("Failed to remove user identity '%s', error: %s", providerId, error.getMessage()));
+					}
+
+				}
+		);
 	}
 
-	private void logOut()
+	private void showDialogToSolveIdentityConflict(final User currentUser, final User remoteUser, final AddUserIdentityObserver.UserIdentityResolver resolver)
 	{
-		if(getSocial.isUserLoggedIn())
-		{
-			getSocial.logout(
-					new GetSocial.LogoutObserver()
-					{
-						@Override
-						public void onComplete()
-						{
-							logInfoAndToast("Successfully logged out");
-						}
-					}
-			);
-		}
-		else
-		{
-			logWarningAndToast("User has to be logged in to logout");
-		}
+
+		runOnUiThread(new Runnable()
+					  {
+						  @Override
+						  public void run()
+						  {
+							  new AlertDialog.Builder(MainActivity.this)
+									  .setTitle("Conflict")
+									  .setMessage("The new identity is already linked to another user. Which one do you want to continue using?")
+									  .setPositiveButton("Remote", new DialogInterface.OnClickListener()
+											  {
+												  public void onClick(DialogInterface dialog, int whichButton)
+												  {
+													  resolver.resolve(AddUserIdentityObserver.AddIdentityConflictResolutionStrategy.REMOTE);
+												  }
+											  }
+									  )
+									  .setNegativeButton("Current", new DialogInterface.OnClickListener()
+											  {
+												  public void onClick(DialogInterface dialog, int whichButton)
+												  {
+													  resolver.resolve(AddUserIdentityObserver.AddIdentityConflictResolutionStrategy.CURRENT);
+												  }
+											  }
+									  )
+									  .show();
+						  }
+					  }
+		);
 	}
 	//endregion
 
@@ -713,7 +1129,7 @@ public class MainActivity extends AppCompatActivity
 				new UserListViewBuilder.UserListObserver()
 				{
 					@Override
-					public void onUserSelected(UserIdentity user)
+					public void onUserSelected(User user)
 					{
 						logInfoAndToast("Selected user: " + user.getDisplayName());
 					}
@@ -779,7 +1195,7 @@ public class MainActivity extends AppCompatActivity
 					{
 						logInfoAndToast(formatLeaderboardData(leaderboard));
 					}
-
+					
 					@Override
 					public void onFailure(Exception exception)
 					{
@@ -803,7 +1219,7 @@ public class MainActivity extends AppCompatActivity
 							logInfoAndToast(formatLeaderboardData(leaderboard));
 						}
 					}
-
+					
 					@Override
 					public void onFailure(Exception exception)
 					{
@@ -826,7 +1242,7 @@ public class MainActivity extends AppCompatActivity
 							logInfoAndToast(formatLeaderboardData(leaderboard));
 						}
 					}
-
+					
 					@Override
 					public void onFailure(Exception exception)
 					{
@@ -856,7 +1272,7 @@ public class MainActivity extends AppCompatActivity
 							);
 						}
 					}
-
+					
 					@Override
 					public void onFailure(Exception exception)
 					{
@@ -919,27 +1335,34 @@ public class MainActivity extends AppCompatActivity
 	//region Working with Cloud Save
 	private void openCloudSaveDialog()
 	{
-		final EditText dataTextView = new EditText(this);
-		dataTextView.setHint("serialized data to save");
+		View saveStateView = getLayoutInflater().inflate(R.layout.dialog_save_state, null, false);
+		final EditText dataTextView = (EditText) saveStateView.findViewById(R.id.save_state);
 
-		AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-		builder.setTitle(R.string.enter_data_to_save);
-		builder.setPositiveButton(R.string.save, new DialogInterface.OnClickListener()
-				{
-					@Override
-					public void onClick(DialogInterface dialogInterface, int i)
-					{
-						String data = dataTextView.getText().toString();
-						if(data != null && !data.isEmpty())
+		new AlertDialog.Builder(MainActivity.this)
+				.setView(saveStateView)
+				.setPositiveButton(R.string.save, new DialogInterface.OnClickListener()
 						{
-							getSocial.save(data);
+							@Override
+							public void onClick(DialogInterface dialogInterface, int i)
+							{
+								String data = dataTextView.getText().toString();
+								if(!data.isEmpty())
+								{
+									getSocial.save(data);
+								}
+							}
 						}
-					}
-				}
-		);
-		builder.setNegativeButton(android.R.string.cancel, null);
-		builder.setView(dataTextView);
-		builder.show();
+				)
+				.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener()
+						{
+							@Override
+							public void onClick(DialogInterface dialog, int which)
+							{
+								//save cancelled
+							}
+						}
+				)
+				.show();
 	}
 
 	private void getClodSaveData()
@@ -952,11 +1375,11 @@ public class MainActivity extends AppCompatActivity
 					{
 						logInfoAndToast("Loaded data: " + data);
 					}
-
+					
 					@Override
-					public void onFailure()
+					public void onFailure(String errorMessage)
 					{
-						logErrorAndToast("Failed to load saved data");
+						logErrorAndToast(errorMessage);
 					}
 				}
 		);
@@ -983,39 +1406,11 @@ public class MainActivity extends AppCompatActivity
 		);
 		builder.create().show();
 	}
-
-	private void showLoginSelectionDialog()
-	{
-		String[] providers = {"Facebook", "Generic provider"};
-
-		AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-		builder.setTitle(R.string.login_with);
-		builder.setNegativeButton(android.R.string.cancel, null);
-		builder.setItems(providers, new DialogInterface.OnClickListener()
-				{
-					public void onClick(DialogInterface dialog, int which)
-					{
-						switch(which)
-						{
-							case 0:
-								logInWithFacebook();
-								break;
-							case 1:
-								logInWithGenericProvider();
-								break;
-						}
-					}
-				}
-		);
-		builder.create().show();
-	}
-	//endregion
-
 	//endregion
 
 
 	// /////////////////////////////////
-	// region Helper methods 
+	// region Helper methods
 	// /////////////////////////////////
 
 	private void initFacebook()
@@ -1024,25 +1419,33 @@ public class MainActivity extends AppCompatActivity
 		callbackManager = CallbackManager.Factory.create();
 	}
 
+	private void initGoogleServices()
+	{
+		if(googlePlusLoginProviderHelper == null)
+		{
+			googlePlusLoginProviderHelper = new GooglePlusLoginProviderHelper(this);
+		}
+		if(googlePlayLoginProviderHelper == null)
+		{
+			googlePlayLoginProviderHelper = new GooglePlayLoginProviderHelper(this);
+		}
+	}
+
 	private void initUi()
 	{
 		userInfoView = (UserInfoView) findViewById(R.id.toolbar_userInfo);
-		userInfoView.setUser(getSocial.getLoggedInUser());
+		userInfoView.setUser(getSocial.getCurrentUser());
 		userInfoView.setOnClickListener(
 				new View.OnClickListener()
 				{
 					@Override
 					public void onClick(View v)
 					{
-						if(getSocial.isUserLoggedIn())
+						if(getSocial.isInitialized())
 						{
 							FragmentManager fm = getSupportFragmentManager();
-							UserInfoDialog editNameDialog = new UserInfoDialog();
-							editNameDialog.show(fm, "user_info_dialog");
-						}
-						else
-						{
-							showLoginSelectionDialog();
+							UserInfoDialog userInfoDialog = new UserInfoDialog();
+							userInfoDialog.show(fm, "user_info_dialog");
 						}
 					}
 				}
@@ -1138,33 +1541,36 @@ public class MainActivity extends AppCompatActivity
 		//
 		//  User Authentication
 		//
-		ListViewMenu userAuthenticationMenu = rootMenu.addItem(new ListViewMenu("User Authentication"));
+		ListViewMenu userAuthenticationMenu = rootMenu.addItem(new ListViewMenu("User Management"));
+
 		userAuthenticationMenu.addItem(
 				new ActionableListViewMenu(
-						"Log in with Facebook",
+						"Change user display name",
 						new ListViewMenuItemAction()
 						{
 							@Override
 							public void execute(ListViewMenu menuItem)
 							{
-								logInWithFacebook();
+								changeDisplayName();
 							}
 						}
 				)
 		);
+
 		userAuthenticationMenu.addItem(
 				new ActionableListViewMenu(
-						"Log in with Generic provider",
+						"Change user avatar",
 						new ListViewMenuItemAction()
 						{
 							@Override
 							public void execute(ListViewMenu menuItem)
 							{
-								logInWithGenericProvider();
+								changeUserAvatar();
 							}
 						}
 				)
 		);
+
 		userAuthenticationMenu.addItem(
 				new ActionableListViewMenu(
 						"Add Facebook user identity",
@@ -1173,7 +1579,34 @@ public class MainActivity extends AppCompatActivity
 							@Override
 							public void execute(ListViewMenu menuItem)
 							{
-								addFbUserIdentity();
+								addFbUserIdentity(null);
+							}
+						}
+				)
+		);
+
+		userAuthenticationMenu.addItem(
+				new ActionableListViewMenu(
+						"Add Google+ user identity",
+						new ListViewMenuItemAction()
+						{
+							@Override
+							public void execute(ListViewMenu menuItem)
+							{
+								addGooglePlusUserIdentity(null);
+							}
+						}
+				)
+		);
+		userAuthenticationMenu.addItem(
+				new ActionableListViewMenu(
+						"Add Google Play user identity",
+						new ListViewMenuItemAction()
+						{
+							@Override
+							public void execute(ListViewMenu menuItem)
+							{
+								addGooglePlayUserIdentity(null);
 							}
 						}
 				)
@@ -1186,7 +1619,7 @@ public class MainActivity extends AppCompatActivity
 							@Override
 							public void execute(ListViewMenu menuItem)
 							{
-								addCustomUserIdentity();
+								addCustomUserIdentity(null);
 							}
 						}
 				)
@@ -1202,8 +1635,35 @@ public class MainActivity extends AppCompatActivity
 					}
 				}
 		);
+
 		removeFbUserIdentityMenuItem.setSubtitle("Log out from Facebook");
 		userAuthenticationMenu.addItem(removeFbUserIdentityMenuItem);
+
+		ActionableListViewMenu removeGooglePlusUserIdentity = new ActionableListViewMenu(
+				"Remove Google+ user identity",
+				new ListViewMenuItemAction()
+				{
+					@Override
+					public void execute(ListViewMenu menuItem)
+					{
+						removeGooglePlusUserIdentity();
+					}
+				}
+		);
+		userAuthenticationMenu.addItem(removeGooglePlusUserIdentity);
+
+		ActionableListViewMenu removeGooglePlayUserIdentity = new ActionableListViewMenu(
+				"Remove Google Play user identity",
+				new ListViewMenuItemAction()
+				{
+					@Override
+					public void execute(ListViewMenu menuItem)
+					{
+						removeGooglePlayUserIdentity();
+					}
+				}
+		);
+		userAuthenticationMenu.addItem(removeGooglePlayUserIdentity);
 
 		userAuthenticationMenu.addItem(
 				new ActionableListViewMenu(
@@ -1213,25 +1673,44 @@ public class MainActivity extends AppCompatActivity
 							@Override
 							public void execute(ListViewMenu menuItem)
 							{
-								removeUserIdentity("GetSocial");
-							}
-						}
-				)
-		);
-		userAuthenticationMenu.addItem(
-				new ActionableListViewMenu(
-						"Log out",
-						new ListViewMenuItemAction()
-						{
-							@Override
-							public void execute(ListViewMenu menuItem)
-							{
-								logOut();
+								removeUserIdentity("Custom");
 							}
 						}
 				)
 		);
 
+		userAuthenticationMenu.addItem(
+				new ActionableListViewMenu(
+						"Reset current user",
+						new ListViewMenuItemAction()
+						{
+							@Override
+							public void execute(ListViewMenu menuItem)
+							{
+								getSocial.getCurrentUser().reset(new CurrentUser.UpdateUserInfoObserver()
+
+																 {
+																	 @Override
+																	 public void onComplete()
+																	 {
+																		 updateUserInfoView();
+																		 disconnectFromFacebook();
+																		 logInfoAndToast("Successfully reseted");
+																	 }
+
+																	 @Override
+																	 public void onError(Exception error)
+																	 {
+																		 logErrorAndToast(error);
+																	 }
+
+																 }
+
+								);
+							}
+						}
+				)
+		);
 
 		//
 		//  Activities
@@ -1628,6 +2107,45 @@ public class MainActivity extends AppCompatActivity
 
 		settingsMenu.addItem(
 				new CheckboxListViewMenu(
+						"Prevent anonymous user from posting",
+						isPreventAnonymousInteract,
+						new OnCheckboxListViewMenuChecked()
+						{
+							@Override
+							public void onCheckChanged(boolean isChecked)
+							{
+								isPreventAnonymousInteract = isChecked;
+								if(isPreventAnonymousInteract)
+								{
+									toast("Try to perform some action as an anonymous user. (eg. like a post)");
+								}
+							}
+						}
+				)
+		);
+
+
+		settingsMenu.addItem(
+				new CheckboxListViewMenu(
+						"Perform action handler",
+						isOnActionPerformListener,
+						new OnCheckboxListViewMenuChecked()
+						{
+							@Override
+							public void onCheckChanged(boolean isChecked)
+							{
+								isOnActionPerformListener = isChecked;
+								if(isOnActionPerformListener)
+								{
+									toast("Try to open any window to see action confirmation dialog");
+								}
+							}
+						}
+				)
+		);
+
+		settingsMenu.addItem(
+				new CheckboxListViewMenu(
 						"Enable User Generated Content Handler",
 						isContentModerated,
 						new OnCheckboxListViewMenuChecked()
@@ -1636,6 +2154,10 @@ public class MainActivity extends AppCompatActivity
 							public void onCheckChanged(boolean isChecked)
 							{
 								isContentModerated = isChecked;
+								if(isContentModerated)
+								{
+									toast("Try to post an activity or chat message");
+								}
 							}
 						}
 				)
@@ -1650,6 +2172,10 @@ public class MainActivity extends AppCompatActivity
 							public void onCheckChanged(boolean isChecked)
 							{
 								isUserAvatarClickHandlerCustom = isChecked;
+								if(isUserAvatarClickHandlerCustom)
+								{
+									toast("Tap on any user avatar");
+								}
 							}
 						}
 				)
@@ -1664,6 +2190,10 @@ public class MainActivity extends AppCompatActivity
 							public void onCheckChanged(boolean isChecked)
 							{
 								isAppAvatarClickHandlerCustom = isChecked;
+								if(isAppAvatarClickHandlerCustom)
+								{
+									toast("Tap on any app avatar");
+								}
 							}
 						}
 				)
@@ -1678,6 +2208,10 @@ public class MainActivity extends AppCompatActivity
 							public void onCheckChanged(boolean isChecked)
 							{
 								isActivityActionHandlerCustom = isChecked;
+								if(isActivityActionHandlerCustom)
+								{
+									toast("Tap on an activity action button to see the effect");
+								}
 							}
 						}
 				)
@@ -1692,6 +2226,7 @@ public class MainActivity extends AppCompatActivity
 							public void onCheckChanged(boolean isChecked)
 							{
 								isInviteButtonClickHandlerCustom = isChecked;
+								toast("Tap on invite button inside Chat window to see the effect");
 							}
 						}
 				)
@@ -1732,9 +2267,9 @@ public class MainActivity extends AppCompatActivity
 		}
 	}
 
-	private String moderateUserGeneratedContent(int type, String content)
+	private String moderateUserGeneratedContent(GetSocial.ContentSource source, String content)
 	{
-		UiConsole.logInfo(String.format("User Content (%s) was generated \"%s\"", type, content));
+		UiConsole.logInfo(String.format("User Content (%s) was generated \"%s\"", source, content));
 		return content + "(verified \uD83D\uDC6E)";
 	}
 
@@ -1788,10 +2323,12 @@ public class MainActivity extends AppCompatActivity
 			{
 				smartInviteViewBuilder.setReferralData((HashMap<String, String>) data.getSerializableExtra(InviteActivity.EXTRA_BUNDLE));
 			}
+
 			if(data.hasExtra(InviteActivity.EXTRA_IMAGE))
 			{
 				smartInviteViewBuilder.setImageUrl(data.getStringExtra(InviteActivity.EXTRA_IMAGE));
 			}
+
 			smartInviteViewBuilder.show();
 		}
 	}
@@ -1808,9 +2345,9 @@ public class MainActivity extends AppCompatActivity
 			}
 
 			@Override
-			public void onFailure()
+			public void onFailure(String errorMessage)
 			{
-				toast("Activity NOT posted (check if the user authenticated)");
+				toast("Activity NOT posted. Check your internet connection");
 			}
 		};
 	}
@@ -1887,6 +2424,21 @@ public class MainActivity extends AppCompatActivity
 		}
 	}
 
+	private void updateUserInfoView()
+	{
+		runOnUiThread(
+				new Runnable()
+				{
+					@Override
+					public void run()
+					{
+						userInfoView.setUser(getSocial.getCurrentUser());
+					}
+				}
+		);
+
+	}
+
 	private void dialogOnUiThread(final String title, final String message)
 	{
 		runOnUiThread(
@@ -1903,6 +2455,54 @@ public class MainActivity extends AppCompatActivity
 					}
 				}
 		);
+	}
+
+	private void disconnectFromFacebook()
+	{
+
+		if(AccessToken.getCurrentAccessToken() == null)
+		{
+			return; // already logged out
+		}
+
+		new GraphRequest(AccessToken.getCurrentAccessToken(), "/me/permissions/", null, HttpMethod.DELETE, new GraphRequest
+				.Callback()
+		{
+			@Override
+			public void onCompleted(GraphResponse graphResponse)
+			{
+
+				LoginManager.getInstance().logOut();
+
+			}
+		}
+		).executeAsync();
+	}
+
+	private boolean isNonAnonymousUserAction(GetSocial.Action action)
+	{
+		boolean nonAnonymousUserAction = false;
+
+		switch(action)
+		{
+			case LIKE_ACTIVITY:
+			case LIKE_COMMENT:
+			case POST_ACTIVITY:
+			case POST_COMMENT:
+			case SEND_PRIVATE_CHAT_MESSAGE:
+			case SEND_PUBLIC_CHAT_MESSAGE:
+				nonAnonymousUserAction = true;
+				break;
+		}
+
+		return nonAnonymousUserAction;
+	}
+
+	public interface OnResultListener
+	{
+		void onComplete();
+
+		void onError(Exception error);
 	}
 	//endregion
 }

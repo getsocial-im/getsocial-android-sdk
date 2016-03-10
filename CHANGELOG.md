@@ -2,6 +2,28 @@
 
 ## Version History
 
+### v5.0.0
+
++ ADDED `GetSocialCurrentUser` object
++ ADDED methods to set `DisplayName` and `AvatarUrl` for the current user
++ ADDED methods to add/remove identities for the current user with conflict support
++ ADDED methods to reset the current user
++ ADDED `OnUserActionPerformHandler` to intercept all user interactions
++ ADDED CoreProperty.HEADER_PADDING_TOP and CoreProperty.HEADER_PADDING_BOTTOM
++ DEPRECATED CoreProperty.TITLE_MARGIN_TOP (use CoreProperty.HEADER_PADDING_TOP instead)
++ ADDED `CoreProperty.ACTIVITY_COMMENT_BG_COLOR` property to configure comments background color
++ REMOVED `WRITE_EXTERNAL_STORAGE` permission
++ IMPROVED UI scaling in landscape mode
++ FIXED app install and smart invite sent analytics being reported incorrectly
++ FIXED UI Overlay image not being displayed
++ FIXED styling for popup dialogs in chat list and chat views
++ FIXED smart invites not working when user is logged out and device has no internet connection
++ FIXED `window.overlay-image` UI configuration property not working
+
+
+
+---
+
 ### v4.0.4
 
 + FIXED `GetSocial.getSupportedInviteProviders()` method call returning 0 providers when invoked from `GetSocial.init() onSuccess()` callback
@@ -14,10 +36,10 @@
 
 + IMPROVED invite flow via email. Now SDK shows only email clients
 + FIXED issue with being not possible to install two apps with GetSocial SDK v4.0.2 integrated
-+ FIXED property ACTIVITY_ACTION_BUTTON_TEXT_Y_OFFSET_NORMAL and ACTIVITY_ACTION_BUTTON_TEXT_Y_OFFSET_PRESSED behaviour
++ FIXED property `ACTIVITY_ACTION_BUTTON_TEXT_Y_OFFSET_NORMAL` and `ACTIVITY_ACTION_BUTTON_TEXT_Y_OFFSET_PRESSED` behaviour
 
 
- 
+
 ---
 
 ### v4.0.2
@@ -43,9 +65,9 @@ Release v4.0.0 brings a lot of new features, improvements and few breaking chang
 + Integration guide and reference migrated to [docs.getsocial.im](http://docs.getsocial.im).
 + Now GetSocial is split into `Core` (Activity Feed, Notifications, Smart Invites) and `Chat` modules. [Learn more about migration from version 3.x.](http://docs.getsocial.im/#upgrade-guide)
 + New UI configuration system. Now all UI properties can be customized via JSON configuration file. [Learn more...](http://docs.getsocial.im/ui-customization/#developers-guide)
-+ Big part of `GetSocial` methods were refactored to more meaningful names (e.g. `authenticateGame(...)` => `init(...)`, `verifyUserIdentity(...)` => `login(...)`, etc.)/   
++ Big part of `GetSocial` methods were refactored to more meaningful names (e.g. `authenticateGame(...)` => `init(...)`, `verifyUserIdentity(...)` => `login(...)`, etc.)/
 + Added support for linking multiple user accounts. [Learn more...](http://docs.getsocial.im/#adding-identity-info)
-+ Replaced generic `open(...)` view method with sophisticated builders API. To obtain view builder call `createXxxView()`. 
++ Replaced generic `open(...)` view method with sophisticated builders API. To obtain view builder call `createXxxView()`.
 + Added friends list view. [Learn more...](http://docs.getsocial.im/#friends-list)
 + Added support for Facebook SDK v4.x. [Learn more...](http://docs.getsocial.im/#integration-with-facebook)
 + Now users can receive notifications about likes and comments from application account.
@@ -128,6 +150,6 @@ Release v4.0.0 brings a lot of new features, improvements and few breaking chang
 
 ---
 
-### v3.1.0 
+### v3.1.0
 
 + Initial GetSocial version

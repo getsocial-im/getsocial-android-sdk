@@ -1,6 +1,17 @@
 /*
- * Published under the MIT License (MIT)
- * Copyright: (c) 2015 GetSocial B.V.
+ *    	Copyright 2015-2016 GetSocial B.V.
+ *
+ *	Licensed under the Apache License, Version 2.0 (the "License");
+ *	you may not use this file except in compliance with the License.
+ *	You may obtain a copy of the License at
+ *
+ *    	http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *	Unless required by applicable law or agreed to in writing, software
+ *	distributed under the License is distributed on an "AS IS" BASIS,
+ *	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *	See the License for the specific language governing permissions and
+ *	limitations under the License.
  */
 
 package im.getsocial.testapp.ui;
@@ -29,21 +40,18 @@ import java.io.BufferedOutputStream;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.List;
 
-import im.getsocial.sdk.core.IdentityInfo;
-import im.getsocial.sdk.core.UserIdentity;
+import im.getsocial.sdk.core.User;
 import im.getsocial.sdk.core.util.Log;
 import im.getsocial.testapp.R;
 
 public class UserInfoView extends RelativeLayout
 {
-	private UserIdentity user;
+	private User user;
 	
 	private TextView displayNameTextView;
-	private TextView guidTextView;
+	private TextView extraInfoTextView;
 	private ImageView avatarImageView;
-	private View rootView;
 	
 	public UserInfoView(Context context)
 	{
@@ -63,7 +71,7 @@ public class UserInfoView extends RelativeLayout
 		init(attrs, defStyle);
 	}
 	
-	public void setUser(UserIdentity user)
+	public void setUser(User user)
 	{
 		this.user = user;
 		updateContent();
@@ -72,10 +80,10 @@ public class UserInfoView extends RelativeLayout
 	private void init(AttributeSet attrs, int defStyle)
 	{
 		LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-		rootView = inflater.inflate(R.layout.view_user_info, this, true);
+		View rootView = inflater.inflate(R.layout.view_user_info, this, true);
 		
 		displayNameTextView = (TextView) rootView.findViewById(R.id.userInfo_displayName);
-		guidTextView = (TextView) rootView.findViewById(R.id.userInfo_extra);
+		extraInfoTextView = (TextView) rootView.findViewById(R.id.userInfo_extra);
 		avatarImageView = (ImageView) rootView.findViewById(R.id.userInfo_avatar);
 		
 		updateContent();
@@ -86,34 +94,48 @@ public class UserInfoView extends RelativeLayout
 		if(user != null)
 		{
 			displayNameTextView.setText(user.getDisplayName());
-			guidTextView.setText(printProviders());
+			if(user.isAnonymous())
+			{
+				extraInfoTextView.setText("Anonymous");
+			}
+			else
+			{
+				extraInfoTextView.setText(printProviders());
+			}
 			new DownloadImage().execute(user.getAvatarUrl());
 		}
 		else
 		{
-			displayNameTextView.setText(R.string.logged_out);
-			guidTextView.setText(R.string.touch_to_login);
+			displayNameTextView.setText(R.string.no_user);
+			extraInfoTextView.setText(R.string.probably_you_are_offline);
 			avatarImageView.setImageResource(R.drawable.avatar_default);
 		}
 	}
 	
 	private String printProviders()
 	{
-		StringBuilder sb = new StringBuilder();
-		
-		List<String> providers = new ArrayList(user.getIdentities().keySet());
-		for(int i = 0; i < providers.size(); i++)
+		if(user.getIdentities() != null)
 		{
-			sb.append(providers.get(i));
-			if(i < providers.size() - 1)
+			StringBuilder sb = new StringBuilder();
+			int providerSize = user.getIdentities().size() > 3 ? 3 : user.getIdentities().size();
+			ArrayList<String> providers = new ArrayList<>(user.getIdentities());
+			for(int i = 0; i < providerSize; i++)
 			{
-				sb.append(" / ");
+				sb.append(providers.get(i));
+				if(i < providers.size() - 1)
+				{
+					sb.append(" / ");
+				}
 			}
+			if(providers.size() > 3){
+				sb.append("…");
+			}
+			return sb.toString();
 		}
-		
-		return sb.toString();
+
+		return "";
 	}
-	
+
 	public class DownloadImage extends AsyncTask<String, Integer, Drawable>
 	{
 		@Override
@@ -121,7 +143,7 @@ public class UserInfoView extends RelativeLayout
 		{
 			return downloadImage(arg0[0]);
 		}
-		
+
 		@Override
 		protected void onPostExecute(Drawable image)
 		{
@@ -130,51 +152,51 @@ public class UserInfoView extends RelativeLayout
 				avatarImageView.setImageDrawable(image);
 			}
 		}
-		
+
 		private Drawable downloadImage(String stringUrl)
 		{
 			URL url;
 			BufferedOutputStream out;
 			InputStream in;
 			BufferedInputStream buf;
-			
+
 			try
 			{
 				url = new URL(stringUrl);
 				in = url.openStream();
 				buf = new BufferedInputStream(in);
-				
+
 				Bitmap bitmap = BitmapFactory.decodeStream(buf);
-				
+
 				if(buf != null)
 				{
 					buf.close();
 				}
-				
+
 				return new BitmapDrawable(getRoundedBitmap(bitmap));
-				
+
 			}
 			catch(Exception e)
 			{
 				Log.e("Error loading image: " + e.toString());
 			}
-			
+
 			return null;
 		}
-		
+
 		private Bitmap getRoundedBitmap(Bitmap bitmap)
 		{
 			int radius = Math.min(bitmap.getWidth(), bitmap.getHeight());
-			
+
 			Bitmap roundedBitmap = Bitmap.createBitmap(radius, radius,
 					Bitmap.Config.ARGB_8888
 			);
 			Canvas canvas = new Canvas(roundedBitmap);
-			
+
 			final int color = 0xffa19774;
 			final Paint paint = new Paint();
 			final Rect rect = new Rect(0, 0, radius, radius);
-			
+
 			paint.setAntiAlias(true);
 			paint.setFilterBitmap(true);
 			paint.setDither(true);
@@ -185,7 +207,7 @@ public class UserInfoView extends RelativeLayout
 			);
 			paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
 			canvas.drawBitmap(bitmap, rect, rect, paint);
-			
+
 			return roundedBitmap;
 		}
 	}

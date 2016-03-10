@@ -14,7 +14,7 @@ GetSocial provides the whole social layer stack that powers **engagement**, **re
 * Community Management
 * Player Feedback and support
 * Smart invites and tracking
-* Localisation to 12 languages
+* Localisation to 17 languages
 * In-app Notification Center
 * Socially triggered push notifications
 * And more...
@@ -25,7 +25,6 @@ For more information on GetSocial, visit our [website](http://www.getsocial.im/)
 
 To manage the integration of the GetSocial SDK, login to the [GetSocial Developer Portal](https://developers.getsocial.im).
 
-
 ## License
 
-Example project is published under the [MIT License](https://github.com/getsocial-im/getsocial-android-sdk/blob/master/LICENSE.txt) 
+Example project is published under the [Apache 2.0](https://github.com/getsocial-im/getsocial-android-sdk/blob/master/LICENSE)
