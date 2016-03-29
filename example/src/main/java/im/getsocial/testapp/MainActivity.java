@@ -256,10 +256,9 @@ public class MainActivity extends AppCompatActivity
 	{
 		UiConsole.logInfo(getTestAppInfo());
 
-		getSocial = GetSocial.getInstance(getApplicationContext());
-		getSocialChat = GetSocialChat.getInstance();
+		getSocial = GetSocial.getInstance();
 
-		getSocial.init(getString(R.string.getsocial_app_key), new GetSocial.OperationObserver()
+		getSocial.init(this, getString(R.string.getsocial_app_key), new GetSocial.OperationObserver()
 				{
 					@Override
 					public void onSuccess(String data)
@@ -275,6 +274,8 @@ public class MainActivity extends AppCompatActivity
 					}
 				}
 		);
+
+		getSocialChat = GetSocialChat.getInstance();
 
 		getSocial.registerPlugin(UserIdentity.PROVIDER_FACEBOOK, new FacebookInvitePlugin(this, callbackManager));
 
@@ -1785,7 +1786,7 @@ public class MainActivity extends AppCompatActivity
 		);
 		postActivityMenu.addItem(
 				new ActionableListViewMenu(
-						"Post Text+Button",
+						"Post Text + Button",
 						new ListViewMenuItemAction()
 						{
 							@Override
@@ -1798,7 +1799,7 @@ public class MainActivity extends AppCompatActivity
 		);
 		postActivityMenu.addItem(
 				new ActionableListViewMenu(
-						"Post Text+Image+Button",
+						"Post Text + Image + Button",
 						new ListViewMenuItemAction()
 						{
 							@Override
@@ -1811,7 +1812,7 @@ public class MainActivity extends AppCompatActivity
 		);
 		postActivityMenu.addItem(
 				new ActionableListViewMenu(
-						"Post Image+Button",
+						"Post Image + Button",
 						new ListViewMenuItemAction()
 						{
 							@Override
@@ -1824,7 +1825,7 @@ public class MainActivity extends AppCompatActivity
 		);
 		postActivityMenu.addItem(
 				new ActionableListViewMenu(
-						"Post Image+Action",
+						"Post Image + Action",
 						new ListViewMenuItemAction()
 						{
 							@Override
@@ -1874,7 +1875,7 @@ public class MainActivity extends AppCompatActivity
 		updateChatMenuSubtitle();
 		chatMenu.addItem(
 				new ActionableListViewMenu(
-						"Open global chat",
+						"Open Global Chat",
 						new ListViewMenuItemAction()
 						{
 							@Override
@@ -1887,7 +1888,7 @@ public class MainActivity extends AppCompatActivity
 		);
 		chatMenu.addItem(
 				new ActionableListViewMenu(
-						"Open conversation list",
+						"Open Conversation List",
 						new ListViewMenuItemAction()
 						{
 							@Override
@@ -1905,7 +1906,7 @@ public class MainActivity extends AppCompatActivity
 		//
 		notificationsMenu = rootMenu.addItem(
 				new ActionableListViewMenu(
-						"Notifications Center",
+						"Notification Center",
 						new ListViewMenuItemAction()
 						{
 							@Override
@@ -1958,7 +1959,7 @@ public class MainActivity extends AppCompatActivity
 		);
 		uiCustomizationMenu.addItem(
 				new ActionableListViewMenu(
-						"Load Custom UI from URL",
+						"Custom UI from Url",
 						new ListViewMenuItemAction()
 						{
 							@Override
@@ -1990,7 +1991,7 @@ public class MainActivity extends AppCompatActivity
 		);
 		leaderboardsMenu.addItem(
 				new ActionableListViewMenu(
-						"Get User Rank on Leaderboards 1, 2, 3",
+						"Get User Rank on Leaderboards 1, 2 and 3",
 						new ListViewMenuItemAction()
 						{
 							@Override
@@ -2380,7 +2381,14 @@ public class MainActivity extends AppCompatActivity
 	{
 		Log.e(message.toString());
 		UiConsole.logError(message.toString());
-		toastOnUiThread(message.toString());
+
+		if(message instanceof Throwable){
+			Throwable t = (Throwable) message;
+			toastOnUiThread(t.getMessage());
+		}
+		else{
+			toastOnUiThread(message.toString());
+		}
 	}
 
 	private void toastOnUiThread(final String message)

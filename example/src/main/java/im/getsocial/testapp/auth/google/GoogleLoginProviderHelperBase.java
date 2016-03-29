@@ -144,7 +144,7 @@ public abstract class GoogleLoginProviderHelperBase implements GoogleApiClient.C
 	{
 		if(mode != Mode.None)
 		{
-			Toast.makeText(context, CONCURRENT_OPERATION_ERROR_MESSAGE, Toast.LENGTH_SHORT).show();
+			toastOnUiThread(CONCURRENT_OPERATION_ERROR_MESSAGE, Toast.LENGTH_SHORT);
 			return;
 		}
 
@@ -167,7 +167,8 @@ public abstract class GoogleLoginProviderHelperBase implements GoogleApiClient.C
 	{
 		if(mode != Mode.None)
 		{
-			Toast.makeText(context, CONCURRENT_OPERATION_ERROR_MESSAGE, Toast.LENGTH_SHORT).show();
+
+			toastOnUiThread(CONCURRENT_OPERATION_ERROR_MESSAGE, Toast.LENGTH_SHORT);
 			return;
 		}
 
@@ -234,35 +235,35 @@ public abstract class GoogleLoginProviderHelperBase implements GoogleApiClient.C
 
 				switch(resultCode){
 					case GamesActivityResultCodes.RESULT_SIGN_IN_FAILED:
-						Toast.makeText(activity, "Google SDK sent \"GamesActivityResultCodes.RESULT_SIGN_IN_FAILED\". Do you need to add the login account to the app?", Toast.LENGTH_LONG).show();
+						toastOnUiThread("Google SDK sent \"GamesActivityResultCodes.RESULT_SIGN_IN_FAILED\". Do you need to add the login account to the app?", Toast.LENGTH_LONG);
 						break;
 					case GamesActivityResultCodes.RESULT_APP_MISCONFIGURED:
-						Toast.makeText(activity, "Google SDK sent \"GamesActivityResultCodes.RESULT_APP_MISCONFIGURED\".", Toast.LENGTH_LONG).show();
+						toastOnUiThread("Google SDK sent \"GamesActivityResultCodes.RESULT_APP_MISCONFIGURED\".", Toast.LENGTH_LONG);
 						break;
 					case GamesActivityResultCodes.RESULT_INVALID_ROOM:
-						Toast.makeText(activity, "Google SDK sent \"GamesActivityResultCodes.RESULT_INVALID_ROOM\".", Toast.LENGTH_LONG).show();
+						toastOnUiThread("Google SDK sent \"GamesActivityResultCodes.RESULT_INVALID_ROOM\".", Toast.LENGTH_LONG);
 						break;
 					case GamesActivityResultCodes.RESULT_LICENSE_FAILED:
-						Toast.makeText(activity, "Google SDK sent \"GamesActivityResultCodes.RESULT_LICENSE_FAILED\".", Toast.LENGTH_LONG).show();
+						toastOnUiThread("Google SDK sent \"GamesActivityResultCodes.RESULT_LICENSE_FAILED\".", Toast.LENGTH_LONG);
 						break;
 					case GamesActivityResultCodes.RESULT_NETWORK_FAILURE:
-						Toast.makeText(activity, "Google SDK sent \"GamesActivityResultCodes.RESULT_NETWORK_FAILURE\".", Toast.LENGTH_LONG).show();
+						toastOnUiThread("Google SDK sent \"GamesActivityResultCodes.RESULT_NETWORK_FAILURE\".", Toast.LENGTH_LONG);
 						break;
 					case GamesActivityResultCodes.RESULT_RECONNECT_REQUIRED:
 						// @see http://stackoverflow.com/questions/26902935/android-api-isconnected-returning-true-after-signing-out
 						// check for "inconsistent state"
 						// force a disconnect to sync up state, ensuring that mClient reports "not connected"
 						googleApiClient.disconnect();
-						Toast.makeText(activity, "Google SDK sent \"GamesActivityResultCodes.RESULT_RECONNECT_REQUIRED\".", Toast.LENGTH_LONG).show();
+						toastOnUiThread("Google SDK sent \"GamesActivityResultCodes.RESULT_RECONNECT_REQUIRED\".", Toast.LENGTH_LONG);
 						break;
 					case GamesActivityResultCodes.RESULT_SEND_REQUEST_FAILED:
-						Toast.makeText(activity, "Google SDK sent \"GamesActivityResultCodes.RESULT_SEND_REQUEST_FAILED\".", Toast.LENGTH_LONG).show();
+						toastOnUiThread("Google SDK sent \"GamesActivityResultCodes.RESULT_SEND_REQUEST_FAILED\".", Toast.LENGTH_LONG);
 						break;
 				}
 
 				if(resultCode == Activity.RESULT_CANCELED)
 				{
-					Toast.makeText(activity, "Google SDK sent \"Activity.RESULT_CANCELED\". If you did not cancel the sign in please check you are using the correct certificate for this build.", Toast.LENGTH_LONG).show();
+					toastOnUiThread("Google SDK sent \"Activity.RESULT_CANCELED\". If you did not cancel the sign in please check you are using the correct certificate for this build.", Toast.LENGTH_LONG);
 				}
 
 				clearMode();
@@ -296,7 +297,7 @@ public abstract class GoogleLoginProviderHelperBase implements GoogleApiClient.C
 			{
 				clearMode();
 				// Permission Denied
-				Toast.makeText(activity, "Contacts permission denied", Toast.LENGTH_SHORT).show();
+				toastOnUiThread("Contacts permission denied", Toast.LENGTH_SHORT);
 			}
 			return true;
 		}
@@ -385,7 +386,7 @@ public abstract class GoogleLoginProviderHelperBase implements GoogleApiClient.C
 					clearMode();
 					e.printStackTrace();
 					Log.e("GetSocial Exception", e.getMessage(), e);
-					Toast.makeText(activity, "GetSocial("+e+"):"+e.getMessage(), Toast.LENGTH_SHORT).show();
+					toastOnUiThread("GetSocial("+e+"):"+e.getMessage(), Toast.LENGTH_SHORT);
 				}
 			}
 		}).start();
@@ -407,5 +408,20 @@ public abstract class GoogleLoginProviderHelperBase implements GoogleApiClient.C
 	public void setOnConnectionStatusChangedListener(OnConnectionStatusChangedListener onConnectionStatusChangedListener)
 	{
 		this.onConnectionStatusChangedListener = onConnectionStatusChangedListener;
+	}
+
+	private void toastOnUiThread(final String message, final int length)
+	{
+		if(activity != null)
+		{
+			activity.runOnUiThread(new Runnable()
+			{
+				@Override
+				public void run()
+				{
+					Toast.makeText(activity, message, length);
+				}
+			});
+		}
 	}
 }

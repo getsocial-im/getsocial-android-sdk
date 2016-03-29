@@ -2,6 +2,22 @@
 
 ## Version History
 
+
+### v5.0.1
+
++ IMPROVED image loading, memory management and caching
++ IMPROVED SDK initialization with poor internet connectivity
++ IMPROVED offline support
++ IMPROVED support for shared libraries
++ FIXED counters
++ FIXED Occasional connectivity issues with Unity
++ REDUCED SDK method count
+
+
+
+
+---
+
 ### v5.0.0
 
 + ADDED `GetSocialCurrentUser` object

@@ -72,6 +72,9 @@ public class ListViewMenuItemView extends RelativeLayout implements CompoundButt
 		{
 			checkBox.setChecked(((CheckboxListViewMenu) menuItem).isChecked());
 		}
+
+		titleTextView.setContentDescription(this.menuItem.getTitle());
+		subtitleTextView.setContentDescription(this.menuItem.getSubtitle());
 	}
 	
 	public ListViewMenu getMenuItem()
