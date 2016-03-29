@@ -2,6 +2,11 @@
 
 ## Version History
 
+### v5.0.2
+
++ FIXED Chat notification crash
+
+---
 
 ### v5.0.1
 
