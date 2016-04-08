@@ -2,6 +2,12 @@
 
 ## Version History
 
+### v5.0.3
+
++ FIXED Duplicate resources issue during build
+
+---
+
 ### v5.0.2
 
 + FIXED Chat notification crash
