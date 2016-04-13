@@ -2,6 +2,12 @@
 
 ## Version History
 
+### v5.0.4
+
++ FIXED bugs related to init from multiple threads
+
+---
+
 ### v5.0.3
 
 + FIXED Duplicate resources issue during build
