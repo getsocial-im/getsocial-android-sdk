@@ -2,6 +2,12 @@
 
 ## Version History
 
+### v5.0.5
+
++ FIXED Incorrect font scaling when setting text style programmatically through UI config transaction
+
+---
+
 ### v5.0.4
 
 + FIXED bugs related to init from multiple threads
