@@ -2,9 +2,17 @@
 
 ## Version History
 
+### v5.0.7
+
++ FIXED Bugs in Analytics
+
+
+---
+
 ### v5.0.6
 
 + ADDED support for delay SDK initialization
+
 
 
 ---
