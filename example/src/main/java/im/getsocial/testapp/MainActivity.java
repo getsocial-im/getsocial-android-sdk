@@ -458,7 +458,8 @@ public class MainActivity extends AppCompatActivity
 																								   @Override
 																								   public void onComplete()
 																								   {
-																									   MainActivity.this.runOnUiThread(new Runnable() {
+																									   MainActivity.this.runOnUiThread(new Runnable()
+																									   {
 																										   @Override
 																										   public void run()
 																										   {
@@ -663,7 +664,7 @@ public class MainActivity extends AppCompatActivity
 								updateUserInfoView();
 
 								//check if we continue with a user that has facebook identity
-								if(addIdentityResult==AddIdentityResult.CONFLICT_WAS_RESOLVED_WITH_CURRENT)
+								if(addIdentityResult == AddIdentityResult.CONFLICT_WAS_RESOLVED_WITH_CURRENT)
 								{
 									logInfoAndToast("Facebook identity is not added");
 									disconnectFromFacebook();
@@ -712,7 +713,7 @@ public class MainActivity extends AppCompatActivity
 					@Override
 					public void onComplete(AddIdentityResult addIdentityResult)
 					{
-						if(addIdentityResult==AddIdentityResult.CONFLICT_WAS_RESOLVED_WITH_CURRENT)
+						if(addIdentityResult == AddIdentityResult.CONFLICT_WAS_RESOLVED_WITH_CURRENT)
 						{
 							logInfoAndToast("Google+ identity is not added");
 						}
@@ -756,7 +757,7 @@ public class MainActivity extends AppCompatActivity
 					@Override
 					public void onComplete(AddIdentityResult addIdentityResult)
 					{
-						if(addIdentityResult==AddIdentityResult.CONFLICT_WAS_RESOLVED_WITH_CURRENT)
+						if(addIdentityResult == AddIdentityResult.CONFLICT_WAS_RESOLVED_WITH_CURRENT)
 						{
 							logInfoAndToast("GooglePlay identity is not added");
 						}
@@ -850,7 +851,7 @@ public class MainActivity extends AppCompatActivity
 						@Override
 						public void onComplete(AddIdentityResult addIdentityResult)
 						{
-							if(addIdentityResult==AddIdentityResult.CONFLICT_WAS_RESOLVED_WITH_CURRENT)
+							if(addIdentityResult == AddIdentityResult.CONFLICT_WAS_RESOLVED_WITH_CURRENT)
 							{
 								logInfoAndToast("'custom identity' is not added");
 							}
@@ -2382,11 +2383,13 @@ public class MainActivity extends AppCompatActivity
 		Log.e(message.toString());
 		UiConsole.logError(message.toString());
 
-		if(message instanceof Throwable){
+		if(message instanceof Throwable)
+		{
 			Throwable t = (Throwable) message;
 			toastOnUiThread(t.getMessage());
 		}
-		else{
+		else
+		{
 			toastOnUiThread(message.toString());
 		}
 	}
