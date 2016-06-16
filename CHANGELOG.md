@@ -2,6 +2,12 @@
 
 ## Version History
 
+### v5.0.9
+
++ FIXED Bug in Analytics
+
+---
+
 ### v5.0.8
 
 + FIXED Bug in save state
