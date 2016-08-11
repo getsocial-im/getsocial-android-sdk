@@ -2,6 +2,14 @@
 
 ## Version History
 
+### v5.0.10
+
++ REDUCED SDK method count
++ REMOVED dependency on io.reactivex:rxandroid and io.reactivex:rxjava
++ FIXED sending invites from background thread with image attachment
+
+---
+
 ### v5.0.9
 
 + FIXED Bug in Analytics

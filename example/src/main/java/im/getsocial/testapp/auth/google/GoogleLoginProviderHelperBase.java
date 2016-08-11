@@ -419,7 +419,7 @@ public abstract class GoogleLoginProviderHelperBase implements GoogleApiClient.C
 				@Override
 				public void run()
 				{
-					Toast.makeText(activity, message, length);
+					Toast.makeText(activity, message, length).show();
 				}
 			});
 		}
