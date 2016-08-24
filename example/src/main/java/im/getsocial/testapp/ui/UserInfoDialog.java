@@ -86,9 +86,9 @@ public class UserInfoDialog extends DialogFragment
 			sb.append("\n\n");
 			sb.append("IDENTITIES:").append("\n\n");
 
-			if(user.getIdentities() != null)
+			if(user.getAllIdentities() != null)
 			{
-				for(String key : user.getIdentities())
+				for(String key : user.getAllIdentities().keySet())
 				{
 					sb.append(key).append(": ").append(user.getUserIdForProvider(key)).append("\n\n");
 				}

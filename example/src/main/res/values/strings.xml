@@ -16,58 +16,62 @@
   -->
 
 <resources>
-	
-	<string name="app_name">GetSocial Test App</string>
 
-	<string name="getsocial_app_key">4We9Uqq8SR04tNXqV10M0000000s8i7N997ga98n</string>
+    <string name="app_name">GetSocial Test App</string>
+
+    <string name="getsocial_app_key">4We9Uqq8SR04tNXqV10M0000000s8i7N997ga98n</string>
 
     <string name="google_services_app_id">792423680101</string>
     <!--<string name="google_services_app_id">1:792423680101:android:33559f509f799e9e</string>-->
 
-	<string name="facebook_app_id">1470803889832802</string>
+    <string name="facebook_app_id">1470803889832802</string>
     <string name="title_activity_main">MainActivity</string>
 
     <string name="action_console">Console</string>
-	<string name="no_user">No User</string>
-	<string name="probably_you_are_offline">Probably you\'re offline</string>
+    <string name="no_user">No User</string>
+    <string name="probably_you_are_offline">Probably you\'re offline</string>
 
     <string name="title_activity_console">Console</string>
 
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
-	<string name="action_share">Share</string>
-	<string name="action_shareConsole">Share</string>
-	<string name="action_clearConsole">Clear</string>
-	<string name="login_with">Login with</string>
-	<string name="ui_configuration_url">UI Configuration URL</string>
-	<string name="load">Load</string>
-	<string name="select_language">Change Language</string>
-	<string name="enter_data_to_save">Enter data to save</string>
-	<string name="save">Save</string>
-	<string name="enter_your_score">Enter your score</string>
-	<string name="submit">Submit</string>
-	<string name="label_text">Text</string>
-	<string name="label_subject">Subject</string>
-	<string name="title_custom_invite">Customize your invite subject and text (optional)</string>
-	<string name="direction_long_press_placeholder">Long press on the text fields to easily insert placeholders</string>
-	<string name="hint_subject">Subject</string>
-	<string name="hint_text">Text</string>
-	<string name="hint_key_1">Key1</string>
-	<string name="hint_value_1">Value1</string>
-	<string name="hint_key_2">Key2</string>
-	<string name="hint_value_2">Value2</string>
-	<string name="hint_key_3">Key3</string>
-	<string name="hint_value_3">Value3</string>
-	<string name="action_open_invite_view">Open invite view</string>
-	<string name="label_select_image">Image</string>
-	<string name="label_title_custom_smart_invite">Custom Smart Invite</string>
-	<string name="title_user_display_name">User Display Name</string>
-	<string name="message_enter_display_name">Enter the new Display Name</string>
-	<string name="hint_enter_display_name">Enter display name</string>
-	<string name="title_enter_save_data">Enter data to save</string>
-	<string name="hint_serialized_data_to_save">Serialized data to save</string>
-	<string name="title_custom_user_identity">Custom User Identity</string>
-	<string name="hint_user_id">User ID</string>
-	<string name="hint_token">Token</string>
+    <string name="action_share">Share</string>
+    <string name="action_shareConsole">Share</string>
+    <string name="action_clearConsole">Clear</string>
+    <string name="login_with">Login with</string>
+    <string name="ui_configuration_url">UI Configuration URL</string>
+    <string name="load">Load</string>
+    <string name="select_language">Change Language</string>
+    <string name="enter_data_to_save">Enter data to save</string>
+    <string name="save">Save</string>
+    <string name="enter_your_score">Enter your score</string>
+    <string name="submit">Submit</string>
+    <string name="label_text">Text</string>
+    <string name="label_subject">Subject</string>
+    <string name="title_custom_invite">Customize your invite subject and text (optional)</string>
+    <string name="direction_long_press_placeholder">Long press on the text fields to easily insert placeholders</string>
+    <string name="hint_subject">Subject</string>
+    <string name="hint_text">Text</string>
+    <string name="hint_key_1">Key1</string>
+    <string name="hint_value_1">Value1</string>
+    <string name="hint_key_2">Key2</string>
+    <string name="hint_value_2">Value2</string>
+    <string name="hint_key_3">Key3</string>
+    <string name="hint_value_3">Value3</string>
+    <string name="action_open_invite_view">Open invite view</string>
+    <string name="label_select_image">Image</string>
+    <string name="label_title_custom_smart_invite">Custom Smart Invite</string>
+    <string name="title_user_display_name">User Display Name</string>
+    <string name="message_enter_display_name">Enter the new Display Name</string>
+    <string name="hint_enter_display_name">Enter display name</string>
+    <string name="title_enter_save_data">Enter data to save</string>
+    <string name="hint_serialized_data_to_save">Serialized data to save</string>
+    <string name="title_custom_user_identity">Custom User Identity</string>
+    <string name="hint_user_id">User ID</string>
+    <string name="hint_token">Token</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="label_no_users">No users to display</string>
 
 </resources>

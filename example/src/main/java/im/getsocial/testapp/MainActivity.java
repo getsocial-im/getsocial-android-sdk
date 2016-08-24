@@ -61,12 +61,12 @@ import java.util.Random;
 
 import im.getsocial.sdk.chat.GetSocialChat;
 import im.getsocial.sdk.core.AddUserIdentityObserver;
-import im.getsocial.sdk.core.CurrentUser;
 import im.getsocial.sdk.core.GetSocial;
 import im.getsocial.sdk.core.UI.builder.SmartInviteViewBuilder;
 import im.getsocial.sdk.core.UI.builder.UserListViewBuilder;
 import im.getsocial.sdk.core.User;
 import im.getsocial.sdk.core.UserIdentity;
+import im.getsocial.sdk.core.callback.OperationVoidCallback;
 import im.getsocial.sdk.core.resources.Leaderboard;
 import im.getsocial.sdk.core.resources.LeaderboardScore;
 import im.getsocial.sdk.core.util.InstanceCounter;
@@ -100,9 +100,13 @@ public class MainActivity extends AppCompatActivity
 
 	private static final String ACTIVITIES_TAG = "swamp";
 	private static final String ACTIVITIES_GROUP = "world1";
+	private static final String TAG_USER_LIST_FRAGMENT = "user_list_fragment";
+
+	private boolean isInitializing = false;
 
 	private GetSocial getSocial;
 	private GetSocialChat getSocialChat;
+	private GetSocialChat.OnUnreadRoomsCountChangedListener onUnreadRoomsCountChangedListener;
 	private CallbackManager callbackManager;
 	private GooglePlusLoginProviderHelper googlePlusLoginProviderHelper;
 	private GooglePlayLoginProviderHelper googlePlayLoginProviderHelper;
@@ -114,6 +118,7 @@ public class MainActivity extends AppCompatActivity
 	protected UserInfoView userInfoView;
 	protected ListViewMenu notificationsMenu;
 	protected ListViewMenu uiCustomizationMenu;
+	private ListViewMenu chatMenu;
 	private ActionableListViewMenu languageMenu;
 
 	private boolean isContentModerated = false;
@@ -124,7 +129,6 @@ public class MainActivity extends AppCompatActivity
 	private boolean isOnActionPerformListener = false;
 	private boolean isPreventAnonymousInteract = true;
 
-	private ListViewMenu chatMenu;
 
 	// /////////////////////////////////
 	// region Activity method overrides
@@ -141,7 +145,7 @@ public class MainActivity extends AppCompatActivity
 		Log.setVerbosityLevel(Log.VERBOSE);
 
 		initFacebook();
-		initGetSocial();
+		setupGetSocial();
 
 		initUi();
 	}
@@ -152,13 +156,22 @@ public class MainActivity extends AppCompatActivity
 		super.onResume();
 		initGoogleServices();
 		getSocial.onResume(this);
+		Reachability.onResume(this);
 	}
 
 	@Override
 	protected void onPause()
 	{
 		getSocial.onPause();
+		Reachability.onPause();
 		super.onPause();
+	}
+
+	@Override
+	protected void onDestroy()
+	{
+		getSocialChat.removeOnUnreadRoomsCountChangedListener(onUnreadRoomsCountChangedListener);
+		super.onDestroy();
 	}
 
 	@Override
@@ -166,16 +179,17 @@ public class MainActivity extends AppCompatActivity
 	{
 		super.onActivityResult(requestCode, resultCode, data);
 
-		if(googlePlusLoginProviderHelper.onActivityResult(requestCode, resultCode, data))
+		if(googlePlusLoginProviderHelper != null &&
+				   googlePlusLoginProviderHelper.onActivityResult(requestCode, resultCode, data))
 		{
 			return;
 		}
 
-		if(googlePlayLoginProviderHelper.onActivityResult(requestCode, resultCode, data))
+		if(googlePlayLoginProviderHelper != null &&
+				   googlePlayLoginProviderHelper.onActivityResult(requestCode, resultCode, data))
 		{
 			return;
 		}
-
 		if(requestCode == REQUEST_CODE_INVITE_ACTIVITY)
 		{
 			handleInviteActivityResult(resultCode, data);
@@ -252,32 +266,18 @@ public class MainActivity extends AppCompatActivity
 	// ////////////////////////////////////////
 
 	//region GetSocial initialization
-	private void initGetSocial()
+	private void setupGetSocial()
 	{
 		UiConsole.logInfo(getTestAppInfo());
 
 		getSocial = GetSocial.getInstance();
 
-		getSocial.init(this, getString(R.string.getsocial_app_key), new GetSocial.OperationObserver()
-				{
-					@Override
-					public void onSuccess(String data)
-					{
-						updateUserInfoView();
-						logInfoAndToast("GetSocial initialization successful");
-					}
+		getSocial.registerPlugin(FacebookInvitePlugin.PROVIDER_NAME, new FacebookInvitePlugin(this, callbackManager));
+		getSocial.registerPlugin(FacebookMessengerInvitePlugin.PROVIDER_NAME, new FacebookMessengerInvitePlugin());
 
-					@Override
-					public void onFailure(String errorMessage)
-					{
-						logErrorAndToast(errorMessage);
-					}
-				}
-		);
+		initGetSocial();
 
 		getSocialChat = GetSocialChat.getInstance();
-
-		getSocial.registerPlugin(UserIdentity.PROVIDER_FACEBOOK, new FacebookInvitePlugin(this, callbackManager));
 
 		getSocial.setOnUserAvatarClickHandler(
 				new GetSocial.OnUserAvatarClickHandler()
@@ -402,16 +402,22 @@ public class MainActivity extends AppCompatActivity
 				}
 		);
 
-		getSocialChat.setOnUnreadConversationsCountChangedListener(
-				new GetSocialChat.OnUnreadConversationsCountChangedListener()
-				{
-					@Override
-					public void onUnreadConversationsCountChanged(int unreadConversationsCount)
-					{
-						updateChatMenuSubtitle();
-					}
-				}
-		);
+		onUnreadRoomsCountChangedListener = new GetSocialChat.OnUnreadRoomsCountChangedListener()
+		{
+			@Override
+			public void onUnreadPublicRoomsCountChanged(int unreadPublicRoomsCount)
+			{
+				updateChatMenuSubtitle();
+			}
+
+			@Override
+			public void onUnreadPrivateRoomsCountChanged(int unreadPrivateRoomsCount)
+			{
+				updateChatMenuSubtitle();
+			}
+		};
+
+		getSocialChat.addOnUnreadRoomsCountChangedListener(onUnreadRoomsCountChangedListener);
 		
 		getSocial.setInviteFriendsListener(
 				new GetSocial.InviteFriendsListener()
@@ -431,6 +437,7 @@ public class MainActivity extends AppCompatActivity
 		);
 
 		getSocial.setOnActionPerformListener(new GetSocial.OnActionPerformListener()
+
 											 {
 												 @Override
 												 public void onActionPerform(GetSocial.Action action,
@@ -447,7 +454,7 @@ public class MainActivity extends AppCompatActivity
 																			   AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
 																			   builder.setTitle("Add identity in order to post");
 																			   builder.setItems(new CharSequence[]
-																							   {"Add FB identity", "Add Google+ identity", "Add GooglePlay identity", "Add Custom Identity", "Cancel"},
+																										{"Add FB identity", "Add Google+ identity", "Add GooglePlay identity", "Add Custom Identity", "Cancel"},
 																					   new DialogInterface.OnClickListener()
 																					   {
 																						   public void onClick(DialogInterface dialog, int which)
@@ -524,6 +531,53 @@ public class MainActivity extends AppCompatActivity
 												 }
 											 }
 		);
+
+		//set a notification icon. The identifier should match the name of the file in the Resource/drawable folder
+		GetSocial.getConfiguration().beginTransaction();
+		GetSocial.getConfiguration().setNotificationIconIdentifier("notification_icon");
+		GetSocial.getConfiguration().endTransaction();
+
+		Reachability.addOnIsConnectedChangedListener(new Reachability.OnInternetIsConnectedChangedListener()
+		{
+
+			@Override
+			public void onInternetIsConnectedChanged(boolean isConnected)
+			{
+				initGetSocial();
+			}
+		});
+	}
+
+	private void initGetSocial()
+	{
+
+		if(!getSocial.isInitialized() && !isInitializing)
+		{
+			isInitializing = true;
+
+			getSocial.init(this, getString(R.string.getsocial_app_key), new GetSocial.OperationObserver()
+					{
+						@Override
+						public void onSuccess(String data)
+						{
+							isInitializing = false;
+							updateUserInfoView();
+							updatedNotificationsMenuSubtitle();
+							updateLanguageMenuSubtitle();
+							logInfoAndToast("GetSocial initialization successful");
+						}
+
+						@Override
+						public void onFailure(String errorMessage)
+						{
+							isInitializing = false;
+							logErrorAndToast(errorMessage);
+						}
+					}
+			);
+		}
+
+
 	}
 
 	private void onActionPerformDialog(final GetSocial.Action action, final GetSocial.OnActionPerformListener.ActionFinalizer actionFinalizer)
@@ -581,17 +635,17 @@ public class MainActivity extends AppCompatActivity
 												  {
 													  final String name = displayNameEditText.getText().toString();
 
-													  getSocial.getCurrentUser().setDisplayName(name, new CurrentUser.UpdateUserInfoObserver()
+													  getSocial.getCurrentUser().setDisplayName(name, new OperationVoidCallback()
 															  {
 																  @Override
-																  public void onComplete()
+																  public void onSuccess()
 																  {
 																	  logInfoAndToast("User display name was changed to" + name);
 																	  updateUserInfoView();
 																  }
 
 																  @Override
-																  public void onError(Exception error)
+																  public void onFailure(Exception error)
 																  {
 																	  logInfoAndToast("Cannot change display name. Reason %@" + error.getMessage());
 																  }
@@ -618,17 +672,17 @@ public class MainActivity extends AppCompatActivity
 	{
 		final String avatarUrl = UserIdentityUtils.getRandomAvatar();
 
-		getSocial.getCurrentUser().setAvatarUrl(avatarUrl, new CurrentUser.UpdateUserInfoObserver()
+		getSocial.getCurrentUser().setAvatarUrl(avatarUrl, new OperationVoidCallback()
 				{
 					@Override
-					public void onComplete()
+					public void onSuccess()
 					{
 						logInfoAndToast("User avatar was changed to " + avatarUrl);
 						updateUserInfoView();
 					}
 
 					@Override
-					public void onError(Exception error)
+					public void onFailure(Exception error)
 					{
 						logInfoAndToast("Cannot change avatar. Reason %@" + error.getMessage());
 					}
@@ -808,27 +862,27 @@ public class MainActivity extends AppCompatActivity
 						  public void run()
 						  {
 							  AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this)
-									  .setView(view)
-									  .setPositiveButton("Add", new DialogInterface.OnClickListener()
-											  {
-												  @Override
-												  public void onClick(DialogInterface dialog, int which)
-												  {
-													  String usedId = userdIdEditText.getText().toString().trim();
-													  String token = tokenEditText.getText().toString().trim();
-													  addUserIdentity(usedId, token, resultListener);
-												  }
-											  }
-									  )
-									  .setNegativeButton("Cancel", new DialogInterface.OnClickListener()
-											  {
-												  @Override
-												  public void onClick(DialogInterface dialog, int which)
-												  {
-													  toast("Action cancelled");
-												  }
-											  }
-									  );
+																	.setView(view)
+																	.setPositiveButton("Add", new DialogInterface.OnClickListener()
+																			{
+																				@Override
+																				public void onClick(DialogInterface dialog, int which)
+																				{
+																					String usedId = userdIdEditText.getText().toString().trim();
+																					String token = tokenEditText.getText().toString().trim();
+																					addUserIdentity(usedId, token, resultListener);
+																				}
+																			}
+																	)
+																	.setNegativeButton("Cancel", new DialogInterface.OnClickListener()
+																			{
+																				@Override
+																				public void onClick(DialogInterface dialog, int which)
+																				{
+
+																				}
+																			}
+																	);
 							  builder.show();
 						  }
 					  }
@@ -892,17 +946,17 @@ public class MainActivity extends AppCompatActivity
 	private void removeFbUserIdentity()
 	{
 		getSocial.getCurrentUser().removeUserIdentity(UserIdentity.PROVIDER_FACEBOOK,
-				new CurrentUser.UpdateUserInfoObserver()
+				new OperationVoidCallback()
 				{
 					@Override
-					public void onComplete()
+					public void onSuccess()
 					{
 						updateUserInfoView();
 						logInfoAndToast("Successfully removed Facebook user identity");
 					}
 
 					@Override
-					public void onError(Exception error)
+					public void onFailure(Exception error)
 					{
 						logErrorAndToast("Failed to remove Facebook user identity, error: " + error.getMessage());
 					}
@@ -916,22 +970,22 @@ public class MainActivity extends AppCompatActivity
 	private void removeGooglePlusUserIdentity()
 	{
 		getSocial.getCurrentUser().removeUserIdentity(UserIdentity.PROVIDER_GOOGLEPLUS,
-				new CurrentUser.UpdateUserInfoObserver()
+				new OperationVoidCallback()
 				{
 					@Override
-					public void onComplete()
+					public void onSuccess()
 					{
-						googlePlusLoginProviderHelper.removeUserIdentity(MainActivity.this, new CurrentUser.UpdateUserInfoObserver()
+						googlePlusLoginProviderHelper.removeUserIdentity(MainActivity.this, new OperationVoidCallback()
 								{
 									@Override
-									public void onComplete()
+									public void onSuccess()
 									{
 										updateUserInfoView();
 										logInfoAndToast("Successfully removed Google+ user identity");
 									}
 
 									@Override
-									public void onError(Exception error)
+									public void onFailure(Exception error)
 									{
 										logErrorAndToast("Failed to remove Google+ user identity, error: " + error.getMessage());
 									}
@@ -941,7 +995,7 @@ public class MainActivity extends AppCompatActivity
 					}
 
 					@Override
-					public void onError(Exception error)
+					public void onFailure(Exception error)
 					{
 						logErrorAndToast("Failed to remove Google+ user identity, error: " + error.getMessage());
 					}
@@ -955,22 +1009,22 @@ public class MainActivity extends AppCompatActivity
 	{
 
 		getSocial.getCurrentUser().removeUserIdentity(UserIdentity.PROVIDER_GOOGLEPLAY,
-				new CurrentUser.UpdateUserInfoObserver()
+				new OperationVoidCallback()
 				{
 					@Override
-					public void onComplete()
+					public void onSuccess()
 					{
-						googlePlayLoginProviderHelper.removeUserIdentity(MainActivity.this, new CurrentUser.UpdateUserInfoObserver()
+						googlePlayLoginProviderHelper.removeUserIdentity(MainActivity.this, new OperationVoidCallback()
 								{
 									@Override
-									public void onComplete()
+									public void onSuccess()
 									{
 										updateUserInfoView();
 										logInfoAndToast("Successfully removed Google Play user identity");
 									}
 
 									@Override
-									public void onError(Exception error)
+									public void onFailure(Exception error)
 									{
 										logErrorAndToast("Failed to remove Google Play user identity, error: " + error.getMessage());
 									}
@@ -980,7 +1034,7 @@ public class MainActivity extends AppCompatActivity
 					}
 
 					@Override
-					public void onError(Exception error)
+					public void onFailure(Exception error)
 					{
 						logErrorAndToast("Failed to remove Google Play user identity, error: " + error.getMessage());
 					}
@@ -992,17 +1046,17 @@ public class MainActivity extends AppCompatActivity
 	{
 		getSocial.getCurrentUser().removeUserIdentity(
 				providerId,
-				new CurrentUser.UpdateUserInfoObserver()
+				new OperationVoidCallback()
 				{
 					@Override
-					public void onComplete()
+					public void onSuccess()
 					{
 						updateUserInfoView();
 						logInfoAndToast(String.format("Successfully removed user identity '%s'", providerId));
 					}
 
 					@Override
-					public void onError(Exception error)
+					public void onFailure(Exception error)
 					{
 						logErrorAndToast(String.format("Failed to remove user identity '%s', error: %s", providerId, error.getMessage()));
 					}
@@ -1391,7 +1445,7 @@ public class MainActivity extends AppCompatActivity
 	//region GetSocial Settings
 	private void showLanguageSelectionDialog()
 	{
-		final String[] providers = {"da", "de", "en", "es", "fr", "it", "nb", "nl", "pt", "ru", "sv", "tr", "is", "ja", "ko", "zh-Hans", "zh-Hant"};
+		final String[] providers = {"da", "de", "en", "es", "fr", "id", "is", "it", "ja", "ko", "ms", "nb", "nl", "pt-br", "pt", "ru", "sv", "tl", "tr", "vi", "zh-Hans", "zh-Hant"};
 
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
 		builder.setTitle(R.string.select_language);
@@ -1547,170 +1601,170 @@ public class MainActivity extends AppCompatActivity
 
 		userAuthenticationMenu.addItem(
 				new ActionableListViewMenu(
-						"Change user display name",
-						new ListViewMenuItemAction()
-						{
-							@Override
-							public void execute(ListViewMenu menuItem)
-							{
-								changeDisplayName();
-							}
-						}
+												  "Change user display name",
+												  new ListViewMenuItemAction()
+												  {
+													  @Override
+													  public void execute(ListViewMenu menuItem)
+													  {
+														  changeDisplayName();
+													  }
+												  }
 				)
 		);
 
 		userAuthenticationMenu.addItem(
 				new ActionableListViewMenu(
-						"Change user avatar",
-						new ListViewMenuItemAction()
-						{
-							@Override
-							public void execute(ListViewMenu menuItem)
-							{
-								changeUserAvatar();
-							}
-						}
+												  "Change user avatar",
+												  new ListViewMenuItemAction()
+												  {
+													  @Override
+													  public void execute(ListViewMenu menuItem)
+													  {
+														  changeUserAvatar();
+													  }
+												  }
 				)
 		);
 
 		userAuthenticationMenu.addItem(
 				new ActionableListViewMenu(
-						"Add Facebook user identity",
-						new ListViewMenuItemAction()
-						{
-							@Override
-							public void execute(ListViewMenu menuItem)
-							{
-								addFbUserIdentity(null);
-							}
-						}
+												  "Add Facebook user identity",
+												  new ListViewMenuItemAction()
+												  {
+													  @Override
+													  public void execute(ListViewMenu menuItem)
+													  {
+														  addFbUserIdentity(null);
+													  }
+												  }
 				)
 		);
 
 		userAuthenticationMenu.addItem(
 				new ActionableListViewMenu(
-						"Add Google+ user identity",
-						new ListViewMenuItemAction()
-						{
-							@Override
-							public void execute(ListViewMenu menuItem)
-							{
-								addGooglePlusUserIdentity(null);
-							}
-						}
+												  "Add Google+ user identity",
+												  new ListViewMenuItemAction()
+												  {
+													  @Override
+													  public void execute(ListViewMenu menuItem)
+													  {
+														  addGooglePlusUserIdentity(null);
+													  }
+												  }
 				)
 		);
 		userAuthenticationMenu.addItem(
 				new ActionableListViewMenu(
-						"Add Google Play user identity",
-						new ListViewMenuItemAction()
-						{
-							@Override
-							public void execute(ListViewMenu menuItem)
-							{
-								addGooglePlayUserIdentity(null);
-							}
-						}
+												  "Add Google Play user identity",
+												  new ListViewMenuItemAction()
+												  {
+													  @Override
+													  public void execute(ListViewMenu menuItem)
+													  {
+														  addGooglePlayUserIdentity(null);
+													  }
+												  }
 				)
 		);
 		userAuthenticationMenu.addItem(
 				new ActionableListViewMenu(
-						"Add Custom user identity",
-						new ListViewMenuItemAction()
-						{
-							@Override
-							public void execute(ListViewMenu menuItem)
-							{
-								addCustomUserIdentity(null);
-							}
-						}
+												  "Add Custom user identity",
+												  new ListViewMenuItemAction()
+												  {
+													  @Override
+													  public void execute(ListViewMenu menuItem)
+													  {
+														  addCustomUserIdentity(null);
+													  }
+												  }
 				)
 		);
 		ActionableListViewMenu removeFbUserIdentityMenuItem = new ActionableListViewMenu(
-				"Remove Facebook user identity",
-				new ListViewMenuItemAction()
-				{
-					@Override
-					public void execute(ListViewMenu menuItem)
-					{
-						removeFbUserIdentity();
-					}
-				}
+																								"Remove Facebook user identity",
+																								new ListViewMenuItemAction()
+																								{
+																									@Override
+																									public void execute(ListViewMenu menuItem)
+																									{
+																										removeFbUserIdentity();
+																									}
+																								}
 		);
 
 		removeFbUserIdentityMenuItem.setSubtitle("Log out from Facebook");
 		userAuthenticationMenu.addItem(removeFbUserIdentityMenuItem);
 
 		ActionableListViewMenu removeGooglePlusUserIdentity = new ActionableListViewMenu(
-				"Remove Google+ user identity",
-				new ListViewMenuItemAction()
-				{
-					@Override
-					public void execute(ListViewMenu menuItem)
-					{
-						removeGooglePlusUserIdentity();
-					}
-				}
+																								"Remove Google+ user identity",
+																								new ListViewMenuItemAction()
+																								{
+																									@Override
+																									public void execute(ListViewMenu menuItem)
+																									{
+																										removeGooglePlusUserIdentity();
+																									}
+																								}
 		);
 		userAuthenticationMenu.addItem(removeGooglePlusUserIdentity);
 
 		ActionableListViewMenu removeGooglePlayUserIdentity = new ActionableListViewMenu(
-				"Remove Google Play user identity",
-				new ListViewMenuItemAction()
-				{
-					@Override
-					public void execute(ListViewMenu menuItem)
-					{
-						removeGooglePlayUserIdentity();
-					}
-				}
+																								"Remove Google Play user identity",
+																								new ListViewMenuItemAction()
+																								{
+																									@Override
+																									public void execute(ListViewMenu menuItem)
+																									{
+																										removeGooglePlayUserIdentity();
+																									}
+																								}
 		);
 		userAuthenticationMenu.addItem(removeGooglePlayUserIdentity);
 
 		userAuthenticationMenu.addItem(
 				new ActionableListViewMenu(
-						"Remove Custom user identity",
-						new ListViewMenuItemAction()
-						{
-							@Override
-							public void execute(ListViewMenu menuItem)
-							{
-								removeUserIdentity("Custom");
-							}
-						}
+												  "Remove Custom user identity",
+												  new ListViewMenuItemAction()
+												  {
+													  @Override
+													  public void execute(ListViewMenu menuItem)
+													  {
+														  removeUserIdentity("Custom");
+													  }
+												  }
 				)
 		);
 
 		userAuthenticationMenu.addItem(
 				new ActionableListViewMenu(
-						"Reset current user",
-						new ListViewMenuItemAction()
-						{
-							@Override
-							public void execute(ListViewMenu menuItem)
-							{
-								getSocial.getCurrentUser().reset(new CurrentUser.UpdateUserInfoObserver()
+												  "Reset current user",
+												  new ListViewMenuItemAction()
+												  {
+													  @Override
+													  public void execute(ListViewMenu menuItem)
+													  {
+														  getSocial.getCurrentUser().reset(new OperationVoidCallback()
 
-																 {
-																	 @Override
-																	 public void onComplete()
-																	 {
-																		 updateUserInfoView();
-																		 disconnectFromFacebook();
-																		 logInfoAndToast("Successfully reseted");
-																	 }
+																						   {
+																							   @Override
+																							   public void onSuccess()
+																							   {
+																								   updateUserInfoView();
+																								   disconnectFromFacebook();
+																								   logInfoAndToast("Successfully reseted");
+																							   }
 
-																	 @Override
-																	 public void onError(Exception error)
-																	 {
-																		 logErrorAndToast(error);
-																	 }
+																							   @Override
+																							   public void onFailure(Exception error)
+																							   {
+																								   logErrorAndToast(error);
+																							   }
 
-																 }
+																						   }
 
-								);
-							}
-						}
+														  );
+													  }
+												  }
 				)
 		);
 
@@ -1720,121 +1774,121 @@ public class MainActivity extends AppCompatActivity
 		ListViewMenu activitiesMenu = rootMenu.addItem(new ListViewMenu("Activities"));
 		activitiesMenu.addItem(
 				new ActionableListViewMenu(
-						"Open Global Activities",
-						new ListViewMenuItemAction()
-						{
-							@Override
-							public void execute(ListViewMenu menuItem)
-							{
-								openGlobalActivities();
-							}
-						}
+												  "Open Global Activities",
+												  new ListViewMenuItemAction()
+												  {
+													  @Override
+													  public void execute(ListViewMenu menuItem)
+													  {
+														  openGlobalActivities();
+													  }
+												  }
 				)
 		);
 		activitiesMenu.addItem(
 				new ActionableListViewMenu(
-						"Open Activities Filtered by Group",
-						new ListViewMenuItemAction()
-						{
-							@Override
-							public void execute(ListViewMenu menuItem)
-							{
-								openActivitiesFilteredByGroup();
-							}
-						}
+												  "Open Activities Filtered by Group",
+												  new ListViewMenuItemAction()
+												  {
+													  @Override
+													  public void execute(ListViewMenu menuItem)
+													  {
+														  openActivitiesFilteredByGroup();
+													  }
+												  }
 				)
 		);
 
 		ListViewMenu postActivityMenu = activitiesMenu.addItem(new ListViewMenu("Post Activity"));
 		postActivityMenu.addItem(
 				new ActionableListViewMenu(
-						"Post Text",
-						new ListViewMenuItemAction()
-						{
-							@Override
-							public void execute(ListViewMenu menuItem)
-							{
-								postActivityText();
-							}
-						}
+												  "Post Text",
+												  new ListViewMenuItemAction()
+												  {
+													  @Override
+													  public void execute(ListViewMenu menuItem)
+													  {
+														  postActivityText();
+													  }
+												  }
 				)
 		);
 		postActivityMenu.addItem(
 				new ActionableListViewMenu(
-						"Post Image",
-						new ListViewMenuItemAction()
-						{
-							@Override
-							public void execute(ListViewMenu menuItem)
-							{
-								postActivityImage();
-							}
-						}
+												  "Post Image",
+												  new ListViewMenuItemAction()
+												  {
+													  @Override
+													  public void execute(ListViewMenu menuItem)
+													  {
+														  postActivityImage();
+													  }
+												  }
 				)
 		);
 		postActivityMenu.addItem(
 				new ActionableListViewMenu(
-						"Post Text + Image",
-						new ListViewMenuItemAction()
-						{
-							@Override
-							public void execute(ListViewMenu menuItem)
-							{
-								postActivityTextAndImage();
-							}
-						}
+												  "Post Text + Image",
+												  new ListViewMenuItemAction()
+												  {
+													  @Override
+													  public void execute(ListViewMenu menuItem)
+													  {
+														  postActivityTextAndImage();
+													  }
+												  }
 				)
 		);
 		postActivityMenu.addItem(
 				new ActionableListViewMenu(
-						"Post Text + Button",
-						new ListViewMenuItemAction()
-						{
-							@Override
-							public void execute(ListViewMenu menuItem)
-							{
-								postActivityTextAndButton();
-							}
-						}
+												  "Post Text + Button",
+												  new ListViewMenuItemAction()
+												  {
+													  @Override
+													  public void execute(ListViewMenu menuItem)
+													  {
+														  postActivityTextAndButton();
+													  }
+												  }
 				)
 		);
 		postActivityMenu.addItem(
 				new ActionableListViewMenu(
-						"Post Text + Image + Button",
-						new ListViewMenuItemAction()
-						{
-							@Override
-							public void execute(ListViewMenu menuItem)
-							{
-								postActivityTextAndImageAndButton();
-							}
-						}
+												  "Post Text + Image + Button",
+												  new ListViewMenuItemAction()
+												  {
+													  @Override
+													  public void execute(ListViewMenu menuItem)
+													  {
+														  postActivityTextAndImageAndButton();
+													  }
+												  }
 				)
 		);
 		postActivityMenu.addItem(
 				new ActionableListViewMenu(
-						"Post Image + Button",
-						new ListViewMenuItemAction()
-						{
-							@Override
-							public void execute(ListViewMenu menuItem)
-							{
-								postActivityImageAndButton();
-							}
-						}
+												  "Post Image + Button",
+												  new ListViewMenuItemAction()
+												  {
+													  @Override
+													  public void execute(ListViewMenu menuItem)
+													  {
+														  postActivityImageAndButton();
+													  }
+												  }
 				)
 		);
 		postActivityMenu.addItem(
 				new ActionableListViewMenu(
-						"Post Image + Action",
-						new ListViewMenuItemAction()
-						{
-							@Override
-							public void execute(ListViewMenu menuItem)
-							{
-								postActivityImageAndAction();
-							}
-						}
+												  "Post Image + Action",
+												  new ListViewMenuItemAction()
+												  {
+													  @Override
+													  public void execute(ListViewMenu menuItem)
+													  {
+														  postActivityImageAndAction();
+													  }
+												  }
 				)
 		);
 
@@ -1844,28 +1898,28 @@ public class MainActivity extends AppCompatActivity
 		ListViewMenu smartInvitesMenu = rootMenu.addItem(new ListViewMenu("Smart Invites"));
 		smartInvitesMenu.addItem(
 				new ActionableListViewMenu(
-						"Open Smart Invites UI",
-						new ListViewMenuItemAction()
-						{
-							@Override
-							public void execute(ListViewMenu menuItem)
-							{
-								openSmartInvites();
-							}
-						}
+												  "Open Smart Invites UI",
+												  new ListViewMenuItemAction()
+												  {
+													  @Override
+													  public void execute(ListViewMenu menuItem)
+													  {
+														  openSmartInvites();
+													  }
+												  }
 				)
 		);
 		smartInvitesMenu.addItem(
 				new ActionableListViewMenu(
-						"Send Customized Smart Invite",
-						new ListViewMenuItemAction()
-						{
-							@Override
-							public void execute(ListViewMenu menuItem)
-							{
-								sendCustomizedSmartInvite();
-							}
-						}
+												  "Send Customized Smart Invite",
+												  new ListViewMenuItemAction()
+												  {
+													  @Override
+													  public void execute(ListViewMenu menuItem)
+													  {
+														  sendCustomizedSmartInvite();
+													  }
+												  }
 				)
 		);
 
@@ -1876,28 +1930,28 @@ public class MainActivity extends AppCompatActivity
 		updateChatMenuSubtitle();
 		chatMenu.addItem(
 				new ActionableListViewMenu(
-						"Open Global Chat",
-						new ListViewMenuItemAction()
-						{
-							@Override
-							public void execute(ListViewMenu menuItem)
-							{
-								openGlobalChat();
-							}
-						}
+												  "Open Global Chat",
+												  new ListViewMenuItemAction()
+												  {
+													  @Override
+													  public void execute(ListViewMenu menuItem)
+													  {
+														  openGlobalChat();
+													  }
+												  }
 				)
 		);
 		chatMenu.addItem(
 				new ActionableListViewMenu(
-						"Open Conversation List",
-						new ListViewMenuItemAction()
-						{
-							@Override
-							public void execute(ListViewMenu menuItem)
-							{
-								openConversationList();
-							}
-						}
+												  "Open Conversation List",
+												  new ListViewMenuItemAction()
+												  {
+													  @Override
+													  public void execute(ListViewMenu menuItem)
+													  {
+														  openConversationList();
+													  }
+												  }
 				)
 		);
 
@@ -1907,38 +1961,34 @@ public class MainActivity extends AppCompatActivity
 		//
 		notificationsMenu = rootMenu.addItem(
 				new ActionableListViewMenu(
-						"Notification Center",
-						new ListViewMenuItemAction()
-						{
-							@Override
-							public void execute(ListViewMenu menuItem)
-							{
-								openNotificationsCenter();
-							}
-						}
+												  "Notification Center",
+												  new ListViewMenuItemAction()
+												  {
+													  @Override
+													  public void execute(ListViewMenu menuItem)
+													  {
+														  openNotificationsCenter();
+													  }
+												  }
 				)
 		);
-		updatedNotificationsMenuSubtitle();
-
 
 		//
 		//  Friends List
 		//
 		rootMenu.addItem(new ActionableListViewMenu(
-						"Friends List",
-						new ListViewMenuItemAction()
-						{
-							@Override
-							public void execute(ListViewMenu menuItem)
-							{
-								openFriendsList();
-							}
-						}
+														   "Friends List",
+														   new ListViewMenuItemAction()
+														   {
+															   @Override
+															   public void execute(ListViewMenu menuItem)
+															   {
+																   openFriendsList();
+															   }
+														   }
 				)
 		);
 
-
-		//
 		//  UI Customization
 		//
 		uiCustomizationMenu = rootMenu.addItem(new ListViewMenu("UI Customization"));
@@ -1946,30 +1996,30 @@ public class MainActivity extends AppCompatActivity
 
 		uiCustomizationMenu.addItem(
 				new ActionableListViewMenu(
-						"Default UI",
-						new ListViewMenuItemAction()
-						{
-							@Override
-							public void execute(ListViewMenu menuItem)
-							{
-								loadDefaultUi();
-								updateUiCustomizationMenuSubtitle();
-							}
-						}
+												  "Default UI",
+												  new ListViewMenuItemAction()
+												  {
+													  @Override
+													  public void execute(ListViewMenu menuItem)
+													  {
+														  loadDefaultUi();
+														  updateUiCustomizationMenuSubtitle();
+													  }
+												  }
 				)
 		);
 		uiCustomizationMenu.addItem(
 				new ActionableListViewMenu(
-						"Custom UI from Url",
-						new ListViewMenuItemAction()
-						{
-							@Override
-							public void execute(ListViewMenu menuItem)
-							{
-								loadCustomUiFromUrl();
-								updateUiCustomizationMenuSubtitle();
-							}
-						}
+												  "Custom UI from Url",
+												  new ListViewMenuItemAction()
+												  {
+													  @Override
+													  public void execute(ListViewMenu menuItem)
+													  {
+														  loadCustomUiFromUrl();
+														  updateUiCustomizationMenuSubtitle();
+													  }
+												  }
 				)
 		);
 
@@ -1979,80 +2029,80 @@ public class MainActivity extends AppCompatActivity
 		ListViewMenu leaderboardsMenu = rootMenu.addItem(new ListViewMenu("Leaderboards"));
 		leaderboardsMenu.addItem(
 				new ActionableListViewMenu(
-						"Get User Rank on Leaderboard 1",
-						new ListViewMenuItemAction()
-						{
-							@Override
-							public void execute(ListViewMenu menuItem)
-							{
-								getUserRankOnLb1();
-							}
-						}
+												  "Get User Rank on Leaderboard 1",
+												  new ListViewMenuItemAction()
+												  {
+													  @Override
+													  public void execute(ListViewMenu menuItem)
+													  {
+														  getUserRankOnLb1();
+													  }
+												  }
 				)
 		);
 		leaderboardsMenu.addItem(
 				new ActionableListViewMenu(
-						"Get User Rank on Leaderboards 1, 2 and 3",
-						new ListViewMenuItemAction()
-						{
-							@Override
-							public void execute(ListViewMenu menuItem)
-							{
-								getUserRankOnLb123();
-							}
-						}
+												  "Get User Rank on Leaderboards 1, 2 and 3",
+												  new ListViewMenuItemAction()
+												  {
+													  @Override
+													  public void execute(ListViewMenu menuItem)
+													  {
+														  getUserRankOnLb123();
+													  }
+												  }
 				)
 		);
 		leaderboardsMenu.addItem(
 				new ActionableListViewMenu(
-						"Get first 5 Leaderboards",
-						new ListViewMenuItemAction()
-						{
-							@Override
-							public void execute(ListViewMenu menuItem)
-							{
-								getFirst5Lb();
-							}
-						}
+												  "Get first 5 Leaderboards",
+												  new ListViewMenuItemAction()
+												  {
+													  @Override
+													  public void execute(ListViewMenu menuItem)
+													  {
+														  getFirst5Lb();
+													  }
+												  }
 				)
 		);
 		leaderboardsMenu.addItem(
 				new ActionableListViewMenu(
-						"Get first 5 scores from Leaderboard 1",
-						new ListViewMenuItemAction()
-						{
-							@Override
-							public void execute(ListViewMenu menuItem)
-							{
-								getFirst5ScoresFromLb1();
-							}
-						}
+												  "Get first 5 scores from Leaderboard 1",
+												  new ListViewMenuItemAction()
+												  {
+													  @Override
+													  public void execute(ListViewMenu menuItem)
+													  {
+														  getFirst5ScoresFromLb1();
+													  }
+												  }
 				)
 		);
 		leaderboardsMenu.addItem(
 				new ActionableListViewMenu(
-						"Submit score to Leaderboard 1",
-						new ListViewMenuItemAction()
-						{
-							@Override
-							public void execute(ListViewMenu menuItem)
-							{
-								submitValueToLb("leaderboard_one");
-							}
-						}
+												  "Submit score to Leaderboard 1",
+												  new ListViewMenuItemAction()
+												  {
+													  @Override
+													  public void execute(ListViewMenu menuItem)
+													  {
+														  submitValueToLb("leaderboard_one");
+													  }
+												  }
 				)
 		);
 		leaderboardsMenu.addItem(
 				new ActionableListViewMenu(
-						"Submit score to Leaderboard 2",
-						new ListViewMenuItemAction()
-						{
-							@Override
-							public void execute(ListViewMenu menuItem)
-							{
-								submitValueToLb("leaderboard_two");
-							}
-						}
+												  "Submit score to Leaderboard 2",
+												  new ListViewMenuItemAction()
+												  {
+													  @Override
+													  public void execute(ListViewMenu menuItem)
+													  {
+														  submitValueToLb("leaderboard_two");
+													  }
+												  }
 				)
 		);
 
@@ -2063,28 +2113,28 @@ public class MainActivity extends AppCompatActivity
 		ListViewMenu cloudSaveMenu = rootMenu.addItem(new ListViewMenu("Cloud Save"));
 		cloudSaveMenu.addItem(
 				new ActionableListViewMenu(
-						"Save state",
-						new ListViewMenuItemAction()
-						{
-							@Override
-							public void execute(ListViewMenu menuItem)
-							{
-								openCloudSaveDialog();
-							}
-						}
+												  "Save state",
+												  new ListViewMenuItemAction()
+												  {
+													  @Override
+													  public void execute(ListViewMenu menuItem)
+													  {
+														  openCloudSaveDialog();
+													  }
+												  }
 				)
 		);
 		cloudSaveMenu.addItem(
 				new ActionableListViewMenu(
-						"Get saved state",
-						new ListViewMenuItemAction()
-						{
-							@Override
-							public void execute(ListViewMenu menuItem)
-							{
-								getClodSaveData();
-							}
-						}
+												  "Get saved state",
+												  new ListViewMenuItemAction()
+												  {
+													  @Override
+													  public void execute(ListViewMenu menuItem)
+													  {
+														  getClodSaveData();
+													  }
+												  }
 				)
 		);
 
@@ -2094,143 +2144,142 @@ public class MainActivity extends AppCompatActivity
 		//
 		ListViewMenu settingsMenu = rootMenu.addItem(new ListViewMenu("Settings"));
 		languageMenu = new ActionableListViewMenu(
-				"Change Language",
-				new ListViewMenuItemAction()
-				{
-					@Override
-					public void execute(ListViewMenu menuItem)
-					{
-						showLanguageSelectionDialog();
-					}
-				}
+														 "Change Language",
+														 new ListViewMenuItemAction()
+														 {
+															 @Override
+															 public void execute(ListViewMenu menuItem)
+															 {
+																 showLanguageSelectionDialog();
+															 }
+														 }
 		);
 		settingsMenu.addItem(languageMenu);
-		updateLanguageMenuSubtitle();
 
 		settingsMenu.addItem(
 				new CheckboxListViewMenu(
-						"Prevent anonymous user from posting",
-						isPreventAnonymousInteract,
-						new OnCheckboxListViewMenuChecked()
-						{
-							@Override
-							public void onCheckChanged(boolean isChecked)
-							{
-								isPreventAnonymousInteract = isChecked;
-								if(isPreventAnonymousInteract)
-								{
-									toast("Try to perform some action as an anonymous user. (eg. like a post)");
-								}
-							}
-						}
+												"Prevent anonymous user from posting",
+												isPreventAnonymousInteract,
+												new OnCheckboxListViewMenuChecked()
+												{
+													@Override
+													public void onCheckChanged(boolean isChecked)
+													{
+														isPreventAnonymousInteract = isChecked;
+														if(isPreventAnonymousInteract)
+														{
+															toast("Try to perform some action as an anonymous user. (eg. like a post)");
+														}
+													}
+												}
 				)
 		);
 
 
 		settingsMenu.addItem(
 				new CheckboxListViewMenu(
-						"Perform action handler",
-						isOnActionPerformListener,
-						new OnCheckboxListViewMenuChecked()
-						{
-							@Override
-							public void onCheckChanged(boolean isChecked)
-							{
-								isOnActionPerformListener = isChecked;
-								if(isOnActionPerformListener)
-								{
-									toast("Try to open any window to see action confirmation dialog");
-								}
-							}
-						}
+												"Perform action handler",
+												isOnActionPerformListener,
+												new OnCheckboxListViewMenuChecked()
+												{
+													@Override
+													public void onCheckChanged(boolean isChecked)
+													{
+														isOnActionPerformListener = isChecked;
+														if(isOnActionPerformListener)
+														{
+															toast("Try to open any window to see action confirmation dialog");
+														}
+													}
+												}
 				)
 		);
 
 		settingsMenu.addItem(
 				new CheckboxListViewMenu(
-						"Enable User Generated Content Handler",
-						isContentModerated,
-						new OnCheckboxListViewMenuChecked()
-						{
-							@Override
-							public void onCheckChanged(boolean isChecked)
-							{
-								isContentModerated = isChecked;
-								if(isContentModerated)
-								{
-									toast("Try to post an activity or chat message");
-								}
-							}
-						}
+												"Enable User Generated Content Handler",
+												isContentModerated,
+												new OnCheckboxListViewMenuChecked()
+												{
+													@Override
+													public void onCheckChanged(boolean isChecked)
+													{
+														isContentModerated = isChecked;
+														if(isContentModerated)
+														{
+															toast("Try to post an activity or chat message");
+														}
+													}
+												}
 				)
 		);
 		settingsMenu.addItem(
 				new CheckboxListViewMenu(
-						"User avatar click custom behaviour",
-						isUserAvatarClickHandlerCustom,
-						new OnCheckboxListViewMenuChecked()
-						{
-							@Override
-							public void onCheckChanged(boolean isChecked)
-							{
-								isUserAvatarClickHandlerCustom = isChecked;
-								if(isUserAvatarClickHandlerCustom)
-								{
-									toast("Tap on any user avatar");
-								}
-							}
-						}
+												"User avatar click custom behaviour",
+												isUserAvatarClickHandlerCustom,
+												new OnCheckboxListViewMenuChecked()
+												{
+													@Override
+													public void onCheckChanged(boolean isChecked)
+													{
+														isUserAvatarClickHandlerCustom = isChecked;
+														if(isUserAvatarClickHandlerCustom)
+														{
+															toast("Tap on any user avatar");
+														}
+													}
+												}
 				)
 		);
 		settingsMenu.addItem(
 				new CheckboxListViewMenu(
-						"App avatar click custom behaviour",
-						isAppAvatarClickHandlerCustom,
-						new OnCheckboxListViewMenuChecked()
-						{
-							@Override
-							public void onCheckChanged(boolean isChecked)
-							{
-								isAppAvatarClickHandlerCustom = isChecked;
-								if(isAppAvatarClickHandlerCustom)
-								{
-									toast("Tap on any app avatar");
-								}
-							}
-						}
+												"App avatar click custom behaviour",
+												isAppAvatarClickHandlerCustom,
+												new OnCheckboxListViewMenuChecked()
+												{
+													@Override
+													public void onCheckChanged(boolean isChecked)
+													{
+														isAppAvatarClickHandlerCustom = isChecked;
+														if(isAppAvatarClickHandlerCustom)
+														{
+															toast("Tap on any app avatar");
+														}
+													}
+												}
 				)
 		);
 		settingsMenu.addItem(
 				new CheckboxListViewMenu(
-						"Activity action click custom behaviour",
-						isActivityActionHandlerCustom,
-						new OnCheckboxListViewMenuChecked()
-						{
-							@Override
-							public void onCheckChanged(boolean isChecked)
-							{
-								isActivityActionHandlerCustom = isChecked;
-								if(isActivityActionHandlerCustom)
-								{
-									toast("Tap on an activity action button to see the effect");
-								}
-							}
-						}
+												"Activity action click custom behaviour",
+												isActivityActionHandlerCustom,
+												new OnCheckboxListViewMenuChecked()
+												{
+													@Override
+													public void onCheckChanged(boolean isChecked)
+													{
+														isActivityActionHandlerCustom = isChecked;
+														if(isActivityActionHandlerCustom)
+														{
+															toast("Tap on an activity action button to see the effect");
+														}
+													}
+												}
 				)
 		);
 		settingsMenu.addItem(
 				new CheckboxListViewMenu(
-						"Invite button click custom behaviour",
-						isInviteButtonClickHandlerCustom,
-						new OnCheckboxListViewMenuChecked()
-						{
-							@Override
-							public void onCheckChanged(boolean isChecked)
-							{
-								isInviteButtonClickHandlerCustom = isChecked;
-								toast("Tap on invite button inside Chat window to see the effect");
-							}
-						}
+												"Invite button click custom behaviour",
+												isInviteButtonClickHandlerCustom,
+												new OnCheckboxListViewMenuChecked()
+												{
+													@Override
+													public void onCheckChanged(boolean isChecked)
+													{
+														isInviteButtonClickHandlerCustom = isChecked;
+														toast("Tap on invite button inside Chat window to see the effect");
+													}
+												}
 				)
 		);
 
@@ -2239,14 +2288,22 @@ public class MainActivity extends AppCompatActivity
 
 	private void updateLanguageMenuSubtitle()
 	{
-		String subtitle = String.format("Current language: %s", getSocial.getLanguage());
-		languageMenu.setSubtitle(subtitle);
+		runOnUiThread(new Runnable()
+					  {
+						  @Override
+						  public void run()
+						  {
+							  String subtitle = String.format("Current language: %s", getSocial.getLanguage());
+							  languageMenu.setSubtitle(subtitle);
 
-		if(listViewMenuAdapter != null)
-		{
-			// to update Setting menu item label with new language
-			listViewMenuAdapter.notifyDataSetChanged();
-		}
+							  if(listViewMenuAdapter != null)
+							  {
+								  // to update Setting menu item label with new language
+								  listViewMenuAdapter.notifyDataSetChanged();
+							  }
+						  }
+					  }
+		);
 	}
 
 	void updateUiCustomizationMenuSubtitle()
@@ -2262,11 +2319,20 @@ public class MainActivity extends AppCompatActivity
 
 	private void updatedNotificationsMenuSubtitle()
 	{
-		notificationsMenu.setSubtitle(String.format("Unread notifications: %d", getSocial.getUnreadNotificationsCount()));
-		if(listViewMenuAdapter != null)
-		{
-			listViewMenuAdapter.notifyDataSetChanged();
-		}
+		runOnUiThread(
+				new Runnable()
+				{
+					@Override
+					public void run()
+					{
+						notificationsMenu.setSubtitle(String.format("Unread notifications: %d", getSocial.getUnreadNotificationsCount()));
+						if(listViewMenuAdapter != null)
+						{
+							listViewMenuAdapter.notifyDataSetChanged();
+						}
+					}
+				}
+		);
 	}
 
 	private String moderateUserGeneratedContent(GetSocial.ContentSource source, String content)
@@ -2277,7 +2343,7 @@ public class MainActivity extends AppCompatActivity
 
 	private void updateChatMenuSubtitle()
 	{
-		chatMenu.setSubtitle(String.format("Unread conversations: %d", getSocialChat.getUnreadConversationsCount()));
+		chatMenu.setSubtitle(String.format("Unread rooms: Public (%d) - Private (%d)", getSocialChat.getUnreadPublicRoomsCount(), getSocialChat.getUnreadPrivateRoomsCount()));
 		if(listViewMenuAdapter != null)
 		{
 			runOnUiThread(
@@ -2477,7 +2543,7 @@ public class MainActivity extends AppCompatActivity
 		}
 
 		new GraphRequest(AccessToken.getCurrentAccessToken(), "/me/permissions/", null, HttpMethod.DELETE, new GraphRequest
-				.Callback()
+																													   .Callback()
 		{
 			@Override
 			public void onCompleted(GraphResponse graphResponse)

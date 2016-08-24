@@ -2,11 +2,27 @@
 
 ## Version History
 
+
+### v5.1.0
+
++ ADDED Chat API to build custom chat views
++ ADDED system share provider to Smart Invites
++ ADDED Facebook Messenger as Smart Invites provider
++ REMOVED dependency on io.reactivex:rxandroid and io.reactivex:rxjava
++ DEPRECATED method `GetSocial.getCurrentUser().getIdentities()`, use `GetSocial.getCurrentUser().getAllIdentities()` instead
++ DEPRECATED interface `UpdateUserInfoObserver`, use `OperationVoidCallback` instead
++ DEPRECATED method `GetSocialChat.setOnUnreadConversationsCountChangedListener(...)`, use `GetSocialChat.addOnUnreadRoomsCountChangedListener(...)` instead
++ DEPRECATED method `GetSocialChat.getUnreadConversationsCount(...)`, use `GetSocialChat.getUnreadPrivateRoomsCount()` and `GetSocialChat.getUnreadPublicRoomsCount()` instead
+
+
+---
+
 ### v5.0.10
 
 + REDUCED SDK method count
-+ REMOVED dependency on io.reactivex:rxandroid and io.reactivex:rxjava
++ REMOVED dependency on `io.reactivex:rxandroid` and `io.reactivex:rxjava`
 + FIXED sending invites from background thread with image attachment
+
 
 ---
 

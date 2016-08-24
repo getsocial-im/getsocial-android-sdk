@@ -33,6 +33,7 @@ import im.getsocial.sdk.core.util.Internet;
 
 public class FacebookInvitePlugin extends InvitePlugin
 {
+	public static final String PROVIDER_NAME = "facebook";
 	private Activity activity;
 	private CallbackManager callbackManager;
 	

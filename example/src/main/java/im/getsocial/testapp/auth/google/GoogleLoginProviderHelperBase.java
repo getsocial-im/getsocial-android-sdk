@@ -34,10 +34,10 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.games.GamesActivityResultCodes;
 
 import im.getsocial.sdk.core.AddUserIdentityObserver;
-import im.getsocial.sdk.core.CurrentUser;
 import im.getsocial.sdk.core.GetSocial;
 import im.getsocial.sdk.core.User;
 import im.getsocial.sdk.core.UserIdentity;
+import im.getsocial.sdk.core.callback.OperationVoidCallback;
 import im.getsocial.sdk.core.util.Log;
 
 public abstract class GoogleLoginProviderHelperBase implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener
@@ -163,7 +163,7 @@ public abstract class GoogleLoginProviderHelperBase implements GoogleApiClient.C
 		}
 	}
 
-	public void removeUserIdentity(Context context, CurrentUser.UpdateUserInfoObserver updateUserInfoObserver)
+	public void removeUserIdentity(Context context, OperationVoidCallback callback)
 	{
 		if(mode != Mode.None)
 		{
@@ -174,9 +174,9 @@ public abstract class GoogleLoginProviderHelperBase implements GoogleApiClient.C
 
 		mode = Mode.RemoveUserIdentity;
 
-		if(updateUserInfoObserver != null)
+		if(callback != null)
 		{
-			updateUserInfoObserver.onComplete();
+			callback.onSuccess();
 		}
 
 		clearAccountIfConnected();
@@ -233,7 +233,8 @@ public abstract class GoogleLoginProviderHelperBase implements GoogleApiClient.C
 			if(resultCode != Activity.RESULT_OK)
 			{
 
-				switch(resultCode){
+				switch(resultCode)
+				{
 					case GamesActivityResultCodes.RESULT_SIGN_IN_FAILED:
 						toastOnUiThread("Google SDK sent \"GamesActivityResultCodes.RESULT_SIGN_IN_FAILED\". Do you need to add the login account to the app?", Toast.LENGTH_LONG);
 						break;
@@ -277,7 +278,8 @@ public abstract class GoogleLoginProviderHelperBase implements GoogleApiClient.C
 				googleApiClient.connect();
 			}
 
-			if(googleApiClient.isConnected()){
+			if(googleApiClient.isConnected())
+			{
 				performGetSocialConnectionRequest();
 			}
 
@@ -288,7 +290,8 @@ public abstract class GoogleLoginProviderHelperBase implements GoogleApiClient.C
 
 	public boolean onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults)
 	{
-		if(getAskPermissionsRequestCode() == requestCode){
+		if(getAskPermissionsRequestCode() == requestCode)
+		{
 			if(grantResults[0] == PackageManager.PERMISSION_GRANTED)
 			{
 				performGetSocialConnectionRequest();
@@ -335,41 +338,49 @@ public abstract class GoogleLoginProviderHelperBase implements GoogleApiClient.C
 							break;
 						case AddUserItentity:
 
-							UserIdentity googleIdentity = UserIdentity
+							final UserIdentity googleIdentity = UserIdentity
 									.create(provider, token);
 
-							GetSocial.getInstance().getCurrentUser().addUserIdentity(googleIdentity, new AddUserIdentityObserver()
-									{
-										@Override
-										public void onComplete(AddIdentityResult addIdentityResult)
-										{
-											if(addIdentityInfoObserver != null)
+							activity.runOnUiThread(new Runnable()
+							{
+								@Override
+								public void run()
+								{
+									GetSocial.getInstance().getCurrentUser().addUserIdentity(googleIdentity, new AddUserIdentityObserver()
 											{
-												addIdentityInfoObserver.onComplete(addIdentityResult);
-											}
-											clearMode();
-										}
+												@Override
+												public void onComplete(AddIdentityResult addIdentityResult)
+												{
+													if(addIdentityInfoObserver != null)
+													{
+														addIdentityInfoObserver.onComplete(addIdentityResult);
+													}
+													clearMode();
+												}
 
-										@Override
-										public void onError(Exception error)
-										{
-											if(addIdentityInfoObserver != null)
-											{
-												addIdentityInfoObserver.onError(error);
-											}
-											clearMode();
-										}
+												@Override
+												public void onError(Exception error)
+												{
+													if(addIdentityInfoObserver != null)
+													{
+														addIdentityInfoObserver.onError(error);
+													}
+													clearMode();
+												}
 
-										@Override
-										public void onConflict(User currentUser, User remoteUser, UserIdentityResolver resolver)
-										{
-											if(addIdentityInfoObserver != null)
-											{
-												addIdentityInfoObserver.onConflict(currentUser,remoteUser,resolver);
+												@Override
+												public void onConflict(User currentUser, User remoteUser, UserIdentityResolver resolver)
+												{
+													if(addIdentityInfoObserver != null)
+													{
+														addIdentityInfoObserver.onConflict(currentUser, remoteUser, resolver);
+													}
+												}
 											}
-										}
-									}
-							);
+									);
+								}
+							});
+
 							break;
 						case RemoveUserIdentity:
 							break;
@@ -386,7 +397,7 @@ public abstract class GoogleLoginProviderHelperBase implements GoogleApiClient.C
 					clearMode();
 					e.printStackTrace();
 					Log.e("GetSocial Exception", e.getMessage(), e);
-					toastOnUiThread("GetSocial("+e+"):"+e.getMessage(), Toast.LENGTH_SHORT);
+					toastOnUiThread("GetSocial(" + e + "):" + e.getMessage(), Toast.LENGTH_SHORT);
 				}
 			}
 		}).start();

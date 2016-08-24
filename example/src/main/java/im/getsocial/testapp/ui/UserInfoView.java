@@ -40,6 +40,7 @@ import java.io.BufferedOutputStream;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Set;
 
 import im.getsocial.sdk.core.User;
 import im.getsocial.sdk.core.util.Log;
@@ -114,11 +115,12 @@ public class UserInfoView extends RelativeLayout
 	
 	private String printProviders()
 	{
-		if(user.getIdentities() != null)
+		if(user.getAllIdentities() != null)
 		{
 			StringBuilder sb = new StringBuilder();
-			int providerSize = user.getIdentities().size() > 3 ? 3 : user.getIdentities().size();
-			ArrayList<String> providers = new ArrayList<>(user.getIdentities());
+			Set<String>keySet = user.getAllIdentities().keySet();
+			int providerSize = keySet.size() > 3 ? 3 : keySet.size();
+			ArrayList<String> providers = new ArrayList<>(keySet);
 			for(int i = 0; i < providerSize; i++)
 			{
 				sb.append(providers.get(i));
