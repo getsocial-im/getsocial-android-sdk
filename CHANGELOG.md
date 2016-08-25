@@ -8,6 +8,7 @@
 + ADDED Chat API to build custom chat views
 + ADDED system share provider to Smart Invites
 + ADDED Facebook Messenger as Smart Invites provider
++ ADDED Indonesian, Tagalog, Malay, Brazilian Portuguese and Vietnamese localization
 + REMOVED dependency on io.reactivex:rxandroid and io.reactivex:rxjava
 + DEPRECATED method `GetSocial.getCurrentUser().getIdentities()`, use `GetSocial.getCurrentUser().getAllIdentities()` instead
 + DEPRECATED interface `UpdateUserInfoObserver`, use `OperationVoidCallback` instead
