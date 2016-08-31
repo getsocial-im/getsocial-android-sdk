@@ -2,6 +2,12 @@
 
 ## Version History
 
+### v5.1.1
+
++ FIXED corner case NullPointerException when receiving referral data from Facebook
+
+
+---
 
 ### v5.1.0
 
