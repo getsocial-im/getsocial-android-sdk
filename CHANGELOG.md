@@ -2,6 +2,12 @@
 
 ## Version History
 
+### v5.1.2
+
++ FIXED Crash when attempting disconnect while connecting 
+
+---
+
 ### v5.1.1
 
 + FIXED corner case NullPointerException when receiving referral data from Facebook
