@@ -2,6 +2,13 @@
 
 ## Version History
 
+
+### v5.1.4
+
++ FIXED UI bugs
+
+---
+
 ### v5.1.3
 
 + FIXED Send chat message or activity post on Enter button click
