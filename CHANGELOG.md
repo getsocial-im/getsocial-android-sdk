@@ -2,6 +2,14 @@
 
 ## Version History
 
+### v5.1.3
+
++ FIXED Send chat message or activity post on Enter button click
++ FIXED GetSocial window size calculation on Android N
++ FIXED OnReferralDataReceivedListener not been called
+
+---
+
 ### v5.1.2
 
 + FIXED Crash when attempting disconnect while connecting 
