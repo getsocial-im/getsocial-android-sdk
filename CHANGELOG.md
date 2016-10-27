@@ -3,6 +3,11 @@
 ## Version History
 
 
+### v5.1.5
+
++ FIXED RejectedExecutionException in communication layer
+
+
 ### v5.1.4
 
 + FIXED UI bugs
