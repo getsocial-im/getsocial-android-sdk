@@ -33,6 +33,11 @@
                 <data
                     android:host="s8i7N997ga98n"
                     android:scheme="getsocial"/>
+
+                <data
+                    android:scheme="@string/kakao_scheme"
+                    android:host="@string/kakaolink_host" />
+
             </intent-filter>
         </activity>
     </application>

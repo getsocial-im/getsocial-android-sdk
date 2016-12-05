@@ -13,6 +13,7 @@ buildscript {
 
 repositories {
     maven { url 'https://maven.fabric.io/public' }
+    maven { url 'http://devrepo.kakao.com:8088/nexus/content/groups/public/' }
     jcenter()
 }
 
@@ -48,6 +49,8 @@ dependencies {
     compile('com.crashlytics.sdk.android:crashlytics:2.2.3@aar') {
         transitive = true;
     }
+
+    compile 'com.kakao.sdk:kakaolink:1.0.52'
 }
 
 android {

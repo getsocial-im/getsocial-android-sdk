@@ -3,10 +3,18 @@
 ## Version History
 
 
+### v5.2.0
+
++ ADDED KakaoTalk invite plugin
++ ADDED Social graph
+
+---
+
 ### v5.1.5
 
 + FIXED RejectedExecutionException in communication layer
 
+---
 
 ### v5.1.4
 

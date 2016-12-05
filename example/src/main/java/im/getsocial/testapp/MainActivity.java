@@ -61,6 +61,7 @@ import java.util.Random;
 
 import im.getsocial.sdk.chat.GetSocialChat;
 import im.getsocial.sdk.core.AddUserIdentityObserver;
+import im.getsocial.sdk.core.CurrentUser;
 import im.getsocial.sdk.core.GetSocial;
 import im.getsocial.sdk.core.UI.builder.SmartInviteViewBuilder;
 import im.getsocial.sdk.core.UI.builder.UserListViewBuilder;
@@ -274,6 +275,7 @@ public class MainActivity extends AppCompatActivity
 
 		getSocial.registerPlugin(FacebookInvitePlugin.PROVIDER_NAME, new FacebookInvitePlugin(this, callbackManager));
 		getSocial.registerPlugin(FacebookMessengerInvitePlugin.PROVIDER_NAME, new FacebookMessengerInvitePlugin());
+		getSocial.registerPlugin(KakaoInvitePlugin.PROVIDER_NAME, new KakaoInvitePlugin());
 
 		initGetSocial();
 
@@ -283,11 +285,11 @@ public class MainActivity extends AppCompatActivity
 				new GetSocial.OnUserAvatarClickHandler()
 				{
 					@Override
-					public boolean onUserAvatarClick(User user, int source)
+					public boolean onUserAvatarClick(final User user, int source)
 					{
 						if(isUserAvatarClickHandlerCustom)
 						{
-							logInfoAndToast(String.format("User %s avatar clicked", user.getDisplayName()));
+							showDialogAvatarClick(user);
 							return true; // event consumed
 						}
 						return false; // event should be processed by the SDK
@@ -1097,6 +1099,107 @@ public class MainActivity extends AppCompatActivity
 					  }
 		);
 	}
+
+	private void showDialogAvatarClick(final User user)
+	{
+
+		runOnUiThread(new Runnable()
+					  {
+						  @Override
+						  public void run()
+						  {
+							  AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+							  builder.setTitle("Avatar clicked");
+							  builder.setItems(new CharSequence[]
+													   {"Follow user", "Open chat"},
+									  new DialogInterface.OnClickListener()
+									  {
+										  public void onClick(DialogInterface dialog, int which)
+										  {
+											  switch(which)
+											  {
+												  case 0:
+													  CurrentUser currentUser = getSocial.getCurrentUser();
+													  if(currentUser != null)
+													  {
+														  currentUser.followUser(user, new OperationVoidCallback()
+														  {
+															  @Override
+															  public void onSuccess()
+															  {
+																  logInfoAndToast(String.format("Following user %s", user.getDisplayName()));
+															  }
+
+															  @Override
+															  public void onFailure(Exception exception)
+															  {
+																  logInfoAndToast(String.format("Following user %s failed", user.getDisplayName()));
+															  }
+														  });
+													  }
+													  break;
+												  case 1:
+													  GetSocialChat.getInstance().createChatViewForUser(user).show();
+													  break;
+											  }
+										  }
+									  }
+							  );
+							  builder.create().show();
+						  }
+					  }
+		);
+	}
+
+	private void showDialogFriendClick(final User user)
+	{
+
+		runOnUiThread(new Runnable()
+					  {
+						  @Override
+						  public void run()
+						  {
+							  new AlertDialog.Builder(MainActivity.this)
+									  .setTitle("Friend clicked")
+									  .setMessage("Choose option")
+									  .setPositiveButton("Unfollow user", new DialogInterface.OnClickListener()
+											  {
+												  public void onClick(DialogInterface dialog, int whichButton)
+												  {
+													  CurrentUser currentUser = getSocial.getCurrentUser();
+													  if(currentUser != null)
+													  {
+														  currentUser.unfollowUser(user, new OperationVoidCallback()
+														  {
+															  @Override
+															  public void onSuccess()
+															  {
+																  logInfoAndToast("Unfollowing user " + user.getDisplayName());
+															  }
+
+															  @Override
+															  public void onFailure(Exception exception)
+															  {
+																  logInfoAndToast("Unfollowing user " + user.getDisplayName() + " failed");
+															  }
+														  });
+													  }
+												  }
+											  }
+									  )
+									  .setNegativeButton("Open chat", new DialogInterface.OnClickListener()
+											  {
+												  public void onClick(DialogInterface dialog, int whichButton)
+												  {
+													  GetSocialChat.getInstance().createChatViewForUser(user).show();
+												  }
+											  }
+									  )
+									  .show();
+						  }
+					  }
+		);
+	}
 	//endregion
 
 	//region Working with Activities
@@ -1178,16 +1281,16 @@ public class MainActivity extends AppCompatActivity
 	}
 	//endregion
 
-	//region Working with Friends List
-	private void openFriendsList()
+	//region Working with Following List
+	private void openFollowingList()
 	{
-		getSocial.createUserListView(
+		getSocial.createUserListView(UserListViewBuilder.UserListType.FOLLOWING,
 				new UserListViewBuilder.UserListObserver()
 				{
 					@Override
-					public void onUserSelected(User user)
+					public void onUserSelected(final User user)
 					{
-						logInfoAndToast("Selected user: " + user.getDisplayName());
+						showDialogFriendClick(user);
 					}
 
 					@Override
@@ -1197,8 +1300,33 @@ public class MainActivity extends AppCompatActivity
 					}
 				}
 		).setTitle("Friends").show();
+
 	}
 	//endregion
+
+	//region Working with Followers List
+	private void openFollowersList()
+	{
+		getSocial.createUserListView(UserListViewBuilder.UserListType.FOLLOWERS,
+				new UserListViewBuilder.UserListObserver()
+				{
+					@Override
+					public void onUserSelected(final User user)
+					{
+						logInfoAndToast("Selected user " + user.getDisplayName());
+					}
+
+					@Override
+					public void onCancel()
+					{
+						logInfoAndToast("User selection cancelled");
+					}
+				}
+		).setTitle("Followers").setShowInviteButton(false).show();
+
+	}
+	//endregion
+
 
 	//region Working with UI Customization
 	private void loadDefaultUi()
@@ -1440,6 +1568,7 @@ public class MainActivity extends AppCompatActivity
 				}
 		);
 	}
+
 	//endregion
 
 	//region GetSocial Settings
@@ -1556,7 +1685,7 @@ public class MainActivity extends AppCompatActivity
 
 	protected String getTestAppInfo()
 	{
-		return String.format("GetSocial Android Test App\nSDK v%s", GetSocial.VERSION);
+		return String.format("GetSocial Android Test App\nSDK v%s - API v%s", GetSocial.VERSION, GetSocial.API_VERSION);
 	}
 
 	private void updateToolbarBackButton(ListViewMenu currentMenu)
@@ -1973,21 +2102,6 @@ public class MainActivity extends AppCompatActivity
 				)
 		);
 
-		//
-		//  Friends List
-		//
-		rootMenu.addItem(new ActionableListViewMenu(
-														   "Friends List",
-														   new ListViewMenuItemAction()
-														   {
-															   @Override
-															   public void execute(ListViewMenu menuItem)
-															   {
-																   openFriendsList();
-															   }
-														   }
-				)
-		);
 
 		//  UI Customization
 		//
@@ -2138,6 +2252,37 @@ public class MainActivity extends AppCompatActivity
 				)
 		);
 
+		// Following/Followers menu
+		//
+		ListViewMenu followingFollowers = rootMenu.addItem(new ListViewMenu("Following/Followers"));
+
+		followingFollowers.addItem(
+				new ActionableListViewMenu(
+												  "Open Following list",
+												  new ListViewMenuItemAction()
+												  {
+													  @Override
+													  public void execute(ListViewMenu menuItem)
+													  {
+														  openFollowingList();
+													  }
+												  }
+				)
+		);
+
+		followingFollowers.addItem(
+				new ActionableListViewMenu(
+												  "Open Followers list",
+												  new ListViewMenuItemAction()
+												  {
+													  @Override
+													  public void execute(ListViewMenu menuItem)
+													  {
+														  openFollowersList();
+													  }
+												  }
+				)
+		);
 
 		//
 		//  Settings

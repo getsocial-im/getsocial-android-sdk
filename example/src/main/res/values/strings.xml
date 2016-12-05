@@ -27,6 +27,10 @@
     <string name="facebook_app_id">1470803889832802</string>
     <string name="title_activity_main">MainActivity</string>
 
+    <string name="kakao_app_key">4d436485d41336a82c47d0142682b4d7</string>
+    <string name="kakao_scheme">kakao4d436485d41336a82c47d0142682b4d7</string>
+    <string name="kakaolink_host">kakaolink</string>
+
     <string name="action_console">Console</string>
     <string name="no_user">No User</string>
     <string name="probably_you_are_offline">Probably you\'re offline</string>
