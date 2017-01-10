@@ -2,6 +2,11 @@
 
 ## Version History
 
+### v5.2.1
+
++ FIXED Send chat message after adding an identity
+
+---
 
 ### v5.2.0
 
