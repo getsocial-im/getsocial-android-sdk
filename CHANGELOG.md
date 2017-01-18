@@ -2,6 +2,12 @@
 
 ## Version History
 
+### v5.2.2
+
++ FIXED Compile warnings "Ignoring InnerClasses attribute..."
+
+---
+
 ### v5.2.1
 
 + FIXED Send chat message after adding an identity
