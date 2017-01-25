@@ -2,9 +2,16 @@
 
 ## Version History
 
+### v5.3.0
+
++ ADDED Polish and Ukrainian localizations
++ FIXED Proguard rules to decrease methods count
+
+---
+
 ### v5.2.2
 
-+ FIXED Compile warnings "Ignoring InnerClasses attribute..."
++ FIXED Compile warnings 'Ignoring InnerClasses attribute...'
 
 ---
 

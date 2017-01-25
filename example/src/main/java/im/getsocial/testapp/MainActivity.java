@@ -1574,7 +1574,7 @@ public class MainActivity extends AppCompatActivity
 	//region GetSocial Settings
 	private void showLanguageSelectionDialog()
 	{
-		final String[] providers = {"da", "de", "en", "es", "fr", "id", "is", "it", "ja", "ko", "ms", "nb", "nl", "pt-br", "pt", "ru", "sv", "tl", "tr", "vi", "zh-Hans", "zh-Hant"};
+		final String[] providers = {"da", "de", "en", "es", "fr", "id", "is", "it", "ja", "ko", "ms", "nb", "nl", "pl", "pt-br", "pt", "ru", "sv", "tl", "tr", "uk", "vi", "zh-Hans", "zh-Hant"};
 
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
 		builder.setTitle(R.string.select_language);
