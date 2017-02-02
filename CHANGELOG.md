@@ -2,6 +2,12 @@
 
 ## Version History
 
+### v5.3.1
+
++ ADDED onInviteFriendsFailure(InviteFriendsException exception) callback to InviteFriendsListener. Now friend invitation will fail if Smart Invite Url was not retrieved. 
+
+---
+
 ### v5.3.0
 
 + ADDED Polish and Ukrainian localizations
@@ -11,7 +17,7 @@
 
 ### v5.2.2
 
-+ FIXED Compile warnings 'Ignoring InnerClasses attribute...'
++ FIXED Compile warnings Ignoring InnerClasses attribute...
 
 ---
 

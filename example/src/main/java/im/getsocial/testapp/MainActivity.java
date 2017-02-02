@@ -41,7 +41,6 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.crashlytics.android.Crashlytics;
 import com.facebook.AccessToken;
 import com.facebook.AccessTokenTracker;
@@ -51,18 +50,11 @@ import com.facebook.GraphRequest;
 import com.facebook.GraphResponse;
 import com.facebook.HttpMethod;
 import com.facebook.login.LoginManager;
-
-import java.io.ByteArrayOutputStream;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-
 import im.getsocial.sdk.chat.GetSocialChat;
 import im.getsocial.sdk.core.AddUserIdentityObserver;
 import im.getsocial.sdk.core.CurrentUser;
 import im.getsocial.sdk.core.GetSocial;
+import im.getsocial.sdk.core.InviteFriendsException;
 import im.getsocial.sdk.core.UI.builder.SmartInviteViewBuilder;
 import im.getsocial.sdk.core.UI.builder.UserListViewBuilder;
 import im.getsocial.sdk.core.User;
@@ -85,6 +77,13 @@ import im.getsocial.testapp.ui.UiConsole;
 import im.getsocial.testapp.ui.UserInfoDialog;
 import im.getsocial.testapp.ui.UserInfoView;
 import io.fabric.sdk.android.Fabric;
+
+import java.io.ByteArrayOutputStream;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
 
 public class MainActivity extends AppCompatActivity
 {
@@ -427,13 +426,19 @@ public class MainActivity extends AppCompatActivity
 					@Override
 					public void onInviteFriendsIntent()
 					{
-						Log.e("onInviteFriendsIntent friends intent invoked");
+						Log.i("onInviteFriendsIntent friends intent invoked");
 					}
 					
 					@Override
 					public void onInvitedFriends(int friendsInvited)
 					{
-						Log.e("Invited %d friends", friendsInvited);
+						Log.i("Invited %d friends", friendsInvited);
+					}
+
+					@Override
+					public void onInviteFriendsFailure(InviteFriendsException exception)
+					{
+						logErrorAndToast("Failed to invite friends via provider " + exception.getProvider());
 					}
 				}
 		);
@@ -1116,10 +1121,10 @@ public class MainActivity extends AppCompatActivity
 									  {
 										  public void onClick(DialogInterface dialog, int which)
 										  {
+											  CurrentUser currentUser = getSocial.getCurrentUser();
 											  switch(which)
 											  {
 												  case 0:
-													  CurrentUser currentUser = getSocial.getCurrentUser();
 													  if(currentUser != null)
 													  {
 														  currentUser.followUser(user, new OperationVoidCallback()
@@ -1139,6 +1144,10 @@ public class MainActivity extends AppCompatActivity
 													  }
 													  break;
 												  case 1:
+													  if (currentUser != null && currentUser.getGuid().equals(user.getGuid())) {
+														  logWarningAndToast("Can not open chat with yourself !");
+														  return;
+													  }
 													  GetSocialChat.getInstance().createChatViewForUser(user).show();
 													  break;
 											  }
