@@ -2,6 +2,12 @@
 
 ## Version History
 
+### v5.3.2
+
++ FIXED NullPointerException when null onWindowStateChangeListener was set and window opened. 
+
+---
+
 ### v5.3.1
 
 + ADDED onInviteFriendsFailure(InviteFriendsException exception) callback to InviteFriendsListener. Now friend invitation will fail if Smart Invite Url was not retrieved. 
