@@ -2,6 +2,12 @@
 
 ## Version History
 
+### v5.3.3
+
++ FIXED Now custom avatar click listener will be invoked on all avatar clicks. 
+
+---
+
 ### v5.3.2
 
 + FIXED NullPointerException when null onWindowStateChangeListener was set and window opened. 
