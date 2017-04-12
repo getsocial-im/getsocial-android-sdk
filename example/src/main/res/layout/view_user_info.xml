@@ -16,46 +16,47 @@
   -->
 
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
+				android:layout_width="match_parent"
+				android:layout_height="match_parent">
 
-    <ImageView
-        android:id="@+id/userInfo_avatar"
-        android:layout_width="36dp"
-        android:layout_height="36dp"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_centerVertical="true"
-        android:layout_margin="4dp"
-        android:src="@drawable/avatar_default"/>
+	<ImageView
+			android:id="@+id/userInfo_avatar"
+			android:layout_width="36dp"
+			android:layout_height="36dp"
+			android:layout_alignParentLeft="true"
+			android:layout_alignParentStart="true"
+			android:layout_centerVertical="true"
+			android:layout_margin="4dp"
+			android:src="@drawable/avatar_default"/>
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:layout_marginLeft="4dp"
-        android:layout_marginStart="4dp"
-        android:layout_toRightOf="@id/userInfo_avatar"
-        android:layout_toEndOf="@id/userInfo_avatar"
-        android:layout_centerVertical="true">
+	<LinearLayout
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:orientation="vertical"
+			android:layout_marginLeft="4dp"
+			android:layout_marginStart="4dp"
+			android:layout_toRightOf="@id/userInfo_avatar"
+			android:layout_toEndOf="@id/userInfo_avatar"
+			android:layout_centerVertical="true">
 
-        <TextView
-            android:id="@+id/userInfo_displayName"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/no_user"
-            android:textColor="@color/primary_text"
-            android:textAppearance="?android:attr/textAppearanceMedium"/>
+		<TextView
+				android:id="@+id/userInfo_displayName"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:text="@string/no_user"
+				android:lines="1"
+				android:textColor="@color/primary_text"
+				android:textAppearance="?android:attr/textAppearanceMedium"/>
 
-        <TextView
-            android:id="@+id/userInfo_extra"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:singleLine="true"
-            android:text="@string/probably_you_are_offline"
-            android:textColor="@color/secondary_text"
-            android:textAppearance="?android:attr/textAppearanceSmall"/>
-        
-    </LinearLayout>
+		<TextView
+				android:id="@+id/userInfo_extra"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:lines="1"
+				android:text="@string/probably_you_are_offline"
+				android:textColor="@color/secondary_text"
+				android:textAppearance="?android:attr/textAppearanceSmall"/>
+
+	</LinearLayout>
 
 </RelativeLayout>

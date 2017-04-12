@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<string-array name="mainMenuItems">
+		<item>@string/main_menu_initialize_sdk</item>
+		<item>@string/main_menu_open_smart_invites</item>
+		<!--<item>@string/main_menu_global_feed</item>-->
+		<item>@string/main_menu_ui_customisation</item>
+	</string-array>
+	<string-array name="activityFeedsItems">
+		<item>Global Feed</item>
+		<item>Custom Feed</item>
+	</string-array>
+</resources>

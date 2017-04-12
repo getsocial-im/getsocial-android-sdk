@@ -1,27 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--
-        Copyright 2015-2016 GetSocial B.V.
-
-    Licensed under the Apache License, Version 2.0 (the "License");
-    you may not use this file except in compliance with the License.
-    You may obtain a copy of the License at
-
-        http://www.apache.org/licenses/LICENSE-2.0
-
-    Unless required by applicable law or agreed to in writing, software
-    distributed under the License is distributed on an "AS IS" BASIS,
-    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-    See the License for the specific language governing permissions and
-    limitations under the License.
-  -->
-
 <resources>
-    <color name="primary">#2196F3</color>
-    <color name="primary_dark">#1976D2</color>
-    <color name="primary_light">#BBDEFB</color>
-    <color name="accent">#607D8B</color>
-    <color name="primary_text">#212121</color>
-    <color name="secondary_text">#727272</color>
-    <color name="icons">#FFFFFF</color>
-    <color name="divider">#B6B6B6</color>
+
+	<color name="primary">#2196F3</color>
+	<color name="primary_dark">#1976D2</color>
+	<color name="primary_light">#BBDEFB</color>
+	<color name="accent">#607D8B</color>
+
+	<color name="primary_text">#221f20</color>
+	<color name="primary_text_pressed">#221f20</color>
+	<color name="primary_text_disabled">#cdd6e5</color>
+	<color name="secondary_text">#656565</color>
+	<color name="secondary_text_pressed">#656565</color>
+	<color name="secondary_text_disabled">#cdd6e5</color>
+	<color name="list_item">#ffffff</color>
+	<color name="list_item_pressed">#e3ebee</color>
+	<color name="list_item_disabled">#f0f4f5</color>
+
+	<color name="icons">#FFFFFF</color>
+	<color name="divider">#B6B6B6</color>
+
 </resources>

@@ -1,186 +1,130 @@
 {
   "project_info": {
-    "project_id": "getsocial-test-app",
-    "project_number": "792423680101",
-    "name": "getsocial-test-app"
+    "project_number": "819965240165",
+    "firebase_url": "https://getsocial-demo-sdk-6.firebaseio.com",
+    "project_id": "getsocial-demo-sdk-6",
+    "storage_bucket": "getsocial-demo-sdk-6.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:792423680101:android:61e8d4332692ac7d",
-        "client_id": "android:im.getsocial.testapp",
-        "client_type": 1,
+        "mobilesdk_app_id": "1:819965240165:android:9e1f50e6423e1798",
         "android_client_info": {
-          "package_name": "im.getsocial.testapp"
+          "package_name": "im.getsocial.demo"
         }
       },
-      "oauth_client": [],
-      "api_key": [],
+      "oauth_client": [
+        {
+          "client_id": "819965240165-g9ih4tcf4ahbf7evvu0ojeqh9c0msrno.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "im.getsocial.demo",
+            "certificate_hash": "f127ec761edaf914e662e2baf387385daa3b07d2"
+          }
+        },
+        {
+          "client_id": "819965240165-i9f1kt1vpvetaa7ku6k5tjqn1hqs2liu.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCWxT66hqhu-GTRPLFA38c8IJOE68P-eYI"
+        }
+      ],
       "services": {
         "analytics_service": {
           "status": 1
         },
-        "cloud_messaging_service": {
-          "status": 1,
-          "apns_config": []
-        },
         "appinvite_service": {
-          "status": 1,
-          "other_platform_oauth_client": []
-        },
-        "google_signin_service": {
-          "status": 1
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "819965240165-i9f1kt1vpvetaa7ku6k5tjqn1hqs2liu.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         },
         "ads_service": {
-          "status": 1
+          "status": 2
         }
       }
     },
     {
       "client_info": {
-        "mobilesdk_app_id": "1:792423680101:android:33559f509f799e9e",
-        "client_id": "android:im.getsocial.testapp.testing",
-        "client_type": 1,
+        "mobilesdk_app_id": "1:819965240165:android:a8e4ac7d4f28bff9",
         "android_client_info": {
-          "package_name": "im.getsocial.testapp.testing"
+          "package_name": "im.getsocial.demo.internal"
         }
       },
       "oauth_client": [
         {
-          "client_id": "792423680101-4j632mo75447cnlf1v5ka0lpfcq938jm.apps.googleusercontent.com",
+          "client_id": "819965240165-1kt4ghmtjtdth46ka3ro335u2mo3igc8.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "im.getsocial.testapp.testing",
-            "certificate_hash": "F127EC761EDAF914E662E2BAF387385DAA3B07D2"
+            "package_name": "im.getsocial.demo.internal",
+            "certificate_hash": "f127ec761edaf914e662e2baf387385daa3b07d2"
           }
         },
         {
-          "client_id": "792423680101-97gne9ehbravhvle3oesnu99vaiio4n3.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "im.getsocial.testapp.testing",
-            "certificate_hash": "79EDEBF606983C88BBF3F597B8C8927F93523085"
-          }
+          "client_id": "819965240165-i9f1kt1vpvetaa7ku6k5tjqn1hqs2liu.apps.googleusercontent.com",
+          "client_type": 3
         }
       ],
-      "api_key": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCWxT66hqhu-GTRPLFA38c8IJOE68P-eYI"
+        }
+      ],
       "services": {
         "analytics_service": {
           "status": 1
         },
-        "cloud_messaging_service": {
-          "status": 1,
-          "apns_config": []
-        },
         "appinvite_service": {
-          "status": 1,
-          "other_platform_oauth_client": []
-        },
-        "google_signin_service": {
-          "status": 2
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "819965240165-i9f1kt1vpvetaa7ku6k5tjqn1hqs2liu.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         },
         "ads_service": {
-          "status": 1
+          "status": 2
         }
       }
     },
     {
       "client_info": {
-        "mobilesdk_app_id": "1:792423680101:android:0aa19413ebc07b36",
-        "client_id": "android:im.getsocial.testapp.staging",
-        "client_type": 1,
+        "mobilesdk_app_id": "1:819965240165:android:7cb60377910daacd",
         "android_client_info": {
-          "package_name": "im.getsocial.testapp.staging"
+          "package_name": "im.getsocial.demo.analytics"
         }
       },
       "oauth_client": [
         {
-          "client_id": "792423680101-gnn96o5nnh9f0edk0p2reqk9l05v005h.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "im.getsocial.testapp.staging",
-            "certificate_hash": "F127EC761EDAF914E662E2BAF387385DAA3B07D2"
-          }
-        },
-        {
-          "client_id": "792423680101-pm0c7cut4nn4m8kab2n52u1ea748jmdo.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "im.getsocial.testapp.staging",
-            "certificate_hash": "79EDEBF606983C88BBF3F597B8C8927F93523085"
-          }
+          "client_id": "819965240165-i9f1kt1vpvetaa7ku6k5tjqn1hqs2liu.apps.googleusercontent.com",
+          "client_type": 3
         }
       ],
-      "api_key": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCWxT66hqhu-GTRPLFA38c8IJOE68P-eYI"
+        }
+      ],
       "services": {
         "analytics_service": {
           "status": 1
-        },
-        "cloud_messaging_service": {
-          "status": 1,
-          "apns_config": []
         },
         "appinvite_service": {
           "status": 1,
           "other_platform_oauth_client": []
         },
-        "google_signin_service": {
-          "status": 2
-        },
         "ads_service": {
-          "status": 1
-        }
-      }
-    },
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:792423680101:android:a76bffd3d9c7ef2b",
-        "client_id": "android:im.getsocial.testapp.master",
-        "client_type": 1,
-        "android_client_info": {
-          "package_name": "im.getsocial.testapp.master"
-        }
-      },
-      "oauth_client": [
-        {
-          "client_id": "792423680101-7vqnim2nsc7c374mprspse0597lj3cn6.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "im.getsocial.testapp.master",
-            "certificate_hash": "F127EC761EDAF914E662E2BAF387385DAA3B07D2"
-          }
-        },
-        {
-          "client_id": "792423680101-jootvq86r8k39hj4pm6n0smat7o0d039.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "im.getsocial.testapp.master",
-            "certificate_hash": "79EDEBF606983C88BBF3F597B8C8927F93523085"
-          }
-        }
-      ],
-      "api_key": [],
-      "services": {
-        "analytics_service": {
-          "status": 1
-        },
-        "cloud_messaging_service": {
-          "status": 1,
-          "apns_config": []
-        },
-        "appinvite_service": {
-          "status": 1,
-          "other_platform_oauth_client": []
-        },
-        "google_signin_service": {
           "status": 2
-        },
-        "ads_service": {
-          "status": 1
         }
       }
     }
   ],
-  "client_info": [],
-  "ARTIFACT_VERSION": "1"
+  "configuration_version": "1"
 }

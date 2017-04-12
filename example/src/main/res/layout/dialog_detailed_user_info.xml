@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+        Copyright 2015-2016 GetSocial B.V.
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+  -->
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="16dp">
+
+    <im.getsocial.demo.ui.UserInfoView
+        android:id="@+id/detailedUserInfo_userInfo"
+        android:layout_width="wrap_content"
+        android:layout_height="48dp"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"/>
+    
+    <TextView
+        android:id="@+id/detailedUserInfo_detailedInfo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Lore Ipsum"
+        android:layout_below="@+id/detailedUserInfo_userInfo"
+        android:layout_marginTop="16dp"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"/>
+
+    <Button
+        android:id="@+id/detailedUserInfo_loginLogoutButton"
+        style="@style/Widget.AppCompat.Button.ButtonBar.AlertDialog"
+        android:visibility="gone"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/detailedUserInfo_closeButton"
+        android:layout_toLeftOf="@+id/detailedUserInfo_closeButton"
+        android:layout_toStartOf="@+id/detailedUserInfo_closeButton"
+        android:text="LOGIN"/>
+
+    <Button
+        android:id="@+id/detailedUserInfo_closeButton"
+        style="@style/Widget.AppCompat.Button.ButtonBar.AlertDialog"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:text="CLOSE"/>
+
+
+</RelativeLayout>

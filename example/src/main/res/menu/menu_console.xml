@@ -15,20 +15,20 @@
   -->
 
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
-      xmlns:app="http://schemas.android.com/apk/res-auto"
-      xmlns:tools="http://schemas.android.com/tools"
-      tools:context="im.getsocial.testapp.ConsoleActivity">
+	  xmlns:app="http://schemas.android.com/apk/res-auto"
+	  xmlns:tools="http://schemas.android.com/tools"
+	  tools:context="im.getsocial.testapp.im.getsocial.demo.main.ConsoleActivity">
 
-    <item
-        android:id="@+id/action_shareConsole"
-        app:actionProviderClass=
-            "android.support.v7.widget.ShareActionProvider"
-        app:showAsAction="never"
-        android:title="@string/action_shareConsole"/>
-    
-    <item
-        android:id="@+id/action_cleanConsole"
-        app:showAsAction="never"
-        android:title="@string/action_clearConsole"/>
+	<item
+			android:id="@+id/action_shareConsole"
+			app:actionProviderClass=
+					"android.support.v7.widget.ShareActionProvider"
+			app:showAsAction="never"
+			android:title="@string/action_shareConsole"/>
+
+	<item
+			android:id="@+id/action_cleanConsole"
+			app:showAsAction="never"
+			android:title="@string/action_clearConsole"/>
 
 </menu>

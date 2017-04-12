@@ -13,103 +13,81 @@
     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
     See the License for the specific language governing permissions and
     limitations under the License.
-  -->
+-->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+		  xmlns:tools="http://schemas.android.com/tools"
+		  package="im.getsocial.demo">
 
-<manifest
-    package="im.getsocial.testapp"
-    xmlns:android="http://schemas.android.com/apk/res/android">
+	<!-- Permissions required by GetSocial SDK -->
+	<!-- INTERNET permission is required to communicate with GetSocial API -->
+	<uses-permission android:name="android.permission.INTERNET"/>
+	<!-- ACCESS_NETWORK_STATE permission is required to handle network connectivity changes -->
+	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+	<!-- end of GetSocial SDK permissions -->
 
-    <!--Permissions required by GetSocial SDK-->
+	<uses-permission android:name="android.permission.READ_PHONE_STATE"/>
+	<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+	<uses-permission android:name="android.permission.USE_CREDENTIALS"/>
+	<uses-permission android:name="android.permission.WAKE_LOCK"/>
+	<uses-permission android:name="com.google.android.c2dm.permission.RECEIVE"/>
+	<uses-permission android:name="android.permission.GET_ACCOUNTS"/>
+	<uses-permission android:name=".gcm.permission.C2D_MESSAGE"/>
 
-    <!--INTERNET permission is required to communicate with GetSocial API-->
-    <uses-permission android:name="android.permission.INTERNET"/>
-    <!--ACCESS_NETWORK_STATE permission is required to handle network connectivity changes-->
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
-    <!--end of GetSocial SDK permissions-->
+	<permission
+			android:name=".gcm.permission.C2D_MESSAGE"
+			android:protectionLevel="signature"/>
 
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+	<application
+			android:allowBackup="true"
+			android:icon="@drawable/ic_launcher"
+			android:label="@string/app_name"
+			android:supportsRtl="true"
+			android:theme="@style/AppTheme">
 
-    <uses-permission android:name="android.permission.USE_CREDENTIALS"/>
-    <uses-permission android:name="android.permission.WAKE_LOCK"/>
-    <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE"/>
-    <uses-permission android:name="android.permission.GET_ACCOUNTS"/>
 
-    <permission
-        android:name=".gcm.permission.C2D_MESSAGE"
-        android:protectionLevel="signature"/>
+		<meta-data
+				android:name="com.google.android.gms.games.APP_ID"
+				android:value="@string/google_services_app_id"/>
 
-    <uses-permission android:name=".gcm.permission.C2D_MESSAGE"/>
+		<!-- Main activity will be merged depending on build flavor -->
 
-    <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+		<activity
+				android:name="com.facebook.FacebookActivity"
+				android:configChanges="keyboard|keyboardHidden|screenLayout|screenSize|orientation"
+				android:label="@string/app_name"
+				android:theme="@android:style/Theme.Translucent.NoTitleBar"
+				tools:replace="android:theme"/>
 
-    <application
-        android:name="android.support.multidex.MultiDexApplication"
-        android:allowBackup="true"
-        android:icon="@drawable/ic_launcher"
-        android:label="@string/app_name"
-        android:theme="@style/Theme.GetSocial">
-        <!--android:name="android.support.multidex.MultiDexApplication"-->
-        <meta-data
-            android:name="com.google.android.gms.games.APP_ID"
-            android:value="@string/google_services_app_id"/>
 
-        <!-- Main activity will be merged depending on build flavor -->
+		<receiver android:name="im.getsocial.sdk.invites.InstallReferrerReceiver">
+			<intent-filter>
+				<action android:name="com.android.vending.INSTALL_REFERRER"/>
+			</intent-filter>
+		</receiver>
 
-        <activity
-            android:name=".ConsoleActivity"
-            android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize"
-            android:label="@string/title_activity_console"
-            android:theme="@style/Theme.AppCompat">
-        </activity>
-        <activity
-            android:name=".InviteActivity"
-            android:label="@string/app_name"
-            android:theme="@style/Theme.AppCompat.Light"/>
-        <activity
-            android:name="com.facebook.FacebookActivity"
-            android:configChanges="keyboard|keyboardHidden|screenLayout|screenSize|orientation"
-            android:label="@string/app_name"
-            android:theme="@android:style/Theme.Translucent.NoTitleBar"/>
+		<provider
+				android:name="im.getsocial.sdk.invites.ImageContentProvider"
+				android:authorities="${applicationId}.smartinvite.images.provider"
+				android:exported="true"/>
 
-        <receiver android:name="im.getsocial.sdk.core.gms.InstallReferrerReceiver">
-            <intent-filter>
-                <action android:name="com.android.vending.INSTALL_REFERRER"/>
-            </intent-filter>
-        </receiver>
-        <receiver
-            android:name="im.getsocial.sdk.core.GetSocialReceiver"
-            android:permission="com.google.android.c2dm.permission.SEND">
-            <intent-filter>
-                <action android:name="com.google.android.c2dm.intent.REGISTRATION"/>
-                <action android:name="com.google.android.c2dm.intent.RECEIVE"/>
+		<meta-data
+				android:name="com.facebook.sdk.ApplicationId"
+				android:value="@string/facebook_app_id"/>
 
-                <category android:name=".gcm"/>
-            </intent-filter>
-            <intent-filter>
-                <action android:name="im.getsocial.sdk.intent.RECEIVE"/>
+		<!-- <meta-data -->
+		<!-- android:name="com.google.android.gms.version" -->
+		<!-- android:value="@integer/google_play_services_version"/> -->
+		<meta-data
+				android:name="io.fabric.ApiKey"
+				android:value="d17264f29ed88bb09608a1525b67b047f760af31"/>
+		<meta-data
+				android:name="com.kakao.sdk.AppKey"
+				android:value="@string/kakao_app_key"/>
 
-                <data android:scheme="getSocialNotificationId"/>
-            </intent-filter>
-        </receiver>
+		<meta-data
+				android:name="im.getsocial.sdk.AppId"
+				android:value="@string/get_social_app_id" />
 
-        <meta-data
-            android:name="com.facebook.sdk.ApplicationId"
-            android:value="@string/facebook_app_id"/>
-        <meta-data
-            android:name="com.google.android.gms.version"
-            android:value="@integer/google_play_services_version"/>
-        <meta-data
-            android:name="io.fabric.ApiKey"
-            android:value="d17264f29ed88bb09608a1525b67b047f760af31"/>
-        <meta-data
-            android:name="com.kakao.sdk.AppKey"
-            android:value="@string/kakao_app_key" />
-
-        <provider
-            android:name="im.getsocial.sdk.core.provider.ImageContentProvider"
-            android:authorities="${applicationId}.smartinvite.images.provider"
-            android:exported="true"/>
-    </application>
+	</application>
 
 </manifest>

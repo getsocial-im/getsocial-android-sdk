@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+			android:orientation="vertical"
+			android:gravity="center_horizontal"
+			android:layout_width="match_parent"
+			android:layout_height="match_parent">
+	<LinearLayout android:orientation="vertical"
+				  android:gravity="center_horizontal"
+				  android:layout_width="match_parent"
+				  android:layout_height="wrap_content">
+
+		<EditText android:id="@+id/activity_context_text"
+				  android:hint="Text"
+				  android:layout_width="match_parent"
+				  android:layout_height="wrap_content"/>
+
+
+		<LinearLayout android:orientation="horizontal"
+					  android:layout_width="match_parent"
+					  android:layout_height="wrap_content">
+
+			<CheckBox android:id="@+id/checkbox_has_button"
+					  android:text="Has button"
+					  android:checked="false"
+					  android:layout_width="wrap_content"
+					  android:layout_height="wrap_content"/>
+
+			<LinearLayout android:id="@+id/button_container"
+						  android:orientation="vertical"
+						  android:layout_margin="10dp"
+						  android:visibility="gone"
+						  android:layout_width="match_parent"
+						  android:layout_height="wrap_content">
+				<EditText android:id="@+id/input_button_title"
+						  android:hint="Button Title"
+						  android:layout_width="match_parent"
+						  android:layout_height="wrap_content"/>
+				<EditText android:id="@+id/input_button_action"
+						  android:hint="Button Action"
+						  android:layout_width="match_parent"
+						  android:layout_height="wrap_content"/>
+			</LinearLayout>
+
+		</LinearLayout>
+
+		<LinearLayout android:orientation="horizontal"
+					  android:layout_width="match_parent"
+					  android:layout_height="wrap_content">
+
+			<CheckBox android:id="@+id/checkbox_has_image"
+					  android:text="Has image"
+					  android:checked="false"
+					  android:layout_width="wrap_content"
+					  android:layout_height="wrap_content"/>
+
+			<ImageView android:id="@+id/image_view_post_image"
+					   android:visibility="gone"
+					   android:layout_margin="10dp"
+					   android:layout_width="128dp"
+					   android:layout_height="72dp"
+					   android:src="@drawable/activity_image"/>
+
+		</LinearLayout>
+
+		<Spinner android:id="@+id/selector_feed"
+				 android:layout_width="match_parent"
+				 android:layout_height="wrap_content"/>
+
+		<Button android:id="@+id/button_post"
+				android:text="Post"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"/>
+
+	</LinearLayout>
+</ScrollView>
