@@ -2,6 +2,12 @@
 
 ## Version History
 
+### v6.0.1
+
++ Downgraded targetSdk version to avoid AndroidManifest merge conflicts.
+
+---
+
 ### v6.0.0
 
 We have released version 6.0 of our SDK, codename Sangria.  This is a major update that brings a lot of improvements and new features.
