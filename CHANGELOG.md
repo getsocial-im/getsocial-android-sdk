@@ -2,6 +2,23 @@
 
 ## Version History
 
+### v6.0.2
+
+**New:**
+
++ Added `setViewStateListener` method to all GetSocial Views. Now you can subscribe to GetSocial View lifecycle events.
+
+**Updated:**
+
++ Now `withButtonActionListener` becomes `setButtonActionListener`. 
+
+**Fixed:**
+
++ Fix issue with empty Smart Invite text if it was updated from Dashboard.
++ Fix Activity Feed view with no input displayed if no activities was posted.
+
+---
+
 ### v6.0.1
 
 + Downgraded targetSdk version to avoid AndroidManifest merge conflicts.

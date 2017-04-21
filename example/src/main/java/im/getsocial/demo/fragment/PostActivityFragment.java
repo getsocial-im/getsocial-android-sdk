@@ -155,7 +155,7 @@ public class PostActivityFragment extends BaseFragment implements Callback<Activ
 		boolean postToGlobalFeed = _viewContainer._feed.getSelectedItemPosition() == 0;
 		ActivityFeedViewBuilder feedView = postToGlobalFeed ? GetSocialUi.createGlobalActivityFeedView() : GetSocialUi.createActivityFeedView(ActivitiesFragment.CUSTOM_FEED_NAME);
 
-		feedView.withButtonActionListener(new ActionButtonListener() {
+		feedView.setButtonActionListener(new ActionButtonListener() {
 			@Override
 			public void onButtonClicked(String action, ActivityPost post) {
 				Toast.makeText(getContext(), "Activity Feed button clicked, action: " + action, Toast.LENGTH_SHORT).show();

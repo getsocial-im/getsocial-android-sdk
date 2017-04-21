@@ -20,6 +20,7 @@ import android.widget.Toast;
 import im.getsocial.demo.adapter.MenuItem;
 import im.getsocial.sdk.activities.ActivityPost;
 import im.getsocial.sdk.ui.GetSocialUi;
+import im.getsocial.sdk.ui.ViewStateListener;
 import im.getsocial.sdk.ui.activities.ActionButtonListener;
 
 import java.util.Arrays;
@@ -59,10 +60,21 @@ public class ActivitiesFragment extends BaseListFragment {
 		@Override
 		public void execute() {
 			GetSocialUi.createGlobalActivityFeedView()
-					.withButtonActionListener(new ActionButtonListener() {
+					.setButtonActionListener(new ActionButtonListener() {
 						@Override
 						public void onButtonClicked(String action, ActivityPost post) {
 							Toast.makeText(getContext(), "Activity Feed button clicked, action: " + action, Toast.LENGTH_SHORT).show();
+						}
+					})
+					.setViewStateListener(new ViewStateListener() {
+						@Override
+						public void onOpen() {
+							_log.logInfoAndToast("Global feed was opened");
+						}
+
+						@Override
+						public void onClose() {
+							_log.logInfoAndToast("Global feed was closed");
 						}
 					})
 					.show();
@@ -80,7 +92,7 @@ public class ActivitiesFragment extends BaseListFragment {
 		@Override
 		public void execute() {
 			GetSocialUi.createActivityFeedView(_feed)
-					.withButtonActionListener(new ActionButtonListener() {
+					.setButtonActionListener(new ActionButtonListener() {
 						@Override
 						public void onButtonClicked(String action, ActivityPost post) {
 							Toast.makeText(getContext(), "Activity Feed button clicked, action: " + action, Toast.LENGTH_SHORT).show();
