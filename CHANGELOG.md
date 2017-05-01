@@ -1,6 +1,18 @@
-# GetSocial Android SDK
+# GetSocial Android SDK Changelog
 
 ## Version History
+
+### v6.0.3
+
+**Improved:**:
++ Removed `Picasso` library. Now we have ~750 methods less.
+ 
+**Fixed:**:
++ Fixed UI issue with incorrect loading background.
++ Now `setWindowTitle()` works for all GetSocial views.
++ Fixed issue when SDK do not initialize after changing GetSocial App Id.
+
+---
 
 ### v6.0.2
 
