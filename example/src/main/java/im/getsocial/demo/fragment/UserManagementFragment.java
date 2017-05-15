@@ -20,10 +20,9 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.view.LayoutInflater;
-import android.view.View;
 import android.widget.EditText;
 import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 import com.facebook.AccessToken;
 import com.facebook.AccessTokenTracker;
@@ -31,7 +30,6 @@ import com.facebook.GraphRequest;
 import com.facebook.GraphResponse;
 import com.facebook.HttpMethod;
 import com.facebook.login.LoginManager;
-import im.getsocial.demo.R;
 import im.getsocial.demo.adapter.EnabledCheck;
 import im.getsocial.demo.adapter.MenuItem;
 import im.getsocial.demo.utils.PixelUtils;
@@ -39,19 +37,14 @@ import im.getsocial.demo.utils.UserIdentityUtils;
 import im.getsocial.sdk.CompletionCallback;
 import im.getsocial.sdk.GetSocial;
 import im.getsocial.sdk.GetSocialException;
-import im.getsocial.sdk.usermanagement.AddAuthIdentityCallback;
 import im.getsocial.sdk.usermanagement.AuthIdentity;
 import im.getsocial.sdk.usermanagement.AuthIdentityProviderIds;
-import im.getsocial.sdk.usermanagement.ConflictUser;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 public class UserManagementFragment extends BaseListFragment {
-
-	private static final List<String> FACEBOOK_PERMISSIONS = Arrays.asList("email", "user_friends");
-	private static final String CUSTOM_PROVIDER = "custom";
 
 	public UserManagementFragment() {
 	}
@@ -87,7 +80,18 @@ public class UserManagementFragment extends BaseListFragment {
 				.withAction(new MenuItem.Action() {
 					@Override
 					public void execute() {
-						addFacebookUserIdentity();
+						addFacebookUserIdentity(new CompletionCallback() {
+
+							@Override
+							public void onSuccess() {
+								invalidateUi();
+							}
+
+							@Override
+							public void onFailure(GetSocialException exception) {
+								_log.logErrorAndToast("Authorization failed with exception: " + exception.getMessage());
+							}
+						});
 					}
 				})
 				.withEnabledCheck(new EnabledCheck() {
@@ -102,7 +106,17 @@ public class UserManagementFragment extends BaseListFragment {
 				.withAction(new MenuItem.Action() {
 					@Override
 					public void execute() {
-						addCustomUserIdentity();
+						addCustomUserIdentity(new CompletionCallback() {
+							@Override
+							public void onSuccess() {
+								invalidateUi();
+							}
+
+							@Override
+							public void onFailure(GetSocialException exception) {
+								_log.logErrorAndToast("Authorization failed with exception: " + exception.getMessage());
+							}
+						});
 					}
 				})
 				.withEnabledCheck(new EnabledCheck() {
@@ -143,7 +157,101 @@ public class UserManagementFragment extends BaseListFragment {
 					}
 				})
 				.build());
+
+		listData.add(new MenuItem.Builder("Add property")
+				.withAction(new MenuItem.Action() {
+					@Override
+					public void execute() {
+						setPublicProperty();
+					}
+				}).build()
+		);
+
+		listData.add(new MenuItem.Builder("Get property")
+				.withAction(new MenuItem.Action() {
+					@Override
+					public void execute() {
+						getPublicProperty();
+					}
+				}).build()
+		);
 		return listData;
+	}
+
+	private void getPublicProperty() {
+		final EditText keyInput = new EditText(getContext());
+		final int _8dp = PixelUtils.dp2px(getContext(), 8);
+		FrameLayout frameLayout = new FrameLayout(getContext());
+		frameLayout.setPadding(_8dp, _8dp, _8dp, _8dp);
+		frameLayout.addView(keyInput);
+
+		new AlertDialog.Builder(getContext())
+				.setView(frameLayout)
+				.setTitle("User Property")
+				.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(final DialogInterface dialogInterface, int which) {
+						Toast.makeText(getContext(), keyInput.getText().toString() + " = " + GetSocial.User.getPublicProperty(keyInput.getText().toString()), Toast.LENGTH_SHORT).show();
+					}
+				})
+				.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialogInterface, int which) {
+						dialogInterface.cancel();
+					}
+				})
+				.create()
+				.show();
+	}
+
+	private void setPublicProperty() {
+		final EditText keyInput = new EditText(getContext());
+		final EditText valInput = new EditText(getContext());
+
+		keyInput.setHint("Key");
+		valInput.setHint("Value");
+
+		final int _8dp = PixelUtils.dp2px(getContext(), 8);
+		LinearLayout frameLayout = new LinearLayout(getContext());
+		frameLayout.setOrientation(LinearLayout.VERTICAL);
+		frameLayout.setPadding(_8dp, _8dp, _8dp, _8dp);
+
+		frameLayout.addView(keyInput);
+		frameLayout.addView(valInput);
+
+		new AlertDialog.Builder(getContext())
+				.setView(frameLayout)
+				.setTitle("User Property")
+				.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(final DialogInterface dialogInterface, int which) {
+						GetSocial.User.setPublicProperty(
+								keyInput.getText().toString(),
+								valInput.getText().toString(),
+								new SafeCompletionCallback() {
+									@Override
+									public void onSafeSuccess() {
+										dialogInterface.dismiss();
+										_activityListener.invalidateUi();
+										Toast.makeText(getContext(), "Public property has been changed successfully!", Toast.LENGTH_SHORT).show();
+									}
+
+									@Override
+									public void onSafeFailure(GetSocialException exception) {
+										Toast.makeText(getContext(), "Error changing public property: \n" + exception.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
+									}
+								}
+						);
+					}
+				})
+				.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialogInterface, int which) {
+						dialogInterface.cancel();
+					}
+				})
+				.create()
+				.show();
 	}
 
 
@@ -208,153 +316,6 @@ public class UserManagementFragment extends BaseListFragment {
 				.show();
 	}
 
-	private void addFacebookUserIdentity() {
-		final AddUserIdentityOutcomeCallback addUserIdentityOutcomeCallback = new AddUserIdentityOutcomeCallback() {
-			@Override
-			public void onSuccess() {
-				_log.logInfoAndToast("Added Facebook identity successfully");
-				invalidateUi();
-			}
-
-			@Override
-			public void onFailure(Throwable throwable) {
-				_log.logInfoAndToast("Adding Facebook identity failed : " + throwable);
-				disconnectFromFacebook();
-			}
-
-			@Override
-			public void onConflictResolvedWithCurrent() {
-				_log.logInfoAndToast("Conflict adding Facebook user identity resolved with current");
-				disconnectFromFacebook();
-			}
-
-			@Override
-			public void onConflictResolvedWithRemote() {
-				_log.logInfoAndToast("Conflict adding Facebook user identity resolved with remote");
-				invalidateUi();
-			}
-		};
-
-		final AccessTokenTracker accessTokenTracker = new AccessTokenTracker() {
-			@Override
-			protected void onCurrentAccessTokenChanged(AccessToken oldAccessToken, @Nullable AccessToken newAccessToken) {
-
-				if (newAccessToken == null) {
-					addUserIdentityOutcomeCallback.onFailure(new IllegalStateException("Facebook SDK did not provide an AccessToken"));
-					return;
-				}
-
-				stopTracking();
-
-				final String tokenString = newAccessToken.getToken();
-
-				addIdentity(AuthIdentity.createFacebookIdentity(tokenString), addUserIdentityOutcomeCallback);
-			}
-		};
-		accessTokenTracker.startTracking();
-		LoginManager.getInstance().logInWithReadPermissions(getActivity(), FACEBOOK_PERMISSIONS);
-	}
-
-	private void addCustomUserIdentity() {
-
-		final String providerId = CUSTOM_PROVIDER;
-
-		LayoutInflater layoutInflater = LayoutInflater.from(getContext());
-		final View view = layoutInflater.inflate(R.layout.dialog_custom_identity, null, false);
-
-		final EditText userdIdEditText = (EditText) view.findViewById(R.id.user_id);
-		final EditText tokenEditText = (EditText) view.findViewById(R.id.user_token);
-
-		final AddUserIdentityOutcomeCallback addUserIdentityOutcomeCallback = new AddUserIdentityOutcomeCallback() {
-			@Override
-			public void onSuccess() {
-				_log.logInfoAndToast("Added custom user identity successfully");
-				invalidateUi();
-			}
-
-			@Override
-			public void onFailure(Throwable throwable) {
-				_log.logInfoAndToast("Adding custom user identity failed : " + throwable);
-			}
-
-			@Override
-			public void onConflictResolvedWithCurrent() {
-				_log.logInfoAndToast("Conflict adding custom user identity resolved with current");
-			}
-
-			@Override
-			public void onConflictResolvedWithRemote() {
-				_log.logInfoAndToast("Conflict adding custom user identity resolved with remote");
-				invalidateUi();
-			}
-		};
-
-		AlertDialog.Builder builder = new AlertDialog.Builder(getContext())
-				.setView(view)
-				.setPositiveButton("Add", new DialogInterface.OnClickListener() {
-							@Override
-							public void onClick(DialogInterface dialog, int which) {
-								String userId = userdIdEditText.getText().toString().trim();
-								String token = tokenEditText.getText().toString().trim();
-								addIdentity(AuthIdentity.createCustomIdentity(providerId, userId, token), addUserIdentityOutcomeCallback);
-							}
-						}
-				)
-				.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-							@Override
-							public void onClick(DialogInterface dialog, int which) {
-
-							}
-						}
-				);
-		builder.show();
-	}
-
-	private void addIdentity(final AuthIdentity authIdentity, final AddUserIdentityOutcomeCallback addUserIdentityOutcomeCallback) {
-		GetSocial.User.addAuthIdentity(authIdentity,
-				new AddAuthIdentityCallback() {
-					@Override
-					public void onComplete() {
-						addUserIdentityOutcomeCallback.onSuccess();
-					}
-
-					@Override
-					public void onFailure(GetSocialException exception) {
-						addUserIdentityOutcomeCallback.onFailure(exception);
-					}
-
-					@Override
-					public void onConflict(ConflictUser conflictUser) {
-						resolveConflictIdentities(conflictUser, addUserIdentityOutcomeCallback, authIdentity);
-					}
-				}
-		);
-	}
-
-	private void resolveConflictIdentities(ConflictUser conflictUser, final AddUserIdentityOutcomeCallback addUserIdentityOutcomeCallback, final AuthIdentity authIdentity) {
-		showDialogToSolveIdentityConflict(conflictUser, new ConflictResolution() {
-			@Override
-			public void resolveWithCurrentUser() {
-				addUserIdentityOutcomeCallback.onConflictResolvedWithCurrent();
-			}
-
-			@Override
-			public void resolveWithConflictUser() {
-				GetSocial.User.switchUser(authIdentity, new SafeCompletionCallback() {
-					@Override
-					public void onSafeSuccess() {
-						addUserIdentityOutcomeCallback.onConflictResolvedWithRemote();
-					}
-
-					@Override
-					public void onSafeFailure(GetSocialException exception) {
-						addUserIdentityOutcomeCallback.onFailure(exception);
-					}
-				});
-			}
-		});
-	}
-
 	private void removeFacebookUserIdentity() {
 		removeUserIdentity(AuthIdentityProviderIds.FACEBOOK);
 
@@ -368,26 +329,6 @@ public class UserManagementFragment extends BaseListFragment {
 	//endregion
 
 	//region helpers
-
-	private void showDialogToSolveIdentityConflict(final ConflictUser conflictUser, final ConflictResolution conflictResolution) {
-		new AlertDialog.Builder(getContext())
-				.setTitle("Conflict")
-				.setMessage(String.format("The new identity is already linked to another user(%s). Which one do you want to continue using?", conflictUser.getDisplayName()))
-				.setPositiveButton("Remote", new DialogInterface.OnClickListener() {
-							public void onClick(DialogInterface dialog, int whichButton) {
-								conflictResolution.resolveWithConflictUser();
-							}
-						}
-				)
-				.setNegativeButton("Current", new DialogInterface.OnClickListener() {
-							public void onClick(DialogInterface dialog, int whichButton) {
-								conflictResolution.resolveWithCurrentUser();
-							}
-						}
-				)
-				.show();
-	}
-
 	private void removeUserIdentity(final String providerId) {
 		GetSocial.User.removeAuthIdentity(
 				providerId,
@@ -407,20 +348,6 @@ public class UserManagementFragment extends BaseListFragment {
 		);
 	}
 
-	protected void disconnectFromFacebook() {
-
-		if (AccessToken.getCurrentAccessToken() == null) {
-			return; // already logged out
-		}
-
-		new GraphRequest(AccessToken.getCurrentAccessToken(), "/me/permissions/", null, HttpMethod.DELETE, new GraphRequest.Callback() {
-			@Override
-			public void onCompleted(GraphResponse graphResponse) {
-				LoginManager.getInstance().logOut();
-			}
-		}).executeAsync();
-	}
-
 	@Override
 	public String getTitle() {
 		return "User Management";
@@ -431,43 +358,6 @@ public class UserManagementFragment extends BaseListFragment {
 		return "usermanagement";
 	}
 
-	private interface ConflictResolution {
-		void resolveWithCurrentUser();
 
-		void resolveWithConflictUser();
-	}
-
-	private interface AddUserIdentityOutcomeCallback {
-		void onSuccess();
-
-		void onFailure(Throwable throwable);
-
-		void onConflictResolvedWithCurrent();
-
-		void onConflictResolvedWithRemote();
-	}
-
-
-	private abstract class SafeCompletionCallback implements CompletionCallback {
-
-		@Override
-		public void onSuccess() {
-			if (getContext() != null) {
-				onSafeSuccess();
-			}
-
-		}
-
-		protected abstract void onSafeSuccess();
-
-		@Override
-		public void onFailure(GetSocialException exception) {
-			if (getContext() != null) {
-				onSafeFailure(exception);
-			}
-		}
-
-		protected abstract void onSafeFailure(GetSocialException exception);
-	}
 	//endregion
 }

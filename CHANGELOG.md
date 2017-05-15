@@ -2,6 +2,28 @@
 
 ## Version History
 
+### v6.1.0
+
+**Added**:
++ Added `User Properties` functionality. Now you can store some custom properties for each user. More info in [documentation](http://docs.getsocial.im/guides/user-management/android/get-set-user-properties/).
++ Added fade animation when image is showing.
++ Added `UiActionListener` interface, you can set it with `setUiActionListener()` method on any of `ViewBuilder` chidren. All possible actions you can find in `UiAction` enum. More info in [documentation](http://docs.getsocial.im/guides/ui-framework/android/#ui-user-actions-handling).
+
+
+
+**Improved:**:
++ Removed dependency on `Gson` library. Now SDK adds ~900 methods less.
+
+**Fixed**:
++ Ukrainian and Russian localization for plural nouns.
++ Analytics crash on concurent list modification.
++ Action buttons background issue in landscape mode.
++ GetSocial Views title was trimmed if Activity is in fullscreen mode.
++ Invite text missing in Facebook Messenger.
++ No empty view in case there are no activities yet.
+
+---
+
 ### v6.0.3
 
 **Improved:**:

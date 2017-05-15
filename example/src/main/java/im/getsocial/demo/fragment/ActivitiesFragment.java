@@ -16,10 +16,17 @@
 
 package im.getsocial.demo.fragment;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.widget.Toast;
 import im.getsocial.demo.adapter.MenuItem;
+import im.getsocial.sdk.CompletionCallback;
+import im.getsocial.sdk.GetSocial;
+import im.getsocial.sdk.GetSocialException;
 import im.getsocial.sdk.activities.ActivityPost;
+import im.getsocial.sdk.ui.UiActionListener;
 import im.getsocial.sdk.ui.GetSocialUi;
+import im.getsocial.sdk.ui.UiAction;
 import im.getsocial.sdk.ui.ViewStateListener;
 import im.getsocial.sdk.ui.activities.ActionButtonListener;
 
@@ -29,6 +36,7 @@ import java.util.List;
 public class ActivitiesFragment extends BaseListFragment {
 
 	public static final String CUSTOM_FEED_NAME = "DemoFeed";
+	private static final List<UiAction> FORBIDDEN_FOR_ANONYMOUS = Arrays.asList(UiAction.LIKE_ACTIVITY, UiAction.LIKE_COMMENT, UiAction.POST_ACTIVITY, UiAction.POST_COMMENT);
 
 	@Override
 	protected List<MenuItem> createListData() {
@@ -77,8 +85,58 @@ public class ActivitiesFragment extends BaseListFragment {
 							_log.logInfoAndToast("Global feed was closed");
 						}
 					})
+					.setUiActionListener(new UiActionListener() {
+						@Override
+						public void onUiAction(UiAction action, UiAction.Pending pendingAction) {
+							final String actionDescription = action.name().replace("_", " ").toLowerCase();
+							_log.logInfoAndToast("User is going to " + actionDescription);
+							if (GetSocial.User.isAnonymous() && FORBIDDEN_FOR_ANONYMOUS.contains(action)) {
+								showAuthorizeUserDialogForPendingAction(actionDescription, pendingAction);
+							} else {
+								pendingAction.proceed();
+							}
+						}
+					})
 					.show();
 		}
+	}
+
+	private void showAuthorizeUserDialogForPendingAction(final String actionDescription, final UiAction.Pending pendingAction) {
+		final CompletionCallback completionCallback = new CompletionCallback() {
+			@Override
+			public void onSuccess() {
+				pendingAction.proceed();
+			}
+
+			@Override
+			public void onFailure(GetSocialException exception) {
+				_log.logErrorAndToast("You can not " + actionDescription + " because of exception during authorization: " + exception.getMessage());
+			}
+		};
+		new AlertDialog.Builder(getContext()).setTitle("Authorize to " + actionDescription)
+				.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						_log.logInfoAndToast("Can not " + actionDescription + " without authorization.");
+					}
+				})
+				.setItems(new CharSequence[]{"Facebook", "Custom"}, new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						switch (which) {
+							case 0:
+								addFacebookUserIdentity(completionCallback);
+								break;
+							case 1:
+								addCustomUserIdentity(completionCallback);
+								break;
+							default:
+								break;
+						}
+						dialog.dismiss();
+					}
+				})
+				.show();
 	}
 
 	private class OpenCustomFeedAction implements MenuItem.Action {
