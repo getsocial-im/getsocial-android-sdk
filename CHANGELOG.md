@@ -2,6 +2,27 @@
 
 ## Version History
 
+### v6.2.0
+
+**Added**:
++ Added `ActivityDetailsView`, now you can open activity comments from code.
++ Added `whenInitialized` method to be able to execute any action right after SDK is initialized.
++ Added App Links support. More info in [documentation](guides/smart-invites/android/deep-linking/#app-links-support).
++ Added `setAvatarClickListener` method to `ActivityFeedViewBuilder` and `ActivityDetailsViewBuilder`. You can use this method to get notified if a user clicked on a user's avatar.
++ Added `withImage` method to `InviteContent.Builder` to set invite image using binaries.
++ Facebook and Kakao plugins share image as well in Smart Invites.
+
+
+
+**Fixed**:
++ Memory issues when setting too large image as window background.
++ Full screen activity issue with Unity.
++ Custom translated text issue in Smart Invites.
+
+
+
+---
+
 ### v6.1.0
 
 **Added**:

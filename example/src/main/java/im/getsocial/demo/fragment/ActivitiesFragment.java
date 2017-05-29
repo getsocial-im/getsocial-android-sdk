@@ -20,15 +20,19 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.widget.Toast;
 import im.getsocial.demo.adapter.MenuItem;
+import im.getsocial.sdk.Callback;
 import im.getsocial.sdk.CompletionCallback;
 import im.getsocial.sdk.GetSocial;
 import im.getsocial.sdk.GetSocialException;
+import im.getsocial.sdk.activities.ActivitiesQuery;
 import im.getsocial.sdk.activities.ActivityPost;
-import im.getsocial.sdk.ui.UiActionListener;
+import im.getsocial.sdk.ui.AvatarClickListener;
 import im.getsocial.sdk.ui.GetSocialUi;
 import im.getsocial.sdk.ui.UiAction;
+import im.getsocial.sdk.ui.UiActionListener;
 import im.getsocial.sdk.ui.ViewStateListener;
 import im.getsocial.sdk.ui.activities.ActionButtonListener;
+import im.getsocial.sdk.usermanagement.PublicUser;
 
 import java.util.Arrays;
 import java.util.List;
@@ -49,6 +53,12 @@ public class ActivitiesFragment extends BaseListFragment {
 						.build(),
 				new MenuItem.Builder("Post Activity")
 						.withAction(new OpenPostFeedFormAction())
+						.build(),
+				new MenuItem.Builder("Open Activity Details From Global Feed")
+						.withAction(new OpenActivityDetailsAction(true))
+						.build(),
+				new MenuItem.Builder("Open Activity Details From Global Feed(without feed view)")
+						.withAction(new OpenActivityDetailsAction(false))
 						.build()
 		);
 	}
@@ -97,8 +107,92 @@ public class ActivitiesFragment extends BaseListFragment {
 							}
 						}
 					})
+					.setAvatarClickListener(new AvatarClickListener() {
+						@Override
+						public void onAvatarClicked(PublicUser user) {
+							if (user.getId().equals(GetSocial.User.getId())) {
+								Toast.makeText(getContext(), "Tapped on yourself", Toast.LENGTH_SHORT).show();
+							} else {
+								addOrRemoveFriend(user);
+							}
+						}
+					})
 					.show();
 		}
+	}
+
+	private void addOrRemoveFriend(final PublicUser user) {
+		GetSocial.User.isFriend(user.getId(), new Callback<Boolean>() {
+			@Override
+			public void onSuccess(Boolean isFriend) {
+				if (isFriend) {
+					showRemoveFriendDialog(user);
+				} else {
+					showAddFriendDialog(user);
+				}
+			}
+
+			@Override
+			public void onFailure(GetSocialException exception) {
+				_log.logErrorAndToast("Failed to check if friend: " + exception.getMessage());
+			}
+		});
+	}
+
+	private void showRemoveFriendDialog(final PublicUser user) {
+		new AlertDialog.Builder(getContext()).setTitle("Remove friend")
+				.setMessage("Do you want to remove user " + user.getDisplayName() + " from friends list?")
+				.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+
+					}
+				})
+				.setPositiveButton("Remove", new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						GetSocial.User.removeFriend(user.getId(), new Callback<Integer>() {
+							@Override
+							public void onSuccess(Integer integer) {
+								Toast.makeText(getContext(), user.getDisplayName() + " is not your friend anymore!", Toast.LENGTH_SHORT).show();
+							}
+
+							@Override
+							public void onFailure(GetSocialException exception) {
+								_log.logErrorAndToast("Failed to remove friend: " + exception.getMessage());
+							}
+						});
+					}
+				})
+				.show();
+	}
+
+	private void showAddFriendDialog(final PublicUser user) {
+		new AlertDialog.Builder(getContext()).setTitle("Add friend")
+				.setMessage("Do you want to add user " + user.getDisplayName() + " to friends list?")
+				.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+
+					}
+				})
+				.setPositiveButton("Add", new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						GetSocial.User.addFriend(user.getId(), new Callback<Integer>() {
+							@Override
+							public void onSuccess(Integer integer) {
+								Toast.makeText(getContext(), user.getDisplayName() + " is now your friend!", Toast.LENGTH_SHORT).show();
+							}
+
+							@Override
+							public void onFailure(GetSocialException exception) {
+								_log.logErrorAndToast("Failed to add friend: " + exception.getMessage());
+							}
+						});
+					}
+				})
+				.show();
 	}
 
 	private void showAuthorizeUserDialogForPendingAction(final String actionDescription, final UiAction.Pending pendingAction) {
@@ -165,6 +259,73 @@ public class ActivitiesFragment extends BaseListFragment {
 		@Override
 		public void execute() {
 			addContentFragment(new PostActivityFragment());
+		}
+	}
+
+	private class OpenActivityDetailsAction implements MenuItem.Action {
+
+		private final boolean _showFeed;
+
+		public OpenActivityDetailsAction(boolean showFeed) {
+			_showFeed = showFeed;
+		}
+
+		@Override
+		public void execute() {
+			GetSocial.getActivities(ActivitiesQuery.postsForGlobalFeed().withLimit(5), new Callback<List<ActivityPost>>() {
+				@Override
+				public void onSuccess(final List<ActivityPost> activityPosts) {
+					if (activityPosts.isEmpty()) {
+						Toast.makeText(getContext(), "No activities in global feed", Toast.LENGTH_SHORT).show();
+						return;
+					}
+					final String[] activityContents = new String[activityPosts.size()];
+					for (int i = 0; i < activityContents.length; i++) {
+						activityContents[i] = activityPosts.get(i).getText();
+					}
+					new AlertDialog.Builder(getContext())
+							.setItems(activityContents, new DialogInterface.OnClickListener() {
+								@Override
+								public void onClick(DialogInterface dialog, int which) {
+									dialog.dismiss();
+									String activityId = activityPosts.get(which).getId();
+									GetSocialUi.createActivityDetailsView(activityId)
+											.setViewStateListener(new ViewStateListener() {
+												@Override
+												public void onOpen() {
+													Toast.makeText(getContext(), "Activity details view opened", Toast.LENGTH_SHORT).show();
+												}
+
+												@Override
+												public void onClose() {
+													Toast.makeText(getContext(), "Activity details view closed", Toast.LENGTH_SHORT).show();
+												}
+											})
+											.setButtonActionListener(new ActionButtonListener() {
+												@Override
+												public void onButtonClicked(String action, ActivityPost post) {
+													Toast.makeText(getContext(), "Activity action button pressed: " + action, Toast.LENGTH_SHORT).show();
+												}
+											})
+											.setWindowTitle("Activity Details")
+											.setUiActionListener(new UiActionListener() {
+												@Override
+												public void onUiAction(UiAction action, UiAction.Pending pendingAction) {
+													Toast.makeText(getContext(), "Action done: " + action.name(), Toast.LENGTH_SHORT).show();
+													pendingAction.proceed();
+												}
+											})
+											.setShowActivityFeedView(_showFeed)
+											.show();
+								}
+							}).show();
+				}
+
+				@Override
+				public void onFailure(GetSocialException exception) {
+					_log.logErrorAndToast("Failed to load activities, error: " + exception.getMessage());
+				}
+			});
 		}
 	}
 }

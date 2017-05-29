@@ -42,7 +42,6 @@ import im.getsocial.sdk.usermanagement.AuthIdentity;
 import im.getsocial.sdk.usermanagement.ConflictUser;
 
 import javax.annotation.Nullable;
-
 import java.util.Arrays;
 import java.util.List;
 
@@ -102,6 +101,7 @@ public abstract class BaseFragment extends Fragment implements HasTitle, HasFrag
 			public void onSuccess() {
 				completionCallback.onSuccess();
 				setFacebookDisplayName();
+				setFacebookAvatar();
 			}
 
 			@Override
@@ -158,6 +158,7 @@ public abstract class BaseFragment extends Fragment implements HasTitle, HasFrag
 
 	private void setFacebookDisplayName() {
 		Profile fbProfile = Profile.getCurrentProfile();
+
 		GetSocial.User.setDisplayName(fbProfile.getFirstName() + " " + fbProfile.getLastName(), new CompletionCallback() {
 			@Override
 			public void onSuccess() {
@@ -167,6 +168,23 @@ public abstract class BaseFragment extends Fragment implements HasTitle, HasFrag
 			@Override
 			public void onFailure(GetSocialException exception) {
 				//failed to set facebook name
+			}
+		});
+	}
+
+	private void setFacebookAvatar() {
+		Profile fbProfile = Profile.getCurrentProfile();
+		String profileImageUri = fbProfile.getProfilePictureUri(250, 250).toString();
+
+		GetSocial.User.setAvatarUrl(profileImageUri, new CompletionCallback() {
+			@Override
+			public void onSuccess() {
+				_activityListener.invalidateUi();
+			}
+
+			@Override
+			public void onFailure(GetSocialException e) {
+				// failed to set avatar url
 			}
 		});
 	}

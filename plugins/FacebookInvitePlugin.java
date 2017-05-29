@@ -57,9 +57,13 @@ public class FacebookInvitePlugin extends InviteChannelPlugin {
 	@Override
 	public void presentChannelInterface(InviteChannel inviteChannel, InvitePackage invitePackage, final InviteCallback callback) {
 		if (isConnected()) {
-			AppInviteContent content = new AppInviteContent.Builder()
-					.setApplinkUrl(invitePackage.getReferralUrl())
-					.build();
+			AppInviteContent.Builder contentBuilder =new AppInviteContent.Builder();
+
+			contentBuilder.setApplinkUrl(invitePackage.getReferralUrl());
+			if (invitePackage.getImageUrl() != null && invitePackage.getImage() != null) {
+				contentBuilder.setPreviewImageUrl(invitePackage.getImageUrl());
+			}
+			AppInviteContent sharedContent = contentBuilder.build();
 
 			AppInviteDialog appInviteDialog = new AppInviteDialog(_activity);
 			appInviteDialog.registerCallback(_callbackManager, new FacebookCallback<AppInviteDialog.Result>() {
@@ -79,7 +83,7 @@ public class FacebookInvitePlugin extends InviteChannelPlugin {
 						}
 					}
 			);
-			appInviteDialog.show(content);
+			appInviteDialog.show(sharedContent);
 		} else {
 			onError("Can't reach Facebook. No internet connection.", callback);
 		}

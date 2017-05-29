@@ -32,6 +32,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -49,14 +50,16 @@ import im.getsocial.demo.plugin.KakaoInvitePlugin;
 import im.getsocial.demo.ui.UserInfoView;
 import im.getsocial.demo.utils.CompatibilityUtils;
 import im.getsocial.demo.utils.Console;
+import im.getsocial.demo.utils.SimpleLogger;
 import im.getsocial.sdk.Callback;
 import im.getsocial.sdk.GetSocial;
 import im.getsocial.sdk.GetSocialException;
-import im.getsocial.sdk.core.log.GsLog;
-import im.getsocial.sdk.core.log.Log;
+import im.getsocial.sdk.invites.FetchReferralDataCallback;
 import im.getsocial.sdk.invites.InviteChannelIds;
+import im.getsocial.sdk.invites.ReferralData;
 import im.getsocial.sdk.pushnotifications.NotificationAction;
 import im.getsocial.sdk.pushnotifications.NotificationActionListener;
+import im.getsocial.sdk.pushnotifications.OpenProfileAction;
 import im.getsocial.sdk.ui.GetSocialUi;
 import im.getsocial.sdk.usermanagement.OnUserChangedListener;
 
@@ -66,8 +69,8 @@ import java.util.Map;
 
 public class MainActivity extends AppCompatActivity implements BaseFragment.ActivityListener, OnUserChangedListener {
 
-	private static Log _log = GsLog.create(MainActivity.class); 
-	
+	protected SimpleLogger _log;
+
 	private static final String KEY_APP_SESSION = "GetSocial_AppSession_Key";
 	private static final String KEY_IS_INITIALIZING = "GetSocial_IsInitializing_Key";
 
@@ -79,14 +82,16 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Acti
 	@Override
 	protected void onCreate(@Nullable Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		_log = new SimpleLogger(this, getClass().getSimpleName());
 		setContentView(R.layout.activity_main);
 		_viewContainer = new ViewContainer(this);
 
-		initFacebook();
-		setupGetSocial();
 		if (savedInstanceState == null) {
 			addRootFragment();
 		}
+
+		initFacebook();
+		setupGetSocial();
 	}
 
 	protected void addRootFragment() {
@@ -182,12 +187,44 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Acti
 		GetSocial.setNotificationActionListener(new NotificationActionListener() {
 
 			public boolean onActionReceived(NotificationAction action) {
-				//Handle action here
+				if (action.getAction() == NotificationAction.Type.OPEN_PROFILE) {
+					OpenProfileAction openProfileAction = (OpenProfileAction) action;
+					showProfile(openProfileAction.getUserId());
+					return true;
+				}
 				return false;
 			}
 
 		});
 		GetSocial.User.setOnUserChangedListener(this);
+		GetSocial.whenInitialized(new Runnable() {
+			@Override
+			public void run() {
+				GetSocial.getReferralData(new FetchReferralDataCallback() {
+					@Override
+					public void onSuccess(@Nullable ReferralData referralData) {
+						if (referralData == null) {
+							_log.logInfoAndToast("No referral data.");
+						} else {
+							_log.logInfoAndToast("Referral data received: [ " + referralData + " ]");
+						}
+					}
+
+					@Override
+					public void onFailure(GetSocialException e) {
+						_log.logErrorAndToast("Failed to get referral data: " + e.getMessage());
+					}
+				});
+			}
+		});
+	}
+
+	private void showProfile(String userId) {
+		popToRoot();
+
+		FriendsFragment friendsFragment = new FriendsFragment();
+		friendsFragment.setNewFriend(userId);
+		addContentFragment(friendsFragment);
 	}
 
 	protected String getDemoAppInfo() {
@@ -205,8 +242,18 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Acti
 		}
 	}
 
+	private void popToRoot() {
+		if (getSupportFragmentManager().getBackStackEntryCount() > 0) {
+			getSupportFragmentManager().popBackStackImmediate(findRootFragment().getId(), FragmentManager.POP_BACK_STACK_INCLUSIVE);
+		}
+	}
+
 	protected RootFragment findRootFragment() {
-		return (RootFragment) getSupportFragmentManager().findFragmentByTag("root");
+		return findFragment("root");
+	}
+
+	private <T> T findFragment(String tag) {
+		return (T) getSupportFragmentManager().findFragmentByTag(tag);
 	}
 
 	//region ActivityListener

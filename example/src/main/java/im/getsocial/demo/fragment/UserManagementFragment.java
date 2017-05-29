@@ -19,17 +19,10 @@ package im.getsocial.demo.fragment;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.Toast;
-import com.facebook.AccessToken;
-import com.facebook.AccessTokenTracker;
-import com.facebook.GraphRequest;
-import com.facebook.GraphResponse;
-import com.facebook.HttpMethod;
-import com.facebook.login.LoginManager;
 import im.getsocial.demo.adapter.EnabledCheck;
 import im.getsocial.demo.adapter.MenuItem;
 import im.getsocial.demo.utils.PixelUtils;
@@ -37,11 +30,9 @@ import im.getsocial.demo.utils.UserIdentityUtils;
 import im.getsocial.sdk.CompletionCallback;
 import im.getsocial.sdk.GetSocial;
 import im.getsocial.sdk.GetSocialException;
-import im.getsocial.sdk.usermanagement.AuthIdentity;
 import im.getsocial.sdk.usermanagement.AuthIdentityProviderIds;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class UserManagementFragment extends BaseListFragment {

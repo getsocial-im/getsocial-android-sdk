@@ -17,12 +17,12 @@
 package im.getsocial.demo.fragment;
 
 import android.Manifest;
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -39,15 +39,14 @@ import android.widget.ImageView;
 import butterknife.BindView;
 import butterknife.BindViews;
 import butterknife.ButterKnife;
+import com.squareup.picasso.MemoryPolicy;
 import im.getsocial.demo.R;
 import im.getsocial.sdk.invites.CustomReferralData;
 import im.getsocial.sdk.invites.InviteContent;
 import im.getsocial.sdk.invites.InviteTextPlaceholders;
 import im.getsocial.sdk.ui.GetSocialUi;
 import im.getsocial.sdk.ui.invites.InviteUiCallback;
-import im.getsocial.sdk.util.Utilities;
 
-import java.io.IOException;
 import java.util.List;
 
 import static com.squareup.picasso.Picasso.with;
@@ -60,9 +59,10 @@ public class CustomInviteFragment extends BaseFragment {
 
 	private static final int REQUEST_PICK_IMAGE_ACTIVITY = 1984;
 	private static final int PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE = 2012;
+	private static final int MAX_WIDTH = 500;
 
 	private ViewContainer _viewContainer;
-	private String _imageUriString;
+	private Uri _imageUri;
 
 	public CustomInviteFragment() {
 	}
@@ -94,10 +94,11 @@ public class CustomInviteFragment extends BaseFragment {
 	}
 
 	private void openInviteProviderList() {
+		Bitmap bitmap = ((BitmapDrawable)_viewContainer._inviteImageView.getDrawable()).getBitmap();
 		InviteContent inviteContent = InviteContent.createBuilder()
 				.withSubject(_viewContainer._inviteSubjectInput.getText().toString())
 				.withText(_viewContainer._inviteTextInput.getText().toString())
-				.withImageUrl(_imageUriString)
+				.withImage(bitmap)
 				.build();
 
 		GetSocialUi.createInvitesView()
@@ -154,7 +155,7 @@ public class CustomInviteFragment extends BaseFragment {
 			case PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE:
 				for (int permission : grantResults) {
 					if (permission == PackageManager.PERMISSION_GRANTED) {
-						handlePickedImage(Uri.parse(_imageUriString));
+						handlePickedImage(_imageUri);
 					}
 				}
 				break;
@@ -175,43 +176,17 @@ public class CustomInviteFragment extends BaseFragment {
 		_viewContainer = new ViewContainer(view);
 	}
 
-	private void handlePickedImage(final Uri imageUri) {
-		_imageUriString = imageUri.toString();
 
+	private void handlePickedImage(final Uri imageUri) {
+		_imageUri = imageUri;
 		if (!checkPermissionsAndRequestIfNeeded()) {
 			return;
 		}
-		new Thread(new Runnable() {
-			@Override
-			public void run() {
-				try {
-					Bitmap bitmap = with(getContext())
-							.load(imageUri)
-							.get();
-					if (bitmap == null) {
-						return;
-					}
-					final Uri uri = Utilities.getUriForBitmap(getContext(), bitmap);
-					if (uri == null) {
-						return;
-					}
-					_imageUriString = uri.toString();
-
-					Activity activity = getActivity();
-					if (activity != null) {
-						activity.runOnUiThread(new Runnable() {
-							@Override
-							public void run() {
-								_viewContainer._inviteImageView.setImageURI(uri);
-							}
-						});
-					}
-
-				} catch (IOException ignored) {
-					_log.logInfoAndToast("Failed to load invite image. Proceeding without the image");
-				}
-			}
-		}).start();
+		with(getContext())
+				.load(_imageUri)
+				.resize(MAX_WIDTH, 0)
+				.memoryPolicy(MemoryPolicy.NO_CACHE)
+				.into(_viewContainer._inviteImageView);
 	}
 
 	private boolean checkPermissionsAndRequestIfNeeded() {

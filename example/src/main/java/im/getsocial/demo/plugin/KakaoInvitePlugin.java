@@ -19,8 +19,10 @@ package im.getsocial.demo.plugin;
 import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import com.kakao.KakaoLink;
 import com.kakao.KakaoParameterException;
+import com.kakao.KakaoTalkLinkMessageBuilder;
 import im.getsocial.sdk.invites.InviteCallback;
 import im.getsocial.sdk.invites.InviteChannel;
 import im.getsocial.sdk.invites.InviteChannelPlugin;
@@ -28,6 +30,8 @@ import im.getsocial.sdk.invites.InvitePackage;
 
 public class KakaoInvitePlugin extends InviteChannelPlugin {
 	public static final String PROVIDER_NAME = "kakao";
+
+	private static final int SHARED_IMAGE_WIDTH = 300;
 
 	private static final String PACKAGE_NAME = "com.kakao.talk";
 	private final Activity _activity;
@@ -55,10 +59,17 @@ public class KakaoInvitePlugin extends InviteChannelPlugin {
 	public void presentChannelInterface(InviteChannel inviteChannel, InvitePackage invitePackage, InviteCallback callback) {
 		try {
 			final KakaoLink kakaoLink = KakaoLink.getKakaoLink(getContext());
-			String linkContents = kakaoLink.createKakaoTalkLinkMessageBuilder()
-					.addText(invitePackage.getText())
-					.addWebLink(invitePackage.getReferralUrl(), invitePackage.getReferralUrl())
-					.build();
+			KakaoTalkLinkMessageBuilder messageBuilder = kakaoLink.createKakaoTalkLinkMessageBuilder();
+
+			if (invitePackage.getImageUrl() != null && invitePackage.getImage() != null) {
+				Bitmap image = invitePackage.getImage();
+				double ratio = (double)image.getHeight() / (double)image.getWidth();
+				int height = (int)(ratio * SHARED_IMAGE_WIDTH);
+				messageBuilder.addImage(invitePackage.getImageUrl(), SHARED_IMAGE_WIDTH, height);
+			}
+			messageBuilder.addText(invitePackage.getText());
+
+			String linkContents = messageBuilder.build();
 			kakaoLink.sendMessage(linkContents, _activity);
 
 			callback.onComplete();
