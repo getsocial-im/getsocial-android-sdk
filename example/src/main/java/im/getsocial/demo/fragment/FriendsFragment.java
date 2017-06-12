@@ -52,9 +52,6 @@ public class FriendsFragment extends BaseFragment {
 
 	private ViewContainer _viewContainer;
 
-	@Nullable
-	private String _newFriend;
-
 	@Override
 	public String getFragmentTag() {
 		return "friends";
@@ -148,10 +145,6 @@ public class FriendsFragment extends BaseFragment {
 		hideLoading();
 	}
 
-	public void setNewFriend(String userId) {
-		_newFriend = userId;
-	}
-
 	class ViewContainer {
 
 		@BindView(R.id.friend_id)
@@ -187,13 +180,8 @@ public class FriendsFragment extends BaseFragment {
 			} else {
 				holder = (ViewHolder) convertView.getTag();
 			}
-			PublicUser user = getItem(position);
-			holder.setUser(user);
-			if (user.getId().equals(_newFriend)) {
-				convertView.setBackgroundColor(getResources().getColor(android.R.color.holo_green_dark));
-			} else {
-				convertView.setBackgroundColor(getResources().getColor(android.R.color.transparent));
-			}
+			holder.setUser(getItem(position));
+
 			return convertView;
 		}
 

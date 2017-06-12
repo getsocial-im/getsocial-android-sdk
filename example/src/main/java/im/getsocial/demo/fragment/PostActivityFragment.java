@@ -50,6 +50,7 @@ import im.getsocial.sdk.GetSocialException;
 import im.getsocial.sdk.activities.ActivityPost;
 import im.getsocial.sdk.activities.ActivityPostContent;
 import im.getsocial.sdk.ui.GetSocialUi;
+import im.getsocial.sdk.ui.UiAction;
 import im.getsocial.sdk.ui.activities.ActionButtonListener;
 import im.getsocial.sdk.ui.activities.ActivityFeedViewBuilder;
 
@@ -127,6 +128,17 @@ public class PostActivityFragment extends BaseFragment implements Callback<Activ
 			return;
 		}
 
+		boolean postToGlobalFeed = _viewContainer._feed.getSelectedItemPosition() == 0;
+		if (postToGlobalFeed && GetSocial.User.isAnonymous()) {
+			showAuthorizeUserDialogForPendingAction("Post to global feed", new UiAction.Pending() {
+				@Override
+				public void proceed() {
+					doPost();
+				}
+			});
+			return;
+		}
+
 		ActivityPostContent.Builder builder = new ActivityPostContent.Builder();
 		if (hasText) {
 			builder.withText(text);
@@ -138,7 +150,7 @@ public class PostActivityFragment extends BaseFragment implements Callback<Activ
 			builder.withButton(buttonTitle, buttonAction);
 		}
 		showLoading("Posting activity", "Wait...");
-		boolean postToGlobalFeed = _viewContainer._feed.getSelectedItemPosition() == 0;
+
 		if (postToGlobalFeed) {
 			GetSocial.postActivityToGlobalFeed(builder.build(), this);
 		} else {

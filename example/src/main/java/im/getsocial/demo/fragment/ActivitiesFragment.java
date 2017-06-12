@@ -21,7 +21,6 @@ import android.content.DialogInterface;
 import android.widget.Toast;
 import im.getsocial.demo.adapter.MenuItem;
 import im.getsocial.sdk.Callback;
-import im.getsocial.sdk.CompletionCallback;
 import im.getsocial.sdk.GetSocial;
 import im.getsocial.sdk.GetSocialException;
 import im.getsocial.sdk.activities.ActivitiesQuery;
@@ -190,44 +189,6 @@ public class ActivitiesFragment extends BaseListFragment {
 								_log.logErrorAndToast("Failed to add friend: " + exception.getMessage());
 							}
 						});
-					}
-				})
-				.show();
-	}
-
-	private void showAuthorizeUserDialogForPendingAction(final String actionDescription, final UiAction.Pending pendingAction) {
-		final CompletionCallback completionCallback = new CompletionCallback() {
-			@Override
-			public void onSuccess() {
-				pendingAction.proceed();
-			}
-
-			@Override
-			public void onFailure(GetSocialException exception) {
-				_log.logErrorAndToast("You can not " + actionDescription + " because of exception during authorization: " + exception.getMessage());
-			}
-		};
-		new AlertDialog.Builder(getContext()).setTitle("Authorize to " + actionDescription)
-				.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						_log.logInfoAndToast("Can not " + actionDescription + " without authorization.");
-					}
-				})
-				.setItems(new CharSequence[]{"Facebook", "Custom"}, new DialogInterface.OnClickListener() {
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						switch (which) {
-							case 0:
-								addFacebookUserIdentity(completionCallback);
-								break;
-							case 1:
-								addCustomUserIdentity(completionCallback);
-								break;
-							default:
-								break;
-						}
-						dialog.dismiss();
 					}
 				})
 				.show();

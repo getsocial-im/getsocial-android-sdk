@@ -2,12 +2,28 @@
 
 ## Version History
 
+### v6.3.0
+
+**Added**:
++ Now you can disable image attachment to Smart Invites from Dashboard. Useful to avoid charges for sending MMS instead of SMS.
++ Method `getUserById`, you can retrieve `PublicUser` entity having only user ID.
+
+**Fixed**:
++ Fixed randomly reproducible crashes related to changing UI on non-main threads.
++ Fixed possible `OutOfMemoryException` crashes.
++ Fixed `NullPointerException` in install receiver if no token was passed.
+
+**Improved:**
++ Loading UI assets. Now if asset is not explicitly specified in the your custom UI configuration we fallback to default asset.   
+
+---
+
 ### v6.2.0
 
 **Added**:
 + Added `ActivityDetailsView`, now you can open activity comments from code.
 + Added `whenInitialized` method to be able to execute any action right after SDK is initialized.
-+ Added App Links support. More info in [documentation](guides/smart-invites/android/deep-linking/#app-links-support).
++ Added App Links support. More info in [documentation](http://docs.getsocial.im/guides/smart-invites/android/deep-linking/#app-links-support).
 + Added `setAvatarClickListener` method to `ActivityFeedViewBuilder` and `ActivityDetailsViewBuilder`. You can use this method to get notified if a user clicked on a user's avatar.
 + Added `withImage` method to `InviteContent.Builder` to set invite image using binaries.
 + Facebook and Kakao plugins share image as well in Smart Invites.
@@ -25,17 +41,17 @@
 
 ### v6.1.0
 
-**Added**:
+**Added:**
 + Added `User Properties` functionality. Now you can store some custom properties for each user. More info in [documentation](http://docs.getsocial.im/guides/user-management/android/get-set-user-properties/).
 + Added fade animation when image is showing.
 + Added `UiActionListener` interface, you can set it with `setUiActionListener()` method on any of `ViewBuilder` chidren. All possible actions you can find in `UiAction` enum. More info in [documentation](http://docs.getsocial.im/guides/ui-framework/android/#ui-user-actions-handling).
 
 
 
-**Improved:**:
+**Improved:**
 + Removed dependency on `Gson` library. Now SDK adds ~900 methods less.
 
-**Fixed**:
+**Fixed:**
 + Ukrainian and Russian localization for plural nouns.
 + Analytics crash on concurent list modification.
 + Action buttons background issue in landscape mode.
@@ -47,10 +63,10 @@
 
 ### v6.0.3
 
-**Improved:**:
+**Improved:**
 + Removed `Picasso` library. Now we have ~750 methods less.
  
-**Fixed:**:
+**Fixed:**
 + Fixed UI issue with incorrect loading background.
 + Now `setWindowTitle()` works for all GetSocial views.
 + Fixed issue when SDK do not initialize after changing GetSocial App Id.

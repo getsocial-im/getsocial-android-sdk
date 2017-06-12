@@ -32,12 +32,12 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
-import android.widget.Toast;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookSdk;
+import im.getsocial.demo.dialog.NewFriendDialog;
 import im.getsocial.demo.dialog.UserInfoDialog;
 import im.getsocial.demo.fragment.BaseFragment;
 import im.getsocial.demo.fragment.ConsoleFragment;
@@ -62,6 +62,7 @@ import im.getsocial.sdk.pushnotifications.NotificationActionListener;
 import im.getsocial.sdk.pushnotifications.OpenProfileAction;
 import im.getsocial.sdk.ui.GetSocialUi;
 import im.getsocial.sdk.usermanagement.OnUserChangedListener;
+import im.getsocial.sdk.usermanagement.PublicUser;
 
 import java.util.HashMap;
 import java.util.Locale;
@@ -189,7 +190,7 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Acti
 			public boolean onActionReceived(NotificationAction action) {
 				if (action.getAction() == NotificationAction.Type.OPEN_PROFILE) {
 					OpenProfileAction openProfileAction = (OpenProfileAction) action;
-					showProfile(openProfileAction.getUserId());
+					showNewFriend(openProfileAction.getUserId());
 					return true;
 				}
 				return false;
@@ -219,12 +220,18 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Acti
 		});
 	}
 
-	private void showProfile(String userId) {
-		popToRoot();
+	private void showNewFriend(String userId) {
+		GetSocial.getUserById(userId, new Callback<PublicUser>() {
+			@Override
+			public void onSuccess(PublicUser publicUser) {
+				NewFriendDialog.show(getSupportFragmentManager(), publicUser);
+			}
 
-		FriendsFragment friendsFragment = new FriendsFragment();
-		friendsFragment.setNewFriend(userId);
-		addContentFragment(friendsFragment);
+			@Override
+			public void onFailure(GetSocialException e) {
+				_log.logErrorAndToast("Failed to get user: " + e.getMessage());
+			}
+		});
 	}
 
 	protected String getDemoAppInfo() {

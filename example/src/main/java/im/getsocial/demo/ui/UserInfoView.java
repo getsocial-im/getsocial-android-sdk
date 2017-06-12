@@ -124,22 +124,18 @@ public class UserInfoView extends RelativeLayout {
 	}
 
 	private String printProviders() {
-		if (GetSocial.User.getAuthIdentities() != null) {
-			StringBuilder sb = new StringBuilder();
-			Set<String> keySet = GetSocial.User.getAuthIdentities().keySet();
-			ArrayList<String> providers = new ArrayList<>(keySet);
-			for (int i = 0; i < keySet.size() && i < 3; i++) {
-				sb.append(providers.get(i));
-				if (i < providers.size() - 1) {
-					sb.append(" / ");
-				}
+		StringBuilder sb = new StringBuilder();
+		Set<String> keySet = GetSocial.User.getAuthIdentities().keySet();
+		ArrayList<String> providers = new ArrayList<>(keySet);
+		for (int i = 0; i < keySet.size() && i < 3; i++) {
+			sb.append(providers.get(i));
+			if (i < providers.size() - 1) {
+				sb.append(" / ");
 			}
-			if (providers.size() > 3) {
-				sb.append("…");
-			}
-			return sb.toString();
 		}
-
-		return "";
+		if (providers.size() > 3) {
+			sb.append("…");
+		}
+		return sb.toString();
 	}
 }

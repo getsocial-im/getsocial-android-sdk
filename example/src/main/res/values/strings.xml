@@ -76,5 +76,7 @@
 	<string name="add_friend_title">Add</string>
 	<string name="user_id_hint">User ID</string>
 	<string name="invite_text_placeholders">Invite text placeholders</string>
+	<string name="new_friend_title">You have a new friend!</string>
+	<string name="button_close">Close</string>
 
 </resources>
