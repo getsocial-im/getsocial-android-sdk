@@ -71,24 +71,62 @@ public class UserInfoDialog extends DialogFragment {
 		if (!GetSocial.isInitialized()) {
 			return "";
 		}
-		StringBuilder sb = new StringBuilder();
+		UserInfoBuilder sb = new UserInfoBuilder();
 
 		sb.append("Anonymous: ").append(GetSocial.User.isAnonymous())
-				.append("\n\n")
-				.append("User ID: ").append(GetSocial.User.getId()).append("\n")
-				.append("Avatar URL: ").append(GetSocial.User.getAvatarUrl()).append("\n")
-				.append("\n\n");
+				.endLine()
+				.append("User ID: ").append(GetSocial.User.getId()).endLine()
+				.append("Avatar URL: ").append(GetSocial.User.getAvatarUrl()).endLine()
+				.endLine();
 
 		if (!GetSocial.User.isAnonymous()) {
-			sb.append("IDENTITIES:").append("\n\n");
-			Map<String, String> authIdentities = GetSocial.User.getAuthIdentities();
-			for (Map.Entry<String, String> entry : authIdentities.entrySet()) {
-				sb.append(entry.getKey())
+			sb.append("IDENTITIES:").endLine()
+					.append(GetSocial.User.getAuthIdentities());
+		}
+		sb.append("PUBLIC PROPERTIES:").endLine()
+				.append(GetSocial.User.getAllPublicProperties());
+
+		sb.append("PRIVATE PROPERTIES:").endLine()
+				.append(GetSocial.User.getAllPrivateProperties());
+
+		return sb.toString();
+	}
+
+	private static class UserInfoBuilder {
+		private final StringBuilder _stringBuilder;
+
+		UserInfoBuilder() {
+			_stringBuilder = new StringBuilder();
+		}
+
+		public UserInfoBuilder append(String string) {
+			_stringBuilder.append(string);
+			return this;
+		}
+
+		public UserInfoBuilder append(boolean bool) {
+			_stringBuilder.append(bool);
+			return this;
+		}
+
+		public UserInfoBuilder append(Map<String, String> map) {
+			for (Map.Entry<String, String> entry : map.entrySet()) {
+				append(entry.getKey())
 						.append(": ")
 						.append(entry.getValue())
-						.append("\n\n");
+						.endLine();
 			}
+			return this;
 		}
-		return sb.toString();
+
+		public UserInfoBuilder endLine() {
+			_stringBuilder.append("\n\n");
+			return this;
+		}
+
+		@Override
+		public String toString() {
+			return _stringBuilder.toString();
+		}
 	}
 }

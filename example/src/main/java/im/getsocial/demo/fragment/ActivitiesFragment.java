@@ -80,6 +80,22 @@ public class ActivitiesFragment extends BaseListFragment {
 					.setButtonActionListener(new ActionButtonListener() {
 						@Override
 						public void onButtonClicked(String action, ActivityPost post) {
+							if ("CloseAndRestore".equalsIgnoreCase(action)) {
+								GetSocialUi.closeView(true);
+								new AlertDialog.Builder(getContext())
+										.setPositiveButton("Restore View", new DialogInterface.OnClickListener() {
+											@Override
+											public void onClick(DialogInterface dialogInterface, int i) {
+												GetSocialUi.restoreView();
+											}
+										})
+										.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+											@Override
+											public void onClick(DialogInterface dialog, int which) {
+
+											}
+										}).show();
+							}
 							Toast.makeText(getContext(), "Activity Feed button clicked, action: " + action, Toast.LENGTH_SHORT).show();
 						}
 					})

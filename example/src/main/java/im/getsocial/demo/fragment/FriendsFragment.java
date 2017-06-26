@@ -16,14 +16,18 @@
 
 package im.getsocial.demo.fragment;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
+import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -39,9 +43,12 @@ import im.getsocial.demo.utils.CircleTransform;
 import im.getsocial.sdk.Callback;
 import im.getsocial.sdk.GetSocial;
 import im.getsocial.sdk.GetSocialException;
+import im.getsocial.sdk.socialgraph.SuggestedFriend;
 import im.getsocial.sdk.usermanagement.PublicUser;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Created by orestsavchak on 2/17/17.
@@ -104,6 +111,96 @@ public class FriendsFragment extends BaseFragment {
 		});
 	}
 
+	private void suggestFriends() {
+		showLoading("Loading suggested friends", "Wait please...");
+		GetSocial.User.getSuggestedFriends(0, 10, new Callback<List<SuggestedFriend>>() {
+			@Override
+			public void onSuccess(List<SuggestedFriend> suggestedFriends) {
+				hideLoading();
+				if (suggestedFriends.isEmpty()) {
+					Toast.makeText(getContext(), "No more suggested friends available", Toast.LENGTH_SHORT).show();
+				} else {
+					showSuggestedFriends(suggestedFriends);
+				}
+			}
+
+			@Override
+			public void onFailure(GetSocialException exception) {
+				hideLoading();
+				_log.logErrorAndToast("Failed to get suggested friends: " + exception.getMessage());
+			}
+		});
+	}
+
+	private void showSuggestedFriends(final List<SuggestedFriend> suggestedFriends) {
+		final ListView friendsView = new ListView(getContext());
+		final ArrayAdapter arrayAdapter = new SuggestedFriendsAdapter(friendsView, getContext(), suggestedFriends);
+		friendsView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
+		friendsView.setAdapter(arrayAdapter);
+		friendsView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+			@Override
+			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+				arrayAdapter.notifyDataSetChanged();
+			}
+		});
+		new AlertDialog.Builder(getContext())
+				.setTitle("Suggested friends")
+				.setView(friendsView)
+				.setPositiveButton("Add Friends", new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						SparseBooleanArray checked = friendsView.getCheckedItemPositions();
+						List<SuggestedFriend> friendsToAdd = new ArrayList<SuggestedFriend>(checked.size());
+						for (int i = 0; i < arrayAdapter.getCount(); i++) {
+							if (checked.get(i)) {
+								friendsToAdd.add(suggestedFriends.get(i));
+							}
+						}
+						addFriends(friendsToAdd);
+						dialog.dismiss();
+					}
+				})
+				.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						dialog.dismiss();
+					}
+				})
+				.show();
+	}
+
+	private void addFriends(final List<SuggestedFriend> friendsToAdd) {
+		if (friendsToAdd.isEmpty()) {
+			return;
+		}
+		showLoading("Adding friends", "Wait please...");
+		final Runnable timesToWait = new Runnable() {
+			private AtomicInteger _timeToWait = new AtomicInteger(friendsToAdd.size());
+
+			@Override
+			public void run() {
+				if (_timeToWait.decrementAndGet() == 0) {
+					hideLoading();
+					onFriendsUpdated();
+				}
+			}
+		};
+		for (SuggestedFriend friend : friendsToAdd) {
+			GetSocial.User.addFriend(friend.getId(), new Callback<Integer>() {
+				@Override
+				public void onSuccess(Integer integer) {
+					timesToWait.run();
+				}
+
+				@Override
+				public void onFailure(GetSocialException exception) {
+					timesToWait.run();
+					Toast.makeText(getContext(), "Failed to add friends: " + exception.getMessage(), Toast.LENGTH_SHORT).show();
+				}
+			});
+		}
+	}
+
 	private void onFriendsUpdated() {
 		loadFriends();
 	}
@@ -161,6 +258,11 @@ public class FriendsFragment extends BaseFragment {
 		@OnClick(R.id.add_friend_btn)
 		void addFriend() {
 			FriendsFragment.this.addFriend(_userId.getText().toString());
+		}
+
+		@OnClick(R.id.suggest_friends_btn)
+		void suggestFriends() {
+			FriendsFragment.this.suggestFriends();
 		}
 	}
 
@@ -226,6 +328,77 @@ public class FriendsFragment extends BaseFragment {
 			}
 		}
 
+	}
+
+	class SuggestedFriendsAdapter extends ArrayAdapter<SuggestedFriend> {
+
+		private final ListView _listView;
+
+		public SuggestedFriendsAdapter(ListView listView, @NonNull Context context, @NonNull List<SuggestedFriend> objects) {
+			super(context, 0, objects);
+			_listView = listView;
+		}
+
+		@NonNull
+		@Override
+		public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
+			ViewHolder holder;
+			if (convertView == null) {
+				convertView = LayoutInflater.from(getContext()).inflate(R.layout.list_item_suggested_friend, null);
+				convertView.setTag(holder = new ViewHolder(convertView));
+			} else {
+				holder = (ViewHolder) convertView.getTag();
+			}
+			SuggestedFriend user = getItem(position);
+			holder.setUser(user);
+			if (_listView.getCheckedItemPositions().get(position)) {
+				convertView.setBackgroundColor(getResources().getColor(R.color.grey));
+			} else {
+				convertView.setBackgroundColor(getResources().getColor(R.color.transparent));
+			}
+
+			return convertView;
+		}
+
+		class ViewHolder {
+
+			private SuggestedFriend _user;
+
+			ViewHolder(View view) {
+				ButterKnife.bind(this, view);
+			}
+
+			void setUser(SuggestedFriend user) {
+				_user = user;
+				populate();
+			}
+
+			private void populate() {
+				_userName.setText(_user.getDisplayName());
+				_mutualFriends.setText(String.valueOf(_user.getMutualFriendsCount()));
+				if (TextUtils.isEmpty(_user.getAvatarUrl())) {
+					Picasso.with(getContext())
+							.load(R.drawable.avatar_default)
+							.transform(new CircleTransform())
+							.into(_avatar);
+					return;
+				}
+				Picasso.with(getContext())
+						.load(_user.getAvatarUrl())
+						.placeholder(R.drawable.avatar_default)
+						.transform(new CircleTransform())
+						.into(_avatar);
+			}
+
+			@BindView(R.id.user_avatar)
+			ImageView _avatar;
+
+			@BindView(R.id.user_name)
+			TextView _userName;
+
+			@BindView(R.id.mutual_friends)
+			TextView _mutualFriends;
+		}
 	}
 
 }

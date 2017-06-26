@@ -19,6 +19,7 @@ package im.getsocial.demo.utils;
 import android.graphics.Bitmap;
 import android.graphics.BitmapShader;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import com.squareup.picasso.Transformation;
 
@@ -27,15 +28,23 @@ public class CircleTransform implements Transformation {
 	public Bitmap transform(Bitmap source) {
 		int size = Math.min(source.getWidth(), source.getHeight());
 
-		int x = (source.getWidth() - size) / 2;
-		int y = (source.getHeight() - size) / 2;
+		// a square max size in a circle
+		// calculated to avoid cropped images
+		int diagonalSize = (int)(size / 1.41);
 
-		Bitmap squaredBitmap = Bitmap.createBitmap(source, x, y, size, size);
-		if (squaredBitmap != source) {
-			source.recycle();
-		}
+		Bitmap scaledBitmap = Bitmap.createScaledBitmap(source, diagonalSize, diagonalSize, false);
+		source.recycle();
 
-		Bitmap bitmap = Bitmap.createBitmap(size, size, source.getConfig());
+		int left = (source.getWidth() - scaledBitmap.getWidth()) / 2;
+		int top = (source.getHeight() - scaledBitmap.getHeight()) / 2;
+
+		Bitmap squaredBitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
+		Canvas c = new Canvas(squaredBitmap);
+		c.drawColor(Color.WHITE);
+		c.drawBitmap(scaledBitmap, left, top, null);
+		scaledBitmap.recycle();
+
+		Bitmap bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
 
 		Canvas canvas = new Canvas(bitmap);
 		Paint paint = new Paint();

@@ -21,8 +21,8 @@ apply plugin: 'com.neenbedankt.android-apt'
 apply plugin: 'com.google.gms.google-services'
 
 dependencies {
-	compile('im.getsocial:getsocial-core:[6,7)@aar') { transitive = true }
-	compile('im.getsocial:getsocial-ui:[6,7)@aar') { transitive = true } // Note: add this dependency only if you plan to use GetSocial UI
+	compile('im.getsocial:getsocial-core:[6,7)@aar')
+	compile('im.getsocial:getsocial-ui:[6,7)@aar') // Note: add this dependency only if you plan to use GetSocial UI
 
 	compile 'com.kakao.sdk:kakaolink:1.0.52'
 	compile 'com.facebook.android:facebook-android-sdk:4.18.0'
