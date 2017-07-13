@@ -38,6 +38,14 @@ public class UiCustomizationFragment extends BaseListFragment {
 							public void execute() {
 								loadDefaultConfiguration();
 							}
+						}).build(),
+				new MenuItem.Builder("Default UI Landscape")
+						.withAction(new MenuItem.Action() {
+							@Override
+							public void execute() {
+								GetSocialUi.loadConfiguration(getContext(), "getsocial/ui-landscape.json");
+								updateUiConfigurationName("Default Landscape");
+							}
 						}).build()
 		);
 	}
