@@ -1,6 +1,7 @@
 # GetSocial Android SDK Demo
 
-This is the demo application for GetSocial SDK. Learn more about the products we build at [getsocial.im](http://getsocial.im).
+This is the demo application for GetSocial SDK, which you can also find in [Play Store](https://play.google.com/store/apps/details?id=im.getsocial.demo).
+Learn more about the products we build at [getsocial.im](http://getsocial.im).
 
 ## Running Demo
 
