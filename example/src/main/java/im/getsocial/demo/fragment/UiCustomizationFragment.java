@@ -25,6 +25,8 @@ import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.List;
 
+import static android.R.attr.screenOrientation;
+
 public class UiCustomizationFragment extends BaseListFragment {
 
 	public static final String UI_CONFIGURATION_NAME_KEY = "config_name";
@@ -43,11 +45,50 @@ public class UiCustomizationFragment extends BaseListFragment {
 						.withAction(new MenuItem.Action() {
 							@Override
 							public void execute() {
-								GetSocialUi.loadConfiguration(getContext(), "getsocial/ui-landscape.json");
-								updateUiConfigurationName("Default Landscape");
+								loadConfiguration("getsocial/ui-landscape.json",
+										"Default Landscape", ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+							}
+						}).build(),
+				new MenuItem.Builder("White UI - Portrait")
+						.withAction(new MenuItem.Action() {
+							@Override
+							public void execute() {
+								loadConfiguration("getsocial_white/getsocial_white.json",
+										"White UI - Portrait", ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+							}
+						}).build(),
+				new MenuItem.Builder("White UI - Landscape")
+						.withAction(new MenuItem.Action() {
+							@Override
+							public void execute() {
+								loadConfiguration("getsocial_white_landscape/getsocial_white.json",
+										"White UI - Landscape", ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+							}
+						}).build(),
+				new MenuItem.Builder("Dark UI - Portrait")
+						.withAction(new MenuItem.Action() {
+							@Override
+							public void execute() {
+								loadConfiguration("getsocial_dark/getsocial_dark.json",
+										"Dark UI - Portrait", ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+							}
+						}).build(),
+				new MenuItem.Builder("Dark UI - Landscape")
+						.withAction(new MenuItem.Action() {
+							@Override
+							public void execute() {
+								loadConfiguration("getsocial_dark_landscape/getsocial_dark.json",
+										"Dark UI - Landscape", ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
 							}
 						}).build()
 		);
+	}
+
+	protected void loadConfiguration(final String configurationPath, final String configurationName, final int screenOrientation ) {
+		if (GetSocialUi.loadConfiguration(getContext(), configurationPath)) {
+			getActivity().setRequestedOrientation(screenOrientation);
+			updateUiConfigurationName(configurationName);
+		}
 	}
 
 	private void loadDefaultConfiguration() {

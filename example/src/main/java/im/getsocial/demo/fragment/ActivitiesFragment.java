@@ -20,6 +20,7 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.widget.Toast;
 import im.getsocial.demo.adapter.MenuItem;
+import im.getsocial.demo.dialog.action_dialog.ActionDialog;
 import im.getsocial.sdk.Callback;
 import im.getsocial.sdk.GetSocial;
 import im.getsocial.sdk.GetSocialException;
@@ -49,6 +50,12 @@ public class ActivitiesFragment extends BaseListFragment {
 						.build(),
 				new MenuItem.Builder(String.format("Custom Activity Feed (%s)", CUSTOM_FEED_NAME))
 						.withAction(new OpenCustomFeedAction(CUSTOM_FEED_NAME))
+						.build(),
+				new MenuItem.Builder("My Global Activity Feed")
+						.withAction(new OpenMyGlobalFeedAction())
+						.build(),
+				new MenuItem.Builder("My Custom Activity Feed")
+						.withAction(new OpenMyCustomFeedAction(CUSTOM_FEED_NAME))
 						.build(),
 				new MenuItem.Builder("Post Activity")
 						.withAction(new OpenPostFeedFormAction())
@@ -125,26 +132,82 @@ public class ActivitiesFragment extends BaseListFragment {
 					.setAvatarClickListener(new AvatarClickListener() {
 						@Override
 						public void onAvatarClicked(PublicUser user) {
-							if (user.getId().equals(GetSocial.User.getId())) {
-								Toast.makeText(getContext(), "Tapped on yourself", Toast.LENGTH_SHORT).show();
-							} else {
-								addOrRemoveFriend(user);
-							}
+							showUserActionDialog(user);
 						}
 					})
 					.show();
 		}
 	}
 
-	private void addOrRemoveFriend(final PublicUser user) {
+	private void showUserActionDialog(final PublicUser user) {
+		ActionDialog actionDialog = new ActionDialog(getContext());
+
+		if (isCurrentUser(user)) {
+			actionDialog.addAction(new ActionDialog.Action("Show User Feed") {
+				@Override
+				public void execute() {
+					showGlobalFeedForCurrentUser();
+				}
+			});
+			actionDialog.show();
+		} else {
+			actionDialog.setTitle("User " + user.getDisplayName());
+			actionDialog.addAction(new ActionDialog.Action("Show User Feed") {
+				@Override
+				public void execute() {
+					showGlobalFeedForOtherUser(user);
+				}
+			});
+			checkIfFriendsAndShowDialog(user, actionDialog);
+		}
+	}
+
+	private void showGlobalFeedForCurrentUser() {
+		showGlobalFeedForUser(GetSocial.User.getId(), "My Global Feed");
+	}
+
+	private void showGlobalFeedForOtherUser(PublicUser user) {
+		showGlobalFeedForUser(user.getId(), user.getDisplayName() + " Global Feed");
+	}
+
+	private void showGlobalFeedForUser(String id, String title) {
+		GetSocialUi.createGlobalActivityFeedView()
+				.setFilterByUser(id)
+				.setWindowTitle(title)
+				.setReadOnly(true)
+				.setButtonActionListener(new ActionButtonListener() {
+					@Override
+					public void onButtonClicked(String action, ActivityPost post) {
+						Toast.makeText(getContext(), "Activity Feed button clicked, action: " + action, Toast.LENGTH_SHORT).show();
+					}
+				})
+				.show();
+	}
+
+	private boolean isCurrentUser(PublicUser user) {
+		return user.getId().equals(GetSocial.User.getId());
+	}
+
+	private void checkIfFriendsAndShowDialog(final PublicUser user, final ActionDialog actionDialog) {
 		GetSocial.User.isFriend(user.getId(), new Callback<Boolean>() {
 			@Override
 			public void onSuccess(Boolean isFriend) {
 				if (isFriend) {
-					showRemoveFriendDialog(user);
+					actionDialog.addAction(new ActionDialog.Action("Remove from Friends") {
+						@Override
+						public void execute() {
+							removeFriend(user);
+						}
+					});
 				} else {
-					showAddFriendDialog(user);
+					actionDialog.addAction(new ActionDialog.Action("Add to Friends") {
+						@Override
+						public void execute() {
+							addFriend(user);
+						}
+					});
 				}
+				actionDialog.show();
 			}
 
 			@Override
@@ -154,60 +217,32 @@ public class ActivitiesFragment extends BaseListFragment {
 		});
 	}
 
-	private void showRemoveFriendDialog(final PublicUser user) {
-		new AlertDialog.Builder(getContext()).setTitle("Remove friend")
-				.setMessage("Do you want to remove user " + user.getDisplayName() + " from friends list?")
-				.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
+	private void addFriend(final PublicUser user) {
+		GetSocial.User.addFriend(user.getId(), new Callback<Integer>() {
+			@Override
+			public void onSuccess(Integer integer) {
+				Toast.makeText(getContext(), user.getDisplayName() + " is now your friend!", Toast.LENGTH_SHORT).show();
+			}
 
-					}
-				})
-				.setPositiveButton("Remove", new DialogInterface.OnClickListener() {
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						GetSocial.User.removeFriend(user.getId(), new Callback<Integer>() {
-							@Override
-							public void onSuccess(Integer integer) {
-								Toast.makeText(getContext(), user.getDisplayName() + " is not your friend anymore!", Toast.LENGTH_SHORT).show();
-							}
-
-							@Override
-							public void onFailure(GetSocialException exception) {
-								_log.logErrorAndToast("Failed to remove friend: " + exception.getMessage());
-							}
-						});
-					}
-				})
-				.show();
+			@Override
+			public void onFailure(GetSocialException exception) {
+				_log.logErrorAndToast("Failed to add friend: " + exception.getMessage());
+			}
+		});
 	}
 
-	private void showAddFriendDialog(final PublicUser user) {
-		new AlertDialog.Builder(getContext()).setTitle("Add friend")
-				.setMessage("Do you want to add user " + user.getDisplayName() + " to friends list?")
-				.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
+	private void removeFriend(final PublicUser user) {
+		GetSocial.User.removeFriend(user.getId(), new Callback<Integer>() {
+			@Override
+			public void onSuccess(Integer integer) {
+				Toast.makeText(getContext(), user.getDisplayName() + " is not your friend anymore!", Toast.LENGTH_SHORT).show();
+			}
 
-					}
-				})
-				.setPositiveButton("Add", new DialogInterface.OnClickListener() {
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						GetSocial.User.addFriend(user.getId(), new Callback<Integer>() {
-							@Override
-							public void onSuccess(Integer integer) {
-								Toast.makeText(getContext(), user.getDisplayName() + " is now your friend!", Toast.LENGTH_SHORT).show();
-							}
-
-							@Override
-							public void onFailure(GetSocialException exception) {
-								_log.logErrorAndToast("Failed to add friend: " + exception.getMessage());
-							}
-						});
-					}
-				})
-				.show();
+			@Override
+			public void onFailure(GetSocialException exception) {
+				_log.logErrorAndToast("Failed to remove friend: " + exception.getMessage());
+			}
+		});
 	}
 
 	private class OpenCustomFeedAction implements MenuItem.Action {
@@ -221,6 +256,39 @@ public class ActivitiesFragment extends BaseListFragment {
 		@Override
 		public void execute() {
 			GetSocialUi.createActivityFeedView(_feed)
+					.setButtonActionListener(new ActionButtonListener() {
+						@Override
+						public void onButtonClicked(String action, ActivityPost post) {
+							Toast.makeText(getContext(), "Activity Feed button clicked, action: " + action, Toast.LENGTH_SHORT).show();
+						}
+					})
+					.show();
+		}
+	}
+
+
+	private class OpenMyGlobalFeedAction implements MenuItem.Action {
+
+		@Override
+		public void execute() {
+			showGlobalFeedForCurrentUser();
+		}
+	}
+
+	private class OpenMyCustomFeedAction implements MenuItem.Action {
+
+		private final String _feed;
+
+		OpenMyCustomFeedAction(String feed) {
+			_feed = feed;
+		}
+
+		@Override
+		public void execute() {
+			GetSocialUi.createActivityFeedView(_feed)
+					.setFilterByUser(GetSocial.User.getId())
+					.setWindowTitle("My Custom Feed")
+					.setReadOnly(false)
 					.setButtonActionListener(new ActionButtonListener() {
 						@Override
 						public void onButtonClicked(String action, ActivityPost post) {

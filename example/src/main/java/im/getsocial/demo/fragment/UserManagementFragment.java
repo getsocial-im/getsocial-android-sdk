@@ -18,11 +18,17 @@ package im.getsocial.demo.fragment;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.Toast;
+import com.squareup.picasso.MemoryPolicy;
+import com.squareup.picasso.Picasso;
+import com.squareup.picasso.Target;
 import im.getsocial.demo.adapter.EnabledCheck;
 import im.getsocial.demo.adapter.MenuItem;
 import im.getsocial.demo.utils.PixelUtils;
@@ -35,7 +41,12 @@ import im.getsocial.sdk.usermanagement.AuthIdentityProviderIds;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.squareup.picasso.Picasso.with;
+
 public class UserManagementFragment extends BaseListFragment {
+
+	private static final int MAX_WIDTH = 500;
+	private static final int REQUEST_PICK_AVATAR = 0x1;
 
 	public UserManagementFragment() {
 	}
@@ -63,6 +74,15 @@ public class UserManagementFragment extends BaseListFragment {
 					@Override
 					public void execute() {
 						changeUserAvatar();
+					}
+				})
+				.build());
+
+		listData.add(new MenuItem.Builder("Choose Avatar")
+				.withAction(new MenuItem.Action() {
+					@Override
+					public void execute() {
+						pickImageFromDevice(REQUEST_PICK_AVATAR);
 					}
 				})
 				.build());
@@ -169,6 +189,47 @@ public class UserManagementFragment extends BaseListFragment {
 		return listData;
 	}
 
+	@Override
+	protected void onImagePickedFromDevice(Uri imageUri, int requestCode) {
+		if (requestCode == REQUEST_PICK_AVATAR) {
+			with(getContext())
+					.load(imageUri)
+					.resize(MAX_WIDTH, 0)
+					.memoryPolicy(MemoryPolicy.NO_CACHE)
+					.into(new Target() {
+						@Override
+						public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
+							setAvatarBitmap(bitmap);
+						}
+
+						@Override
+						public void onBitmapFailed(Drawable errorDrawable) {
+							showAlert("Error", "Failed to load image");
+						}
+
+						@Override
+						public void onPrepareLoad(Drawable placeHolderDrawable) {
+
+						}
+					});
+		}
+	}
+
+	private void setAvatarBitmap(Bitmap bitmap) {
+		GetSocial.User.setAvatar(bitmap, new SafeCompletionCallback() {
+			@Override
+			public void onSafeSuccess() {
+				_activityListener.invalidateUi();
+				Toast.makeText(getContext(), "Avatar has been changed successfully!", Toast.LENGTH_SHORT).show();
+			}
+
+			@Override
+			public void onSafeFailure(GetSocialException exception) {
+				Toast.makeText(getContext(), "Error changing avatar: \n" + exception.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
+			}
+		});
+	}
+
 	private void getPublicProperty() {
 		final EditText keyInput = new EditText(getContext());
 		final int _8dp = PixelUtils.dp2px(getContext(), 8);
@@ -244,7 +305,6 @@ public class UserManagementFragment extends BaseListFragment {
 				.create()
 				.show();
 	}
-
 
 	//region Presenter
 

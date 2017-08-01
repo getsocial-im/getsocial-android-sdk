@@ -21,6 +21,10 @@ import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.net.Uri;
+import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -33,6 +37,7 @@ import com.facebook.HttpMethod;
 import com.facebook.Profile;
 import com.facebook.login.LoginManager;
 import im.getsocial.demo.R;
+import im.getsocial.demo.utils.ImagePicker;
 import im.getsocial.demo.utils.SimpleLogger;
 import im.getsocial.sdk.CompletionCallback;
 import im.getsocial.sdk.GetSocial;
@@ -57,6 +62,7 @@ public abstract class BaseFragment extends Fragment implements HasTitle, HasFrag
 
 	protected ActivityListener _activityListener;
 	private ProgressDialog _currentProgressDialog;
+	private ImagePicker _imagePicker;
 
 	@Override
 	public void onAttach(Context context) {
@@ -74,6 +80,61 @@ public abstract class BaseFragment extends Fragment implements HasTitle, HasFrag
 			throw new ClassCastException(activity.toString()
 					+ " must implement ActivityListener");
 		}
+	}
+
+
+	@Override
+	public void onActivityResult(int requestCode, int resultCode, @android.support.annotation.Nullable Intent data) {
+		if (!(_imagePicker != null && _imagePicker.onActivityResult(requestCode, resultCode, data))) {
+			super.onActivityResult(requestCode, resultCode, data);
+		}
+	}
+
+	@Override
+	public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+		if (!(_imagePicker != null && _imagePicker.onRequestPermissionResult(requestCode, permissions, grantResults))) {
+			super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+		}
+	}
+
+	@Override
+	public void onSaveInstanceState(Bundle outState) {
+		if (_imagePicker != null) {
+			_imagePicker.onSaveInstanceState(outState);
+		}
+		super.onSaveInstanceState(outState);
+	}
+
+	@Override
+	public void onViewStateRestored(@android.support.annotation.Nullable Bundle savedInstanceState) {
+		if (_imagePicker != null) {
+			_imagePicker.onViewStateRestored(savedInstanceState);
+		}
+		super.onViewStateRestored(savedInstanceState);
+	}
+
+	protected void pickImageFromDevice(int requestCode) {
+		_imagePicker = new ImagePicker(this, requestCode);
+		_imagePicker.pickImageFromDevice(createImagePickerCallback());
+	}
+
+	private ImagePicker.Callback createImagePickerCallback() {
+		return new ImagePicker.Callback() {
+			@Override
+			public void onImageChosen(Uri imageUri, int requestCode) {
+				onImagePickedFromDevice(imageUri, requestCode);
+				_imagePicker = null;
+			}
+
+			@Override
+			public void onCancel() {
+				_imagePicker = null;
+			}
+		};
+	}
+
+	protected void onImagePickedFromDevice(Uri imageUri, int requestCode) {
+		// Override in children, if you need to handle image picking
 	}
 
 	protected void showLoading(String title, String text) {
