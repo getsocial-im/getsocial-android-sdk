@@ -25,8 +25,6 @@ import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.List;
 
-import static android.R.attr.screenOrientation;
-
 public class UiCustomizationFragment extends BaseListFragment {
 
 	public static final String UI_CONFIGURATION_NAME_KEY = "config_name";
