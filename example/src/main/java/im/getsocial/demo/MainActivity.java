@@ -355,9 +355,7 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Acti
 		}
 
 		private void updateView() {
-
 			_versionTextView.setText(getDemoAppInfo());
-			_userInfoView.updateView();
 
 			if (getSupportFragmentManager().getBackStackEntryCount() == 1) {
 				_toolbar.setNavigationIcon(null);

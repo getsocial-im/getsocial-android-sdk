@@ -59,7 +59,7 @@
 				tools:replace="android:theme"/>
 
 
-		<receiver android:name="im.getsocial.sdk.invites.InstallReferrerReceiver">
+		<receiver android:name="im.getsocial.sdk.invites.MultipleInstallReferrerReceiver">
 			<intent-filter>
 				<action android:name="com.android.vending.INSTALL_REFERRER"/>
 			</intent-filter>
