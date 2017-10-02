@@ -54,6 +54,9 @@ public class ActivitiesFragment extends BaseListFragment {
 				new MenuItem.Builder("My Global Activity Feed")
 						.withAction(new OpenMyGlobalFeedAction())
 						.build(),
+				new MenuItem.Builder("My Friends Global Feed")
+						.withAction(new OpenMyFriendsGlobalFeedAction())
+						.build(),
 				new MenuItem.Builder("My Custom Activity Feed")
 						.withAction(new OpenMyCustomFeedAction(CUSTOM_FEED_NAME))
 						.build(),
@@ -266,12 +269,27 @@ public class ActivitiesFragment extends BaseListFragment {
 		}
 	}
 
-
 	private class OpenMyGlobalFeedAction implements MenuItem.Action {
 
 		@Override
 		public void execute() {
 			showGlobalFeedForCurrentUser();
+		}
+	}
+
+	private class OpenMyFriendsGlobalFeedAction implements MenuItem.Action {
+
+		@Override
+		public void execute() {
+			GetSocialUi.createGlobalActivityFeedView()
+					.setButtonActionListener(new ActionButtonListener() {
+						@Override
+						public void onButtonClicked(String action, ActivityPost post) {
+							Toast.makeText(getContext(), "Activity Feed button clicked, action: " + action, Toast.LENGTH_SHORT).show();
+						}
+					})
+					.setShowFriendsFeed(true)
+					.show();
 		}
 	}
 
