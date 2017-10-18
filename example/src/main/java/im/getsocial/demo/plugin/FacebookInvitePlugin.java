@@ -43,7 +43,6 @@ public class FacebookInvitePlugin extends InviteChannelPlugin {
 	private final ConnectivityManager _connectivityManager;
 
 	public FacebookInvitePlugin(Activity activity, CallbackManager callbackManager) {
-		super(activity);
 		_activity = activity;
 		_callbackManager = callbackManager;
 		_connectivityManager = (ConnectivityManager) activity.getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -57,7 +56,7 @@ public class FacebookInvitePlugin extends InviteChannelPlugin {
 	@Override
 	public void presentChannelInterface(InviteChannel inviteChannel, InvitePackage invitePackage, final InviteCallback callback) {
 		if (isConnected()) {
-			AppInviteContent.Builder contentBuilder =new AppInviteContent.Builder();
+			AppInviteContent.Builder contentBuilder = new AppInviteContent.Builder();
 
 			contentBuilder.setApplinkUrl(invitePackage.getReferralUrl());
 			if (invitePackage.getImageUrl() != null && invitePackage.getImage() != null) {

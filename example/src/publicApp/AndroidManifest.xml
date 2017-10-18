@@ -39,35 +39,7 @@
 
 				<category android:name="android.intent.category.LAUNCHER"/>
 			</intent-filter>
-			<intent-filter>
-				<action android:name="android.intent.action.VIEW"/>
-
-				<category android:name="android.intent.category.DEFAULT"/>
-				<category android:name="android.intent.category.BROWSABLE"/>
-
-				<data
-						android:host="@string/get_social_app_id"
-						android:scheme="getsocial"/>
-			</intent-filter>
-
-			<!-- app-links support start -->
-			<intent-filter android:autoVerify="true">
-				<action android:name="android.intent.action.VIEW" />
-				<category android:name="android.intent.category.DEFAULT" />
-				<category android:name="android.intent.category.BROWSABLE" />
-				<data android:scheme="https" android:host="getsocialdemosdk6.testing.gsc.im" />
-				<data android:scheme="https" android:host="getsocialdemosdk6-gsalt.testing.gsc.im" />
-				<data android:scheme="https" android:host="getsocialdemosdk6.gsc.im" />
-				<data android:scheme="https" android:host="getsocialdemosdk6-gsalt.gsc.im" />
-			</intent-filter>
-			<!-- app-links support end -->
 		</activity>
-
-		<provider
-				android:authorities="${applicationId}.AutoInitSdkContentProvider"
-				android:exported="false"
-				android:enabled="true"
-				android:name="im.getsocial.sdk.AutoInitSdkContentProvider"/>
 
 	</application>
 

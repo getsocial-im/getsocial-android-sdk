@@ -37,7 +37,6 @@ public class KakaoInvitePlugin extends InviteChannelPlugin {
 	private final Activity _activity;
 
 	public KakaoInvitePlugin(Activity activity) {
-		super(activity);
 		_activity = activity;
 	}
 

@@ -19,10 +19,12 @@ package im.getsocial.demo.fragment;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import im.getsocial.demo.adapter.MenuItem;
+import im.getsocial.sdk.Callback;
 import im.getsocial.sdk.GetSocial;
 import im.getsocial.sdk.GetSocialException;
 import im.getsocial.sdk.invites.FetchReferralDataCallback;
 import im.getsocial.sdk.invites.ReferralData;
+import im.getsocial.sdk.invites.ReferredUser;
 import im.getsocial.sdk.ui.GetSocialUi;
 import im.getsocial.sdk.ui.invites.InviteUiCallback;
 
@@ -61,6 +63,15 @@ public class InvitesFragment extends BaseListFragment {
 					@Override
 					public void execute() {
 						checkReferralData();
+					}
+				})
+				.build());
+
+		listData.add(new MenuItem.Builder("Check Referred Users")
+				.withAction(new MenuItem.Action() {
+					@Override
+					public void execute() {
+						checkReferredUsers();
 					}
 				})
 				.build());
@@ -105,7 +116,30 @@ public class InvitesFragment extends BaseListFragment {
 
 			@Override
 			public void onFailure(GetSocialException e) {
-				_log.logInfoAndToast("Could not get referral data: "+e.getMessage());
+				_log.logInfoAndToast("Could not get referral data: " + e.getMessage());
+			}
+		});
+	}
+
+	private void checkReferredUsers() {
+		GetSocial.getReferredUsers(new Callback<List<ReferredUser>>() {
+			@Override
+			public void onSuccess(List<ReferredUser> result) {
+				if (result.size() > 0) {
+					String message = "";
+					for (ReferredUser referredUser : result) {
+						message += referredUser.getDisplayName() + ",";
+					}
+					message = message.substring(0, message.length() - 1);
+					_log.logInfoAndToast("Referred users: " + message);
+				} else {
+					_log.logInfoAndToast("No referred users.");
+				}
+			}
+
+			@Override
+			public void onFailure(GetSocialException exception) {
+				_log.logInfoAndToast("Could not get referred users: " + exception.getMessage());
 			}
 		});
 	}

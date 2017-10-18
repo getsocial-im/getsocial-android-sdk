@@ -182,7 +182,6 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Acti
 
 	protected void setupGetSocial() {
 		Console.logInfo(getDemoAppInfo());
-
 		GetSocial.registerInviteChannelPlugin(InviteChannelIds.KAKAO, new KakaoInvitePlugin(this));
 		GetSocial.registerInviteChannelPlugin(InviteChannelIds.FACEBOOK, new FacebookInvitePlugin(this, _facebookCallbackManager));
 		GetSocial.setNotificationActionListener(new NotificationActionListener() {
