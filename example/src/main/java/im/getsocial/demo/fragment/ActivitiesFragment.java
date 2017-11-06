@@ -28,6 +28,7 @@ import im.getsocial.sdk.activities.ActivitiesQuery;
 import im.getsocial.sdk.activities.ActivityPost;
 import im.getsocial.sdk.ui.AvatarClickListener;
 import im.getsocial.sdk.ui.GetSocialUi;
+import im.getsocial.sdk.ui.MentionClickListener;
 import im.getsocial.sdk.ui.UiAction;
 import im.getsocial.sdk.ui.UiActionListener;
 import im.getsocial.sdk.ui.ViewStateListener;
@@ -82,64 +83,18 @@ public class ActivitiesFragment extends BaseListFragment {
 		return "Activities";
 	}
 
-	private class OpenGlobalFeedAction implements MenuItem.Action {
+	private void getUserAndShowActionDialog(String userId) {
+		GetSocial.getUserById(userId, new Callback<PublicUser>() {
+			@Override
+			public void onSuccess(PublicUser user) {
+				showUserActionDialog(user);
+			}
 
-		@Override
-		public void execute() {
-			GetSocialUi.createGlobalActivityFeedView()
-					.setButtonActionListener(new ActionButtonListener() {
-						@Override
-						public void onButtonClicked(String action, ActivityPost post) {
-							if ("CloseAndRestore".equalsIgnoreCase(action)) {
-								GetSocialUi.closeView(true);
-								new AlertDialog.Builder(getContext())
-										.setPositiveButton("Restore View", new DialogInterface.OnClickListener() {
-											@Override
-											public void onClick(DialogInterface dialogInterface, int i) {
-												GetSocialUi.restoreView();
-											}
-										})
-										.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-											@Override
-											public void onClick(DialogInterface dialog, int which) {
-
-											}
-										}).show();
-							}
-							Toast.makeText(getContext(), "Activity Feed button clicked, action: " + action, Toast.LENGTH_SHORT).show();
-						}
-					})
-					.setViewStateListener(new ViewStateListener() {
-						@Override
-						public void onOpen() {
-							_log.logInfoAndToast("Global feed was opened");
-						}
-
-						@Override
-						public void onClose() {
-							_log.logInfoAndToast("Global feed was closed");
-						}
-					})
-					.setUiActionListener(new UiActionListener() {
-						@Override
-						public void onUiAction(UiAction action, UiAction.Pending pendingAction) {
-							final String actionDescription = action.name().replace("_", " ").toLowerCase();
-							_log.logInfoAndToast("User is going to " + actionDescription);
-							if (GetSocial.User.isAnonymous() && FORBIDDEN_FOR_ANONYMOUS.contains(action)) {
-								showAuthorizeUserDialogForPendingAction(actionDescription, pendingAction);
-							} else {
-								pendingAction.proceed();
-							}
-						}
-					})
-					.setAvatarClickListener(new AvatarClickListener() {
-						@Override
-						public void onAvatarClicked(PublicUser user) {
-							showUserActionDialog(user);
-						}
-					})
-					.show();
-		}
+			@Override
+			public void onFailure(GetSocialException exception) {
+				_log.logErrorAndToast("Failed to get user: " + exception.getMessage());
+			}
+		});
 	}
 
 	private void showUserActionDialog(final PublicUser user) {
@@ -246,6 +201,72 @@ public class ActivitiesFragment extends BaseListFragment {
 				_log.logErrorAndToast("Failed to remove friend: " + exception.getMessage());
 			}
 		});
+	}
+
+	private class OpenGlobalFeedAction implements MenuItem.Action {
+
+		@Override
+		public void execute() {
+			GetSocialUi.createGlobalActivityFeedView()
+					.setButtonActionListener(new ActionButtonListener() {
+						@Override
+						public void onButtonClicked(String action, ActivityPost post) {
+							if ("CloseAndRestore".equalsIgnoreCase(action)) {
+								GetSocialUi.closeView(true);
+								new AlertDialog.Builder(getContext())
+										.setPositiveButton("Restore View", new DialogInterface.OnClickListener() {
+											@Override
+											public void onClick(DialogInterface dialogInterface, int i) {
+												GetSocialUi.restoreView();
+											}
+										})
+										.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+											@Override
+											public void onClick(DialogInterface dialog, int which) {
+
+											}
+										}).show();
+							}
+							Toast.makeText(getContext(), "Activity Feed button clicked, action: " + action, Toast.LENGTH_SHORT).show();
+						}
+					})
+					.setViewStateListener(new ViewStateListener() {
+						@Override
+						public void onOpen() {
+							_log.logInfoAndToast("Global feed was opened");
+						}
+
+						@Override
+						public void onClose() {
+							_log.logInfoAndToast("Global feed was closed");
+						}
+					})
+					.setUiActionListener(new UiActionListener() {
+						@Override
+						public void onUiAction(UiAction action, UiAction.Pending pendingAction) {
+							final String actionDescription = action.name().replace("_", " ").toLowerCase();
+							_log.logInfoAndToast("User is going to " + actionDescription);
+							if (GetSocial.User.isAnonymous() && FORBIDDEN_FOR_ANONYMOUS.contains(action)) {
+								showAuthorizeUserDialogForPendingAction(actionDescription, pendingAction);
+							} else {
+								pendingAction.proceed();
+							}
+						}
+					})
+					.setAvatarClickListener(new AvatarClickListener() {
+						@Override
+						public void onAvatarClicked(PublicUser user) {
+							showUserActionDialog(user);
+						}
+					})
+					.setMentionClickListener(new MentionClickListener() {
+						@Override
+						public void onMentionClicked(String userId) {
+							getUserAndShowActionDialog(userId);
+						}
+					})
+					.show();
+		}
 	}
 
 	private class OpenCustomFeedAction implements MenuItem.Action {

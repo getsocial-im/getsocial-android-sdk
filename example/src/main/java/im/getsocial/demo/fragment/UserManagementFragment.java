@@ -186,7 +186,17 @@ public class UserManagementFragment extends BaseListFragment {
 					}
 				}).build()
 		);
+
+		listData.add(new MenuItem.Builder("Log out")
+				.withAction(new MenuItem.Action() {
+					@Override
+					public void execute() {
+						logOut();
+					}
+				}).build()
+		);
 		return listData;
+
 	}
 
 	@Override
@@ -377,6 +387,23 @@ public class UserManagementFragment extends BaseListFragment {
 		removeUserIdentity(CUSTOM_PROVIDER);
 	}
 
+	private void logOut() {
+		showLoading("Log Out", "Wait...");
+		GetSocial.User.reset(new CompletionCallback() {
+			@Override
+			public void onSuccess() {
+				invalidateUi();
+				hideLoading();
+				Toast.makeText(getContext(), "User has been successfully logged out!", Toast.LENGTH_SHORT).show();
+			}
+
+			@Override
+			public void onFailure(GetSocialException exception) {
+				hideLoading();
+				Toast.makeText(getContext(), "Failed to log out user, error: " + exception.getMessage(), Toast.LENGTH_SHORT).show();
+			}
+		});
+	}
 	//endregion
 
 	//region helpers

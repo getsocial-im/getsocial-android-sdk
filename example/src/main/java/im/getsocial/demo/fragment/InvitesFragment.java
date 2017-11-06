@@ -28,7 +28,9 @@ import im.getsocial.sdk.invites.ReferredUser;
 import im.getsocial.sdk.ui.GetSocialUi;
 import im.getsocial.sdk.ui.invites.InviteUiCallback;
 
+import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class InvitesFragment extends BaseListFragment {
@@ -128,9 +130,9 @@ public class InvitesFragment extends BaseListFragment {
 				if (result.size() > 0) {
 					String message = "";
 					for (ReferredUser referredUser : result) {
-						message += referredUser.getDisplayName() + ",";
+						message += formatReferredUserInfo(referredUser) + ", ";
 					}
-					message = message.substring(0, message.length() - 1);
+					message = message.substring(0, message.length() - 2);
 					_log.logInfoAndToast("Referred users: " + message);
 				} else {
 					_log.logInfoAndToast("No referred users.");
@@ -152,6 +154,12 @@ public class InvitesFragment extends BaseListFragment {
 	@Override
 	public String getFragmentTag() {
 		return "invites";
+	}
+	//endregion
+
+	//region private
+	private static String formatReferredUserInfo(ReferredUser referredUser) {
+		return String.format("%s(on %s via %s)", referredUser.getDisplayName(), DateFormat.getDateTimeInstance().format(new Date(referredUser.getInstallationDate() * 1000)), referredUser.getInstallationChannel());
 	}
 	//endregion
 

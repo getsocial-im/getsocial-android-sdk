@@ -96,6 +96,7 @@
             "text-style": "content",
             "bg-color": "0xFFF7F7F7",
             "hint-color": "0xFF666666",
+            "highlight-color": "0xFFFFF6D1",
             "border-size": 0,
             "border-color": "0x00000000",
             "radius": 3
@@ -178,7 +179,8 @@
         "activity-image": {
             "aspect-ratio": "16:9",
             "radius": 3,
-            "default-image": "activity-image.default-image.png"
+            "default-image": "activity-image.default-image.png",
+            "video-overlay-color": "0x99323945"
         },
         "activity-not-found-placeholder": {
             "bg-image": "activity-not-found.bg-image.png"

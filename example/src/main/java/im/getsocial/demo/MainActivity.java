@@ -200,6 +200,7 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Acti
 		GetSocial.whenInitialized(new Runnable() {
 			@Override
 			public void run() {
+				invalidateUi();
 				GetSocial.getReferralData(new FetchReferralDataCallback() {
 					@Override
 					public void onSuccess(@Nullable ReferralData referralData) {
