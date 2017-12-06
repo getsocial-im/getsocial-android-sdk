@@ -1,15 +1,15 @@
 {
     "base-design": {
         "scale-mode": "scale-with-screen-size",
-        "width": 320,
-        "height": 640,
+        "width": 640,
+        "height": 320,
         "ppi": 72
     },
-    "assets-base-path": "getsocial_dark",
+    "assets-base-path": "getsocial-dark-landscape",
     "elements": {
         "window": {
-            "width": 320,
-            "height": 620,
+            "width": 500,
+            "height": 320,
             "bg-color": "0xFF232323",
             "tint-color": "0xCC000000",
             "animation-style": "scale"

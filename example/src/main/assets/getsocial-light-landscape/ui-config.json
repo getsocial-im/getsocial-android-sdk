@@ -5,18 +5,18 @@
         "height": 320,
         "ppi": 72
     },
-    "assets-base-path": "getsocial_dark",
+    "assets-base-path": "getsocial-light-landscape",
     "elements": {
         "window": {
             "width": 500,
             "height": 320,
-            "bg-color": "0xFF232323",
+            "bg-color": "0xFFFFFFFF",
             "tint-color": "0xCC000000",
             "animation-style": "scale"
         },
         "header": {
             "height": 38,
-            "bg-color": "0xFF242525",
+            "bg-color": "0xFFFFFFFF",
             "padding-top": 2,
             "padding-bottom": 0
         },
@@ -93,19 +93,19 @@
             "text-style": "overscroll"
         },
         "input-field": {
-            "text-style": "input-field",
-            "bg-color": "0xFF454546",
-            "hint-color": "0xFFFFFFFF",
+            "text-style": "content",
+            "bg-color": "0xFFF7F7F7",
+            "hint-color": "0xFF666666",
             "highlight-color": "0xFFFFF6D1",
             "border-size": 0,
             "border-color": "0x00000000",
             "radius": 3
         },
         "activity-input-bar": {
-            "bg-color": "0xFF303031"
+            "bg-color": "0xFFFFFFFF"
         },
         "comment-input-bar": {
-            "bg-color": "0xFF303031"
+            "bg-color": "0xFFFFFFFF"
         },
         "avatar": {
             "border-size": 0,
@@ -169,8 +169,8 @@
             "bg-image": "invite-provider-placeholder.bg-image.png"
         },
         "list-item": {
-            "bg-color-odd": "0xFF383838",
-            "bg-color-even": "0xFF262626"
+            "bg-color-odd": "0xFFFFFFFF",
+            "bg-color-even": "0xFFFFFFFF"
         },
         "notification-list-item": {
             "bg-color-read": "0xFFFFFFFF",
@@ -188,29 +188,24 @@
     },
     "text-styles": {
         "header": {
-            "font": "SourceSansPro-Regular.ttf",
-            "font-size": 20,
-            "font-color": "0xFFFFFFFF"
+            "font": "Lato-Bold.ttf",
+            "font-size": 26,
+            "font-color": "0xFF2e2e2e"
         },
-        "content" : {
-            "font": "SourceSansPro-Semibold.ttf",
+        "content": {
+            "font": "Lato-Regular.ttf",
             "font-size": 16,
-            "font-color": "0xFF999999"
-        },
-        "input-field": {
-            "font": "SourceSansPro-Regular.ttf",
-            "font-size": 16,
-            "font-color": "0xFFFFFFFF"
+            "font-color": "0xFF4c4c4c"
         },
         "entity": {
-            "font": "SourceSansPro-Semibold.ttf",
+            "font": "Lato-Regular.ttf",
             "font-size": 18,
-            "font-color": "0xFFFFFFFF"
+            "font-color": "0xFF323945"
         },
         "timestamp": {
-            "font": "SourceSansPro-Regular.ttf",
+            "font": "Lato-Regular.ttf",
             "font-size": 16,
-            "font-color": "0xFF999999"
+            "font-color": "0xFF949294"
         },
         "segment": {
             "font": "HelveticaNeue-Bold",
@@ -223,32 +218,32 @@
             "font-color": "0xFFFFFFFF"
         },
         "link": {
-            "font": "SourceSansPro-Semibold.ttf",
+            "font": "Lato-Bold.ttf",
             "font-size": 18,
-            "font-color": "0xFF488ee7"
+            "font-color": "0xFF333333"
         },
         "placeholderTitle": {
-            "font": "SourceSansPro-Bold.ttf",
+            "font": "HelveticaNeue-Bold",
             "font-size": 18,
             "font-color": "0xFF9EA6B2"
         },
         "placeholderContent": {
-            "font": "SourceSansPro-Regular.ttf",
+            "font": "HelveticaNeue",
             "font-size": 16,
             "font-color": "0xFF9EA6B2"
         },
         "overscroll": {
-            "font": "SourceSansPro-Regular.ttf",
+            "font": "HelveticaNeue",
             "font-size": 12,
             "font-color": "0xFF9EA6B2"
         },
         "inputField": {
-            "font": "SourceSansPro-Regular.ttf",
+            "font": "Lato-Regular.ttf",
             "font-size": 16,
             "font-color": "0xFF666666"
         },
         "call-to-action": {
-            "font": "SourceSansPro-Bold.ttf",
+            "font": "HelveticaNeue-Bold",
             "font-size": 16,
             "font-color": "0xFFFFFFFF"
         }

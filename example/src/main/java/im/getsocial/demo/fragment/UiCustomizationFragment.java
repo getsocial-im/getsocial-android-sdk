@@ -43,31 +43,31 @@ public class UiCustomizationFragment extends BaseListFragment {
 						.withAction(new MenuItem.Action() {
 							@Override
 							public void execute() {
-								loadConfiguration("getsocial/ui-landscape.json",
+								loadConfiguration("getsocial-default-landscape/ui-config.json",
 										"Default Landscape", ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
 							}
 						}).build(),
-				new MenuItem.Builder("White UI - Portrait")
+				new MenuItem.Builder("Light UI - Portrait")
 						.withAction(new MenuItem.Action() {
 							@Override
 							public void execute() {
-								loadConfiguration("getsocial_white/getsocial_white.json",
-										"White UI - Portrait", ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+								loadConfiguration("getsocial-light/ui-config.json",
+										"Light UI - Portrait", ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 							}
 						}).build(),
-				new MenuItem.Builder("White UI - Landscape")
+				new MenuItem.Builder("Light UI - Landscape")
 						.withAction(new MenuItem.Action() {
 							@Override
 							public void execute() {
-								loadConfiguration("getsocial_white_landscape/getsocial_white.json",
-										"White UI - Landscape", ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+								loadConfiguration("getsocial-light-landscape/ui-config.json",
+										"Light UI - Landscape", ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
 							}
 						}).build(),
 				new MenuItem.Builder("Dark UI - Portrait")
 						.withAction(new MenuItem.Action() {
 							@Override
 							public void execute() {
-								loadConfiguration("getsocial_dark/getsocial_dark.json",
+								loadConfiguration("getsocial-dark/ui-config.json",
 										"Dark UI - Portrait", ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 							}
 						}).build(),
@@ -75,7 +75,7 @@ public class UiCustomizationFragment extends BaseListFragment {
 						.withAction(new MenuItem.Action() {
 							@Override
 							public void execute() {
-								loadConfiguration("getsocial_dark_landscape/getsocial_dark.json",
+								loadConfiguration("getsocial-dark-landscape/ui-config.json",
 										"Dark UI - Landscape", ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
 							}
 						}).build()

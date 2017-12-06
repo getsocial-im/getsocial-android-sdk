@@ -83,8 +83,12 @@ public class ActivitiesFragment extends BaseListFragment {
 		return "Activities";
 	}
 
-	private void getUserAndShowActionDialog(String userId) {
-		GetSocial.getUserById(userId, new Callback<PublicUser>() {
+	private void getUserAndShowActionDialog(String mention) {
+		if (mention.equals(MentionClickListener.APP_SHORTCUT)) {
+			Toast.makeText(getContext(), "Application mention clicked.", Toast.LENGTH_SHORT).show();
+			return;
+		}
+		GetSocial.getUserById(mention, new Callback<PublicUser>() {
 			@Override
 			public void onSuccess(PublicUser user) {
 				showUserActionDialog(user);
@@ -261,8 +265,8 @@ public class ActivitiesFragment extends BaseListFragment {
 					})
 					.setMentionClickListener(new MentionClickListener() {
 						@Override
-						public void onMentionClicked(String userId) {
-							getUserAndShowActionDialog(userId);
+						public void onMentionClicked(String mention) {
+							getUserAndShowActionDialog(mention);
 						}
 					})
 					.show();

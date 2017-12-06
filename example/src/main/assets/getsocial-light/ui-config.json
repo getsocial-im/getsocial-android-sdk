@@ -5,7 +5,7 @@
         "height": 640,
         "ppi": 72
     },
-    "assets-base-path": "getsocial_white",
+    "assets-base-path": "getsocial-light",
     "elements": {
         "window": {
             "width": 300,
