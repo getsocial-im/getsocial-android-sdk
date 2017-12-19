@@ -29,6 +29,7 @@ import im.getsocial.sdk.activities.ActivityPost;
 import im.getsocial.sdk.ui.AvatarClickListener;
 import im.getsocial.sdk.ui.GetSocialUi;
 import im.getsocial.sdk.ui.MentionClickListener;
+import im.getsocial.sdk.ui.TagClickListener;
 import im.getsocial.sdk.ui.UiAction;
 import im.getsocial.sdk.ui.UiActionListener;
 import im.getsocial.sdk.ui.ViewStateListener;
@@ -81,6 +82,14 @@ public class ActivitiesFragment extends BaseListFragment {
 	@Override
 	public String getTitle() {
 		return "Activities";
+	}
+
+	private void openGlobalFeedForTag(String tag) {
+		GetSocialUi.createGlobalActivityFeedView()
+				.setWindowTitle(String.format("Search #%s", tag))
+				.setFilterByTags(tag)
+				.setReadOnly(true)
+				.show();
 	}
 
 	private void getUserAndShowActionDialog(String mention) {
@@ -267,6 +276,12 @@ public class ActivitiesFragment extends BaseListFragment {
 						@Override
 						public void onMentionClicked(String mention) {
 							getUserAndShowActionDialog(mention);
+						}
+					})
+					.setTagClickListener(new TagClickListener() {
+						@Override
+						public void onTagClicked(String tag) {
+							openGlobalFeedForTag(tag);
 						}
 					})
 					.show();

@@ -59,12 +59,10 @@
 		<!-- android:name="com.google.android.gms.version" -->
 		<!-- android:value="@integer/google_play_services_version"/> -->
 		<meta-data
-				android:name="io.fabric.ApiKey"
-				android:value="d17264f29ed88bb09608a1525b67b047f760af31"/>
-		<meta-data
 				android:name="com.kakao.sdk.AppKey"
 				android:value="@string/kakao_app_key"/>
 
+		<meta-data android:name="firebase_crashlytics_collection_enabled" android:value="false" />
 
 	</application>
 

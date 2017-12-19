@@ -35,6 +35,7 @@ import android.widget.TextView;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import com.crashlytics.android.Crashlytics;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookSdk;
 import im.getsocial.demo.dialog.NewFriendDialog;
@@ -63,6 +64,7 @@ import im.getsocial.sdk.pushnotifications.OpenProfileAction;
 import im.getsocial.sdk.ui.GetSocialUi;
 import im.getsocial.sdk.usermanagement.OnUserChangedListener;
 import im.getsocial.sdk.usermanagement.PublicUser;
+import io.fabric.sdk.android.Fabric;
 
 import java.util.HashMap;
 import java.util.Locale;
@@ -83,6 +85,7 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Acti
 	@Override
 	protected void onCreate(@Nullable Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		initCrashlytics();
 		_log = new SimpleLogger(this, getClass().getSimpleName());
 		setContentView(R.layout.activity_main);
 		_viewContainer = new ViewContainer(this);
@@ -298,6 +301,13 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Acti
 		setupGetSocial();
 	}
 
+	private void initCrashlytics() {
+		final Fabric fabric = new Fabric.Builder(this)
+				.kits(new Crashlytics())
+				.debuggable(true)           // Enables Crashlytics debugger
+				.build();
+		Fabric.with(fabric);
+	}
 	//endregion
 
 	//region GetSocial listeners
