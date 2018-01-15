@@ -47,6 +47,7 @@ import im.getsocial.demo.fragment.HasFragmentTag;
 import im.getsocial.demo.fragment.HasTitle;
 import im.getsocial.demo.fragment.RootFragment;
 import im.getsocial.demo.plugin.FacebookInvitePlugin;
+import im.getsocial.demo.plugin.FacebookSharePlugin;
 import im.getsocial.demo.plugin.KakaoInvitePlugin;
 import im.getsocial.demo.ui.UserInfoView;
 import im.getsocial.demo.utils.CompatibilityUtils;
@@ -186,7 +187,7 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Acti
 	protected void setupGetSocial() {
 		Console.logInfo(getDemoAppInfo());
 		GetSocial.registerInviteChannelPlugin(InviteChannelIds.KAKAO, new KakaoInvitePlugin(this));
-		GetSocial.registerInviteChannelPlugin(InviteChannelIds.FACEBOOK, new FacebookInvitePlugin(this, _facebookCallbackManager));
+		GetSocial.registerInviteChannelPlugin(InviteChannelIds.FACEBOOK, new FacebookSharePlugin(this, _facebookCallbackManager));
 		GetSocial.setNotificationActionListener(new NotificationActionListener() {
 
 			public boolean onActionReceived(NotificationAction action) {

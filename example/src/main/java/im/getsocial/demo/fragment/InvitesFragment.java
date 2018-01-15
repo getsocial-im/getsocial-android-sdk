@@ -86,7 +86,7 @@ public class InvitesFragment extends BaseListFragment {
 		GetSocialUi.createInvitesView().setInviteCallback(new InviteUiCallback() {
 			@Override
 			public void onComplete(final String channelId) {
-				_log.logInfoAndToast("Invite channel launched successfully.");
+				_log.logInfoAndToast("Invite was successfully sent.");
 			}
 
 			@Override

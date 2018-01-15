@@ -34,8 +34,12 @@ import im.getsocial.sdk.invites.InvitePackage;
 
 /**
  * Invite Channel Plugin for GetSocial SDK. 
- * Register plugin via {@link GetSocial#registerInviteChannelPlugin(String pliginId, InviteChannelPlugin plugin)}.
+ * Register plugin via {@link GetSocial#registerInviteChannelPlugin(String pluginId, InviteChannelPlugin plugin)}.
+ * @deprecated use {@link im.getsocial.demo.plugin.FacebookSharePlugin} ()} instead.
+ * Facebook is deprecating App Invites from February 5, 2018: https://developers.facebook.com/blog/post/2017/11/07/changes-developer-offerings/
+ * More: https://blog.getsocial.im/facebook-deprecates-app-invites-are-you-ready/
  */
+@Deprecated
 public class FacebookInvitePlugin extends InviteChannelPlugin {
 
 	private final Activity _activity;

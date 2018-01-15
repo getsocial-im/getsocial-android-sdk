@@ -2,19 +2,20 @@ buildscript {
 	repositories {
 		jcenter()
 		maven { url "https://maven.fabric.io/public" }
+		maven { url "https://plugins.gradle.org/m2/" }
 	}
 	dependencies {
 		classpath "com.android.tools.build:gradle:2.3.3"
 		classpath 'com.neenbedankt.gradle.plugins:android-apt:1.8'
 		classpath 'com.google.gms:google-services:3.0.0'
 		classpath 'io.fabric.tools:gradle:1.24.4'
+		classpath "gradle.plugin.im.getsocial:plugin:[0,1)"
 	}
 }
 
 repositories {
 	jcenter()
 	mavenLocal()
-	maven { url 'http://maven.getsocial.im/' }
 	maven { url 'http://devrepo.kakao.com:8088/nexus/content/groups/public/' }
 	maven { url 'https://maven.google.com/' }
 }
@@ -23,11 +24,13 @@ apply plugin: 'com.android.application'
 apply plugin: 'com.neenbedankt.android-apt'
 apply plugin: 'com.google.gms.google-services'
 apply plugin: 'io.fabric'
+apply plugin: 'im.getsocial'
+
+getsocial {
+	appId "LGa80P9790g4"
+}
 
 dependencies {
-	compile('im.getsocial:getsocial-core:[6,7)@aar')
-	compile('im.getsocial:getsocial-ui:[6,7)@aar') // Note: add this dependency only if you plan to use GetSocial UI
-
 	compile 'com.kakao.sdk:kakaolink:1.0.52'
 	compile 'com.facebook.android:facebook-android-sdk:4.18.0'
 
@@ -49,6 +52,11 @@ dependencies {
 	compile('com.crashlytics.sdk.android:crashlytics:2.7.1@aar') {
 		transitive = true
 	}
+
+	//adjust partnership
+	compile 'com.adjust.sdk:adjust-android:4.12.0'
+	compile 'com.android.installreferrer:installreferrer:1.0'
+
 }
 
 
