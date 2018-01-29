@@ -32,6 +32,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -59,9 +60,8 @@ import im.getsocial.sdk.GetSocialException;
 import im.getsocial.sdk.invites.FetchReferralDataCallback;
 import im.getsocial.sdk.invites.InviteChannelIds;
 import im.getsocial.sdk.invites.ReferralData;
-import im.getsocial.sdk.pushnotifications.NotificationAction;
-import im.getsocial.sdk.pushnotifications.NotificationActionListener;
-import im.getsocial.sdk.pushnotifications.OpenProfileAction;
+import im.getsocial.sdk.pushnotifications.Notification;
+import im.getsocial.sdk.pushnotifications.NotificationListener;
 import im.getsocial.sdk.ui.GetSocialUi;
 import im.getsocial.sdk.usermanagement.OnUserChangedListener;
 import im.getsocial.sdk.usermanagement.PublicUser;
@@ -188,12 +188,16 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Acti
 		Console.logInfo(getDemoAppInfo());
 		GetSocial.registerInviteChannelPlugin(InviteChannelIds.KAKAO, new KakaoInvitePlugin(this));
 		GetSocial.registerInviteChannelPlugin(InviteChannelIds.FACEBOOK, new FacebookSharePlugin(this, _facebookCallbackManager));
-		GetSocial.setNotificationActionListener(new NotificationActionListener() {
+		GetSocial.setNotificationListener(new NotificationListener() {
 
-			public boolean onActionReceived(NotificationAction action) {
-				if (action.getAction() == NotificationAction.Type.OPEN_PROFILE) {
-					OpenProfileAction openProfileAction = (OpenProfileAction) action;
-					showNewFriend(openProfileAction.getUserId());
+			public boolean onNotificationReceived(Notification notification, boolean wasClicked) {
+				if (!wasClicked) {
+					Toast.makeText(MainActivity.this, notification.getText(), Toast.LENGTH_SHORT).show();
+					return true;
+				}
+				if (notification.getAction() == Notification.Type.OPEN_PROFILE) {
+					final String userId = notification.getActionData().get(Notification.Key.OpenProfile.USER_ID);
+					showNewFriend(userId);
 					return true;
 				}
 				return false;

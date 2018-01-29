@@ -28,8 +28,10 @@ import android.widget.Button;
 import android.widget.TextView;
 import im.getsocial.demo.R;
 import im.getsocial.demo.ui.UserInfoView;
+import im.getsocial.json.simple.JSONValue;
 import im.getsocial.sdk.GetSocial;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public class UserInfoDialog extends DialogFragment {
@@ -73,6 +75,15 @@ public class UserInfoDialog extends DialogFragment {
 		}
 		UserInfoBuilder sb = new UserInfoBuilder();
 
+		Map<String, Object> userDetails = new HashMap<String, Object>();
+		userDetails.put("Anonymous", GetSocial.User.isAnonymous());
+		userDetails.put("User ID", GetSocial.User.getId());
+		userDetails.put("Display Name", GetSocial.User.getDisplayName());
+		userDetails.put("Avatar URL", GetSocial.User.getAvatarUrl());
+		userDetails.put("Identities", GetSocial.User.getAuthIdentities());
+		userDetails.put("Public Properties", GetSocial.User.getAllPublicProperties());
+		userDetails.put("Private Properties", GetSocial.User.getAllPrivateProperties());
+
 		sb.append("Anonymous: ").append(GetSocial.User.isAnonymous())
 				.endLine()
 				.append("User ID: ").append(GetSocial.User.getId()).endLine()
@@ -88,6 +99,9 @@ public class UserInfoDialog extends DialogFragment {
 
 		sb.append("PRIVATE PROPERTIES:").endLine()
 				.append(GetSocial.User.getAllPrivateProperties());
+
+		sb.append("JSON:").endLine()
+				.append(JSONValue.toJSONString(userDetails));
 
 		return sb.toString();
 	}
