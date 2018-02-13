@@ -7,6 +7,10 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 import com.adjust.sdk.Adjust;
 import com.adjust.sdk.AdjustConfig;
+import com.appsflyer.AppsFlyerConversionListener;
+import com.appsflyer.AppsFlyerLib;
+
+import java.util.Map;
 
 /**
  * Created by orestsavchak on 1/4/18.
@@ -14,10 +18,17 @@ import com.adjust.sdk.AdjustConfig;
 
 public class DemoApplication extends Application {
 
+	private static final String ADJUST_TOKEN = "im.getsocial.demo.adjust.AppToken";
+
 	@Override
 	public void onCreate() {
 		super.onCreate();
-		String appToken = getTokenFromMetaData();
+		configureAdjust();
+		configureAppsFlyer();
+	}
+
+	private void configureAdjust() {
+		String appToken = getTokenFromMetaData(ADJUST_TOKEN);
 		if (appToken == null) {
 			return;
 		}
@@ -28,15 +39,18 @@ public class DemoApplication extends Application {
 		registerActivityLifecycleCallbacks(new AdjustLifecycleCallbacks());
 	}
 
-	private String getTokenFromMetaData() {
-		ApplicationInfo app;
+	private void configureAppsFlyer() {
+		AppsFlyerLib.getInstance().setDebugLog(true);
+		AppsFlyerLib.getInstance().init("AP8P3GvwHgw9NBdBTWAqrb", null, getApplicationContext());
+		AppsFlyerLib.getInstance().startTracking(this);
+	}
+
+	private String getTokenFromMetaData(String key) {
 		try {
-			app = getPackageManager().getApplicationInfo(getPackageName(), PackageManager.GET_META_DATA);
+			return getPackageManager().getApplicationInfo(getPackageName(), PackageManager.GET_META_DATA).metaData.getString(key);
 		} catch (PackageManager.NameNotFoundException e) {
 			return null;
 		}
-		Bundle bundle = app.metaData;
-		return bundle.getString("im.getsocial.demo.adjust.AppToken");
 	}
 
 	private static class AdjustLifecycleCallbacks implements ActivityLifecycleCallbacks {

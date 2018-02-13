@@ -37,6 +37,7 @@ import butterknife.ButterKnife;
 import butterknife.OnCheckedChanged;
 import butterknife.OnClick;
 import com.squareup.picasso.MemoryPolicy;
+import com.squareup.picasso.Picasso;
 import im.getsocial.demo.R;
 import im.getsocial.sdk.Callback;
 import im.getsocial.sdk.GetSocial;
@@ -48,6 +49,8 @@ import im.getsocial.sdk.ui.UiAction;
 import im.getsocial.sdk.ui.activities.ActionButtonListener;
 import im.getsocial.sdk.ui.activities.ActivityFeedViewBuilder;
 
+import java.io.IOException;
+
 import static com.squareup.picasso.Picasso.with;
 
 public class PostActivityFragment extends BaseFragment implements Callback<ActivityPost> {
@@ -56,6 +59,7 @@ public class PostActivityFragment extends BaseFragment implements Callback<Activ
 	private static final int REQUEST_PICK_CUSTOM_IMAGE = 0x1;
 
 	private ViewContainer _viewContainer;
+	private Bitmap _originalImage;
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -79,9 +83,12 @@ public class PostActivityFragment extends BaseFragment implements Callback<Activ
 	}
 
 	private void doPost() {
+		showLoading("Posting activity", "Wait...");
+		_viewContainer._image.setEnabled(false);
+
 		final String text = _viewContainer._postText.getText().toString();
 
-		final Bitmap bitmap = _viewContainer._image.getDrawable() == null ? null : ((BitmapDrawable)_viewContainer._image.getDrawable()).getBitmap();
+		final Bitmap bitmap = _originalImage == null ? null : _originalImage;
 
 		final String buttonTitle = _viewContainer._buttonTitle.getText().toString();
 		final String buttonAction = _viewContainer._buttonAction.getText().toString();
@@ -94,11 +101,14 @@ public class PostActivityFragment extends BaseFragment implements Callback<Activ
 
 		if (!hasText && !hasButton && !hasImage) {
 			hideLoadingAndShowError("Can not post activity without any data");
+			_viewContainer._image.setEnabled(true);
 			return;
 		}
 
 		boolean postToGlobalFeed = _viewContainer._feed.getSelectedItemPosition() == 0;
 		if (postToGlobalFeed && GetSocial.User.isAnonymous()) {
+			_viewContainer._image.setEnabled(true);
+			hideLoading();
 			showAuthorizeUserDialogForPendingAction("Post to global feed", new UiAction.Pending() {
 				@Override
 				public void proceed() {
@@ -118,7 +128,6 @@ public class PostActivityFragment extends BaseFragment implements Callback<Activ
 		if (hasButton) {
 			builder.withButton(buttonTitle, buttonAction);
 		}
-		showLoading("Posting activity", "Wait...");
 
 		if (postToGlobalFeed) {
 			GetSocial.postActivityToGlobalFeed(builder.build(), this);
@@ -130,6 +139,7 @@ public class PostActivityFragment extends BaseFragment implements Callback<Activ
 	@Override
 	public void onSuccess(ActivityPost activityPost) {
 		hideLoading();
+		_viewContainer._image.setEnabled(true);
 
 		Toast.makeText(getContext(), "Activity was successfully posted", Toast.LENGTH_SHORT).show();
 
@@ -146,12 +156,27 @@ public class PostActivityFragment extends BaseFragment implements Callback<Activ
 
 	@Override
 	public void onFailure(GetSocialException exception) {
+		_viewContainer._image.setEnabled(true);
 		hideLoadingAndShowError(exception.getMessage());
 	}
 
 	private void hideLoadingAndShowError(String message) {
 		hideLoading();
 		Toast.makeText(getContext(), "Failed to post activity: " + message, Toast.LENGTH_SHORT).show();
+	}
+
+	private void loadOriginalImage(final Uri imageUri) {
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+				try {
+					_originalImage = Picasso.with(getContext()).load(imageUri).get();
+				} catch (IOException e) {
+					_viewContainer._image = null;
+					Toast.makeText(getContext(), "Could not load original image: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+				}
+			}
+		}).start();
 	}
 
 	@Override
@@ -162,7 +187,15 @@ public class PostActivityFragment extends BaseFragment implements Callback<Activ
 					.resize(MAX_WIDTH, 0)
 					.memoryPolicy(MemoryPolicy.NO_CACHE)
 					.into(_viewContainer._image);
+			loadOriginalImage(imageUri);
 		}
+	}
+
+
+	@Override
+	public void onDetach() {
+		hideLoading();
+		super.onDetach();
 	}
 
 	class ViewContainer {
@@ -211,6 +244,7 @@ public class PostActivityFragment extends BaseFragment implements Callback<Activ
 		@OnCheckedChanged(R.id.checkbox_has_image)
 		void toggleHasImage(boolean hasImage) {
 			_image.setVisibility(hasImage ? View.VISIBLE : View.GONE);
+			_originalImage = hasImage ? ((BitmapDrawable)_image.getDrawable()).getBitmap() : null;
 		}
 
 	}

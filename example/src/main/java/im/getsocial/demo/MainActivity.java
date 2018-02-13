@@ -17,6 +17,8 @@
 package im.getsocial.demo;
 
 import android.app.Activity;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
@@ -36,6 +38,7 @@ import android.widget.Toast;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import butterknife.OnLongClick;
 import com.crashlytics.android.Crashlytics;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookSdk;
@@ -47,7 +50,6 @@ import im.getsocial.demo.fragment.FriendsFragment;
 import im.getsocial.demo.fragment.HasFragmentTag;
 import im.getsocial.demo.fragment.HasTitle;
 import im.getsocial.demo.fragment.RootFragment;
-import im.getsocial.demo.plugin.FacebookInvitePlugin;
 import im.getsocial.demo.plugin.FacebookSharePlugin;
 import im.getsocial.demo.plugin.KakaoInvitePlugin;
 import im.getsocial.demo.ui.UserInfoView;
@@ -246,15 +248,24 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Acti
 		return String.format(Locale.getDefault(), "GetSocial Android Demo\nSDK v%s. Build v%d", GetSocial.getSdkVersion(), BuildConfig.VERSION_CODE);
 	}
 
-	protected void initFacebook() {
+	private void initFacebook() {
 		_facebookCallbackManager = CallbackManager.Factory.create();
 		FacebookSdk.sdkInitialize(getApplicationContext());
 	}
 
-	protected void showUserDetails() {
+	private void showUserDetails() {
 		if (GetSocial.isInitialized()) {
 			UserInfoDialog.show(getSupportFragmentManager());
 		}
+	}
+
+	private void copyUserIdToClipboard() {
+		final String userId = GetSocial.User.getId();
+
+		ClipboardManager clipboard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
+		ClipData clip = ClipData.newPlainText("GetSocial User ID", userId);
+		clipboard.setPrimaryClip(clip);
+		Toast.makeText(this, "Copied " + userId + " to clipboard.", Toast.LENGTH_LONG).show();
 	}
 
 	private void popToRoot() {
@@ -263,7 +274,7 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Acti
 		}
 	}
 
-	protected RootFragment findRootFragment() {
+	private RootFragment findRootFragment() {
 		return findFragment("root");
 	}
 
@@ -367,6 +378,12 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Acti
 		@OnClick(R.id.userInfoView)
 		void onUserInfoClicked() {
 			showUserDetails();
+		}
+
+		@OnLongClick(R.id.userInfoView)
+		boolean onUserInfoLongClicked() {
+			copyUserIdToClipboard();
+			return true;
 		}
 
 		private void updateView() {
