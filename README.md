@@ -27,7 +27,7 @@ GetSocial Android SDK API Reference can be found at: [docs.getsocial.im/referenc
 ## Repo Structure
 
 - An example application that showcases all GetSocial features in `example/` folder.
-- GetSocial Invite Channel plugins in `plugins/` folder. Learn more about Invite Plugins in [docs](http://docs.getsocial.im/guides/smart-invites/android/essential-setup/#setup-invite-channels).
+- GetSocial Invite Channel plugins in `plugins/` folder. Learn more about Invite Plugins in [docs](http://docs.getsocial.im/guides/smart-invites/channels/setup-android/).
 
 
 ## Licence
