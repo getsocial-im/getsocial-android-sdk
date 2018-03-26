@@ -78,5 +78,14 @@
 	<string name="invite_text_placeholders">Invite text placeholders</string>
 	<string name="new_friend_title">You have a new friend!</string>
 	<string name="button_close">Close</string>
+	<string name="label_landingPageTitle">Title</string>
+	<string name="hint_landingPageTitle">Title</string>
+	<string name="label_landingPageDescription">Description</string>
+	<string name="hint_landingPageDescription">Description</string>
+	<string name="label_landingPageImageURL">Image URL</string>
+	<string name="hint_landingPageImageURL">Image URL</string>
+	<string name="label_landingPageVideoURL">Video URL</string>
+	<string name="hint_landingPageVideoURL">Video URL</string>
+	<string name="label_remove">Remove</string>
 
 </resources>

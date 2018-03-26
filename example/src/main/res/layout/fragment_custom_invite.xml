@@ -101,6 +101,157 @@
 
 		</LinearLayout>
 
+		<LinearLayout
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:orientation="horizontal">
+
+			<TextView
+					style="?android:textAppearanceLarge"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:text="Customize landing page (optional)"/>
+
+		</LinearLayout>
+
+		<LinearLayout
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:orientation="horizontal">
+
+			<TextView
+					style="?android:textAppearanceMedium"
+					android:layout_width="0dp"
+					android:layout_height="wrap_content"
+					android:layout_weight=".3"
+					android:text="@string/label_landingPageTitle"/>
+
+			<EditText
+					android:id="@+id/landingPageTitle"
+					android:layout_width="0dp"
+					android:layout_height="wrap_content"
+					android:layout_weight=".7"
+					android:hint="@string/hint_landingPageTitle"/>
+
+		</LinearLayout>
+
+		<LinearLayout
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:orientation="horizontal">
+
+			<TextView
+					style="?android:textAppearanceMedium"
+					android:layout_width="0dp"
+					android:layout_height="wrap_content"
+					android:layout_weight=".3"
+					android:text="@string/label_landingPageDescription"/>
+
+			<EditText
+					android:id="@+id/landingPageDescription"
+					android:layout_width="0dp"
+					android:layout_height="wrap_content"
+					android:layout_weight=".7"
+					android:hint="@string/hint_landingPageDescription"/>
+
+		</LinearLayout>
+
+		<LinearLayout
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:orientation="horizontal">
+
+			<TextView
+					style="?android:textAppearanceMedium"
+					android:layout_width="0dp"
+					android:layout_height="wrap_content"
+					android:layout_weight=".3"
+					android:text="@string/label_landingPageImageURL"/>
+
+			<EditText
+					android:id="@+id/landingPageImageURL"
+					android:layout_width="0dp"
+					android:layout_height="wrap_content"
+					android:layout_weight=".7"
+					android:hint="@string/hint_landingPageImageURL"/>
+
+		</LinearLayout>
+
+		<LinearLayout
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:orientation="horizontal">
+
+			<TextView
+					style="?android:textAppearanceMedium"
+					android:layout_width="0dp"
+					android:layout_height="wrap_content"
+					android:layout_weight=".3"
+					android:text="@string/label_landingPageVideoURL"/>
+
+			<EditText
+					android:id="@+id/landingPageVideoURL"
+					android:layout_width="0dp"
+					android:layout_height="wrap_content"
+					android:layout_weight=".7"
+					android:hint="@string/hint_landingPageVideoURL"/>
+
+		</LinearLayout>
+
+		<LinearLayout
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:orientation="vertical"
+				android:layout_marginTop="20dp">
+
+			<LinearLayout
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:orientation="horizontal">
+
+				<TextView
+						style="?android:textAppearanceMedium"
+						android:layout_width="0dp"
+						android:layout_height="wrap_content"
+						android:layout_weight=".3"
+						android:text="@string/label_select_image"/>
+
+				<Button
+						android:id="@+id/button_select_image"
+						android:visibility="visible"
+						android:layout_width="80dp"
+						android:layout_height="40dp"
+						android:layout_marginLeft="20dp"
+						android:text="Change"/>
+
+				<Button
+						android:id="@+id/button_use_same_image"
+						android:visibility="visible"
+						android:layout_width="180dp"
+						android:layout_height="40dp"
+						android:layout_marginLeft="20dp"
+						android:text="Use Invite Image"/>
+
+			</LinearLayout>
+
+			<ImageView
+					android:id="@+id/landingPageImage"
+					android:visibility="gone"
+					android:layout_width="match_parent"
+					android:layout_height="100dp"
+					android:layout_weight=".7"
+					android:hint="@string/hint_text"/>
+
+			<Button
+					android:id="@+id/button_remove_image"
+					android:visibility="gone"
+					android:layout_width="match_parent"
+					android:layout_height="40dp"
+					android:layout_marginTop="10dp"
+					android:text="@string/label_remove"/>
+
+		</LinearLayout>
+
 		<TextView
 				style="?android:textAppearanceLarge"
 				android:layout_width="match_parent"

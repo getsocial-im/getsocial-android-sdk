@@ -35,9 +35,9 @@ import butterknife.BindViews;
 import butterknife.ButterKnife;
 import com.squareup.picasso.MemoryPolicy;
 import im.getsocial.demo.R;
-import im.getsocial.sdk.invites.CustomReferralData;
 import im.getsocial.sdk.invites.InviteContent;
 import im.getsocial.sdk.invites.InviteTextPlaceholders;
+import im.getsocial.sdk.invites.LinkParams;
 import im.getsocial.sdk.ui.GetSocialUi;
 import im.getsocial.sdk.ui.invites.InviteUiCallback;
 
@@ -54,6 +54,7 @@ public class CustomInviteFragment extends BaseFragment {
 	private static final int REQUEST_PICK_CUSTOM_IMAGE = 0x1;
 	private static final int MAX_WIDTH = 500;
 	private ViewContainer _viewContainer;
+	private boolean _imageForInvite;
 
 	public CustomInviteFragment() {
 		//
@@ -81,15 +82,17 @@ public class CustomInviteFragment extends BaseFragment {
 
 	private void openInviteProviderList() {
 		final Bitmap bitmap = _viewContainer._inviteImageView.getDrawable() == null ? null : ((BitmapDrawable)_viewContainer._inviteImageView.getDrawable()).getBitmap();
+
 		InviteContent inviteContent = InviteContent.createBuilder()
 				.withSubject(_viewContainer._inviteSubjectInput.getText().toString())
 				.withText(_viewContainer._inviteTextInput.getText().toString())
 				.withImage(bitmap)
 				.build();
 
+		LinkParams params = createLinkParams();
 		GetSocialUi.createInvitesView()
 				.setCustomInviteContent(inviteContent)
-				.setCustomReferralData(createCustomReferralData())
+				.setLinkParams(params)
 				.setInviteCallback(new InviteUiCallback() {
 					@Override
 					public void onComplete(final String channelId) {
@@ -109,16 +112,37 @@ public class CustomInviteFragment extends BaseFragment {
 				.show();
 	}
 
-	private CustomReferralData createCustomReferralData() {
-		CustomReferralData customReferralData = new CustomReferralData();
-		for (int i = 0; i < _viewContainer._customReferralDataKeys.size(); i++) {
-			String key = _viewContainer._customReferralDataKeys.get(i).getText().toString();
-			String value = _viewContainer._customReferralDataValues.get(i).getText().toString();
+	private LinkParams createLinkParams() {
+		LinkParams linkParams = new LinkParams();
+		if (_viewContainer._landingPageTitle.getText().toString().length() > 0) {
+			linkParams.put(LinkParams.KEY_CUSTOM_TITLE, _viewContainer._landingPageTitle.getText().toString());
+		}
+
+		if (_viewContainer._landingPageDescription.getText().toString().length() > 0) {
+			linkParams.put(LinkParams.KEY_CUSTOM_DESCRIPTION, _viewContainer._landingPageDescription.getText().toString());
+		}
+
+		if (_viewContainer._landingPageImageURL.getText().toString().length() > 0) {
+			linkParams.put(LinkParams.KEY_CUSTOM_IMAGE, _viewContainer._landingPageImageURL.getText().toString());
+		}
+
+		if (_viewContainer._landingPageVideoURL.getText().toString().length() > 0) {
+			linkParams.put(LinkParams.KEY_CUSTOM_YOUTUBE_VIDEO, _viewContainer._landingPageVideoURL.getText().toString());
+		}
+
+		final Bitmap bitmap = _viewContainer._landingPageImageView.getDrawable() == null ? null : ((BitmapDrawable)_viewContainer._landingPageImageView.getDrawable()).getBitmap();
+		if (bitmap != null) {
+			linkParams.put(LinkParams.KEY_CUSTOM_IMAGE, bitmap);
+		}
+
+		for (int i = 0; i < _viewContainer._linkParamsKeys.size(); i++) {
+			String key = _viewContainer._linkParamsKeys.get(i).getText().toString();
+			String value = _viewContainer._linkParamsValues.get(i).getText().toString();
 			if (!TextUtils.isEmpty(key) && !TextUtils.isEmpty(value)) {
-				customReferralData.put(key, value);
+				linkParams.put(key, value);
 			}
 		}
-		return customReferralData;
+		return linkParams;
 	}
 
 	@Override
@@ -145,11 +169,19 @@ public class CustomInviteFragment extends BaseFragment {
 	@Override
 	protected void onImagePickedFromDevice(Uri imageUri, int requestCode) {
 		if (requestCode == REQUEST_PICK_CUSTOM_IMAGE) {
+			ImageView imageView = null;
+			if (_imageForInvite) {
+				imageView = _viewContainer._inviteImageView;
+			} else {
+				imageView = _viewContainer._landingPageImageView;
+				_viewContainer._landingPageImageView.setVisibility(View.VISIBLE);
+				_viewContainer._buttonRemoveImage.setVisibility(View.VISIBLE);
+			}
 			with(getContext())
 					.load(imageUri)
 					.resize(MAX_WIDTH, 0)
 					.memoryPolicy(MemoryPolicy.NO_CACHE)
-					.into(_viewContainer._inviteImageView);
+					.into(imageView);
 		}
 	}
 
@@ -164,10 +196,30 @@ public class CustomInviteFragment extends BaseFragment {
 		@BindView(R.id.buttonOpenInviteView)
 		Button _buttonOpenInviteView;
 
+		@BindView(R.id.landingPageImage)
+		ImageView _landingPageImageView;
+
+		@BindView(R.id.landingPageTitle)
+		EditText _landingPageTitle;
+		@BindView(R.id.landingPageDescription)
+		EditText _landingPageDescription;
+		@BindView(R.id.landingPageImageURL)
+		EditText _landingPageImageURL;
+		@BindView(R.id.landingPageVideoURL)
+		EditText _landingPageVideoURL;
+
+		@BindView(R.id.button_select_image)
+		Button _buttonSelectLandingPageImage;
+		@BindView(R.id.button_use_same_image)
+		Button _buttonUseSameImage;
+		@BindView(R.id.button_remove_image)
+		Button _buttonRemoveImage;
+
+
 		@BindViews({R.id.key1, R.id.key2, R.id.key3})
-		List<EditText> _customReferralDataKeys;
+		List<EditText> _linkParamsKeys;
 		@BindViews({R.id.value1, R.id.value2, R.id.value3})
-		List<EditText> _customReferralDataValues;
+		List<EditText> _linkParamsValues;
 
 		ViewContainer(View view) {
 
@@ -206,7 +258,33 @@ public class CustomInviteFragment extends BaseFragment {
 			_inviteImageView.setOnClickListener(new View.OnClickListener() {
 				@Override
 				public void onClick(View view) {
+					_imageForInvite = true;
 					pickImageFromDevice(REQUEST_PICK_CUSTOM_IMAGE);
+				}
+			});
+			_buttonSelectLandingPageImage.setOnClickListener(new View.OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					_imageForInvite = false;
+					pickImageFromDevice(REQUEST_PICK_CUSTOM_IMAGE);
+				}
+			});
+			_buttonUseSameImage.setOnClickListener(new View.OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					if (_inviteImageView.getDrawable() != null) {
+						_landingPageImageView.setImageDrawable(_inviteImageView.getDrawable());
+						_landingPageImageView.setVisibility(View.VISIBLE);
+						_buttonRemoveImage.setVisibility(View.VISIBLE);
+					}
+				}
+			});
+			_buttonRemoveImage.setOnClickListener(new View.OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					_landingPageImageView.setImageDrawable(null);
+					_landingPageImageView.setVisibility(View.GONE);
+					_buttonRemoveImage.setVisibility(View.GONE);
 				}
 			});
 		}

@@ -2,15 +2,11 @@ package im.getsocial.demo;
 
 import android.app.Activity;
 import android.app.Application;
-import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import com.adjust.sdk.Adjust;
 import com.adjust.sdk.AdjustConfig;
-import com.appsflyer.AppsFlyerConversionListener;
 import com.appsflyer.AppsFlyerLib;
-
-import java.util.Map;
 
 /**
  * Created by orestsavchak on 1/4/18.
