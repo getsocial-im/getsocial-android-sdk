@@ -7,6 +7,7 @@ import android.os.Bundle;
 import com.adjust.sdk.Adjust;
 import com.adjust.sdk.AdjustConfig;
 import com.appsflyer.AppsFlyerLib;
+import com.vk.sdk.VKSdk;
 
 /**
  * Created by orestsavchak on 1/4/18.
@@ -19,6 +20,7 @@ public class DemoApplication extends Application {
 	@Override
 	public void onCreate() {
 		super.onCreate();
+		configureVK();
 		configureAdjust();
 		configureAppsFlyer();
 	}
@@ -39,6 +41,10 @@ public class DemoApplication extends Application {
 		AppsFlyerLib.getInstance().setDebugLog(true);
 		AppsFlyerLib.getInstance().init("AP8P3GvwHgw9NBdBTWAqrb", null, getApplicationContext());
 		AppsFlyerLib.getInstance().startTracking(this);
+	}
+
+	private void configureVK() {
+		VKSdk.initialize(getApplicationContext());
 	}
 
 	private String getTokenFromMetaData(String key) {

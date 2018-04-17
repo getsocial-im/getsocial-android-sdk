@@ -28,7 +28,6 @@ import android.widget.Button;
 import android.widget.TextView;
 import im.getsocial.demo.R;
 import im.getsocial.demo.ui.UserInfoView;
-import im.getsocial.json.simple.JSONValue;
 import im.getsocial.sdk.GetSocial;
 
 import java.util.HashMap;
@@ -101,8 +100,53 @@ public class UserInfoDialog extends DialogFragment {
 				.append(GetSocial.User.getAllPrivateProperties());
 
 		sb.append("JSON:").endLine()
-				.append(JSONValue.toJSONString(userDetails));
+				.append(toJson(userDetails));
 
+		return sb.toString();
+	}
+
+	private String toJson(Object object) {
+		if (object instanceof Map) {
+			return mapToJson((Map<String, Object>) object);
+		}
+		if (object instanceof Iterable) {
+			return iterableToJson((Iterable) object);
+		}
+		if (object instanceof Boolean) {
+			return object.toString();
+		}
+		if (object instanceof Number) {
+			return object.toString();
+		}
+		return "\"" + object.toString() + "\"";
+	}
+
+	private String iterableToJson(Iterable iterable) {
+		StringBuilder sb = new StringBuilder();
+		sb.append("{");
+
+		for (final Object entry : iterable) {
+			sb.append(toJson(entry)).append(",");
+		}
+		if (sb.charAt(sb.length() - 1) == ',') {
+			sb.deleteCharAt(sb.length() - 1);
+		}
+		sb.append("}");
+		return sb.toString();
+	}
+
+	private String mapToJson(Map<String, Object> map) {
+		StringBuilder sb = new StringBuilder();
+		sb.append("{");
+
+		for (final Map.Entry<String, Object> entry : map.entrySet()) {
+			sb.append("\"").append(entry.getKey()).append("\"").append(":")
+					.append(toJson(entry.getValue())).append(",");
+		}
+		if (sb.charAt(sb.length() - 1) == ',') {
+			sb.deleteCharAt(sb.length() - 1);
+		}
+		sb.append("}");
 		return sb.toString();
 	}
 

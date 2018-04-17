@@ -34,6 +34,10 @@ dependencies {
 	compile 'com.kakao.sdk:kakaolink:1.0.52'
 	compile 'com.facebook.android:facebook-android-sdk:4.18.0'
 
+	compile('com.vk:androidsdk:1.6.9') {
+		transitive = false
+	}
+
 	apt 'com.jakewharton:butterknife-compiler:8.4.0'
 	compile 'com.jakewharton:butterknife:8.4.0'
 	compile 'com.google.code.findbugs:jsr305:3.0.1'

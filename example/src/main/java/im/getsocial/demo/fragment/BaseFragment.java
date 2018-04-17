@@ -40,6 +40,7 @@ import im.getsocial.demo.R;
 import im.getsocial.demo.utils.ImagePicker;
 import im.getsocial.demo.utils.SimpleLogger;
 import im.getsocial.sdk.CompletionCallback;
+import im.getsocial.sdk.ErrorCode;
 import im.getsocial.sdk.GetSocial;
 import im.getsocial.sdk.GetSocialException;
 import im.getsocial.sdk.ui.UiAction;
@@ -50,8 +51,6 @@ import im.getsocial.sdk.usermanagement.ConflictUser;
 import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.List;
-
-import static im.getsocial.sdk.core.exception.GetSocialExceptionAdapter.upgradeToGetSocialException;
 
 public abstract class BaseFragment extends Fragment implements HasTitle, HasFragmentTag {
 
@@ -225,10 +224,10 @@ public abstract class BaseFragment extends Fragment implements HasTitle, HasFrag
 			}
 
 			@Override
-			public void onFailure(Throwable throwable) {
-				_log.logInfoAndToast("Adding Facebook identity failed : " + throwable);
+			public void onFailure(GetSocialException exception) {
+				_log.logInfoAndToast("Adding Facebook identity failed : " + exception);
 				disconnectFromFacebook();
-				wrapped.onFailure(upgradeToGetSocialException(throwable));
+				wrapped.onFailure(exception);
 			}
 
 			@Override
@@ -249,7 +248,7 @@ public abstract class BaseFragment extends Fragment implements HasTitle, HasFrag
 			protected void onCurrentAccessTokenChanged(AccessToken oldAccessToken, @Nullable AccessToken newAccessToken) {
 
 				if (newAccessToken == null) {
-					addUserIdentityOutcomeCallback.onFailure(new IllegalStateException("Facebook SDK did not provide an AccessToken"));
+					addUserIdentityOutcomeCallback.onFailure(new GetSocialException(ErrorCode.UNKNOWN, "Facebook SDK did not provide an AccessToken"));
 					return;
 				}
 
@@ -314,9 +313,9 @@ public abstract class BaseFragment extends Fragment implements HasTitle, HasFrag
 			}
 
 			@Override
-			public void onFailure(Throwable throwable) {
-				_log.logInfoAndToast("Adding custom user identity failed : " + throwable);
-				completionCallback.onFailure(upgradeToGetSocialException(throwable));
+			public void onFailure(GetSocialException exception) {
+				_log.logInfoAndToast("Adding custom user identity failed : " + exception);
+				completionCallback.onFailure(exception);
 			}
 
 			@Override
@@ -452,7 +451,7 @@ public abstract class BaseFragment extends Fragment implements HasTitle, HasFrag
 	protected interface AddUserIdentityOutcomeCallback {
 		void onSuccess();
 
-		void onFailure(Throwable throwable);
+		void onFailure(GetSocialException exception);
 
 		void onConflictResolvedWithCurrent();
 

@@ -88,4 +88,6 @@
 	<string name="hint_landingPageVideoURL">Video URL</string>
 	<string name="label_remove">Remove</string>
 
+	<!-- VK -->
+	<integer name="com_vk_sdk_AppId">6437031</integer>
 </resources>

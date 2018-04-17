@@ -42,6 +42,7 @@ import butterknife.OnLongClick;
 import com.crashlytics.android.Crashlytics;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookSdk;
+import com.vk.sdk.VKSdk;
 import im.getsocial.demo.dialog.NewFriendDialog;
 import im.getsocial.demo.dialog.UserInfoDialog;
 import im.getsocial.demo.fragment.BaseFragment;
@@ -52,6 +53,7 @@ import im.getsocial.demo.fragment.HasTitle;
 import im.getsocial.demo.fragment.RootFragment;
 import im.getsocial.demo.plugin.FacebookSharePlugin;
 import im.getsocial.demo.plugin.KakaoInvitePlugin;
+import im.getsocial.demo.plugin.VKInvitePlugin;
 import im.getsocial.demo.ui.UserInfoView;
 import im.getsocial.demo.utils.CompatibilityUtils;
 import im.getsocial.demo.utils.Console;
@@ -84,6 +86,7 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Acti
 	private CallbackManager _facebookCallbackManager;
 	private ViewContainer _viewContainer;
 	private final Map<String, String> _demoAppSessionData = new HashMap<>();
+	private VKInvitePlugin _vkInvitePlugin;
 
 	@Override
 	protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -96,6 +99,8 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Acti
 		if (savedInstanceState == null) {
 			addRootFragment();
 		}
+
+		_vkInvitePlugin = new VKInvitePlugin(this);
 
 		initFacebook();
 		setupGetSocial();
@@ -129,6 +134,7 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Acti
 		super.onActivityResult(requestCode, resultCode, data);
 
 		_facebookCallbackManager.onActivityResult(requestCode, resultCode, data);
+		VKSdk.onActivityResult(requestCode, resultCode, data, _vkInvitePlugin);
 	}
 
 	@Override
@@ -190,6 +196,7 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Acti
 		Console.logInfo(getDemoAppInfo());
 		GetSocial.registerInviteChannelPlugin(InviteChannelIds.KAKAO, new KakaoInvitePlugin(this));
 		GetSocial.registerInviteChannelPlugin(InviteChannelIds.FACEBOOK, new FacebookSharePlugin(this, _facebookCallbackManager));
+		GetSocial.registerInviteChannelPlugin(InviteChannelIds.VK, _vkInvitePlugin);
 		GetSocial.setNotificationListener(new NotificationListener() {
 
 			public boolean onNotificationReceived(Notification notification, boolean wasClicked) {
