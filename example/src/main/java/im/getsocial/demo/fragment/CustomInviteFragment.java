@@ -19,7 +19,9 @@ package im.getsocial.demo.fragment;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
+import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -35,14 +37,18 @@ import butterknife.BindViews;
 import butterknife.ButterKnife;
 import com.squareup.picasso.MemoryPolicy;
 import im.getsocial.demo.R;
+import im.getsocial.demo.utils.VideoUtils;
 import im.getsocial.sdk.invites.InviteContent;
 import im.getsocial.sdk.invites.InviteTextPlaceholders;
 import im.getsocial.sdk.invites.LinkParams;
 import im.getsocial.sdk.ui.GetSocialUi;
 import im.getsocial.sdk.ui.invites.InviteUiCallback;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.util.List;
 
+import static android.provider.MediaStore.Video.Thumbnails.MINI_KIND;
 import static com.squareup.picasso.Picasso.with;
 
 public class CustomInviteFragment extends BaseFragment {
@@ -51,10 +57,12 @@ public class CustomInviteFragment extends BaseFragment {
 			InviteTextPlaceholders.PLACEHOLDER_APP_INVITE_URL
 	};
 
-	private static final int REQUEST_PICK_CUSTOM_IMAGE = 0x1;
+	private static final int REQUEST_PICK_CUSTOM_INVITE_IMAGE = 0x1;
+	private static final int REQUEST_PICK_CUSTOM_LP_IMAGE = 0x2;
+	private static final int REQUEST_PICK_CUSTOM_VIDEO = 0x3;
 	private static final int MAX_WIDTH = 500;
 	private ViewContainer _viewContainer;
-	private boolean _imageForInvite;
+	private String _videoPath;
 
 	public CustomInviteFragment() {
 		//
@@ -82,11 +90,20 @@ public class CustomInviteFragment extends BaseFragment {
 
 	private void openInviteProviderList() {
 		final Bitmap bitmap = _viewContainer._inviteImageView.getDrawable() == null ? null : ((BitmapDrawable)_viewContainer._inviteImageView.getDrawable()).getBitmap();
-
+		byte[] videoContent = null;
+		if (_videoPath != null) {
+			videoContent = VideoUtils.getVideoContent(_videoPath);
+		}
+		String imageUrl = null;
+		if (_viewContainer._inviteImageUrlInput.getText().toString().trim().length() > 0) {
+			imageUrl = _viewContainer._inviteImageUrlInput.getText().toString();
+		}
 		InviteContent inviteContent = InviteContent.createBuilder()
 				.withSubject(_viewContainer._inviteSubjectInput.getText().toString())
 				.withText(_viewContainer._inviteTextInput.getText().toString())
+				.withImageUrl(imageUrl)
 				.withImage(bitmap)
+				.withVideo(videoContent)
 				.build();
 
 		LinkParams params = createLinkParams();
@@ -168,22 +185,55 @@ public class CustomInviteFragment extends BaseFragment {
 
 	@Override
 	protected void onImagePickedFromDevice(Uri imageUri, int requestCode) {
-		if (requestCode == REQUEST_PICK_CUSTOM_IMAGE) {
-			ImageView imageView = null;
-			if (_imageForInvite) {
+		ImageView imageView;
+		if (requestCode == REQUEST_PICK_CUSTOM_INVITE_IMAGE) {
 				imageView = _viewContainer._inviteImageView;
+				_viewContainer._inviteImageView.setVisibility(View.VISIBLE);
+				_viewContainer._buttonRemoveInviteImage.setVisibility(View.VISIBLE);
+		} else {
+			imageView = _viewContainer._landingPageImageView;
+			_viewContainer._landingPageImageView.setVisibility(View.VISIBLE);
+			_viewContainer._buttonRemoveImage.setVisibility(View.VISIBLE);
+		}
+		with(getContext())
+				.load(imageUri)
+				.resize(MAX_WIDTH, 0)
+				.memoryPolicy(MemoryPolicy.NO_CACHE)
+				.into(imageView);
+	}
+
+	@Override
+	protected void onVideoPickedFromDevice(Uri videoUri, int requestCode) {
+		if (requestCode == REQUEST_PICK_CUSTOM_VIDEO) {
+			String realPath;
+			if (videoUri.getScheme().equalsIgnoreCase("content")) {
+				realPath = VideoUtils.getRealPathFromUri(getContext(), videoUri);
 			} else {
-				imageView = _viewContainer._landingPageImageView;
-				_viewContainer._landingPageImageView.setVisibility(View.VISIBLE);
-				_viewContainer._buttonRemoveImage.setVisibility(View.VISIBLE);
+				realPath = videoUri.getPath();
 			}
-			with(getContext())
-					.load(imageUri)
-					.resize(MAX_WIDTH, 0)
-					.memoryPolicy(MemoryPolicy.NO_CACHE)
-					.into(imageView);
+			File f = new File(realPath);
+			if (f.exists()) {
+				_videoPath = realPath;
+
+				Bitmap thumbnail = null;
+				if (realPath.endsWith("gif")) {
+					try {
+						FileInputStream is = new FileInputStream(realPath);
+						thumbnail = BitmapFactory.decodeStream(is);
+					} catch(Exception e) {
+						e.printStackTrace();
+					}
+				} else {
+					thumbnail = ThumbnailUtils.createVideoThumbnail(_videoPath, MINI_KIND);
+				}
+				_viewContainer._inviteVideoView.setImageBitmap(thumbnail);
+				_viewContainer._inviteVideoView.setVisibility(View.VISIBLE);
+				_viewContainer._selectVideoButton.setVisibility(View.GONE);
+				_viewContainer._removeVideoButton.setVisibility(View.VISIBLE);
+			}
 		}
 	}
+
 
 	class ViewContainer {
 
@@ -193,6 +243,8 @@ public class CustomInviteFragment extends BaseFragment {
 		EditText _inviteSubjectInput;
 		@BindView(R.id.text)
 		EditText _inviteTextInput;
+		@BindView(R.id.input_invite_imageurl)
+		EditText _inviteImageUrlInput;
 		@BindView(R.id.buttonOpenInviteView)
 		Button _buttonOpenInviteView;
 
@@ -220,6 +272,19 @@ public class CustomInviteFragment extends BaseFragment {
 		List<EditText> _linkParamsKeys;
 		@BindViews({R.id.value1, R.id.value2, R.id.value3})
 		List<EditText> _linkParamsValues;
+
+		@BindView(R.id.video)
+		ImageView _inviteVideoView;
+		@BindView(R.id.select_video)
+		Button _selectVideoButton;
+		@BindView(R.id.remove_video)
+		Button _removeVideoButton;
+
+		@BindView(R.id.button_select_invite_image)
+		Button _buttonSelectInviteImage;
+
+		@BindView(R.id.button_remove_invite_image)
+		Button _buttonRemoveInviteImage;
 
 		ViewContainer(View view) {
 
@@ -255,18 +320,41 @@ public class CustomInviteFragment extends BaseFragment {
 
 			_inviteSubjectInput.setOnLongClickListener(onInsertTextLongClickListener);
 			_inviteTextInput.setOnLongClickListener(onInsertTextLongClickListener);
-			_inviteImageView.setOnClickListener(new View.OnClickListener() {
+			_buttonSelectInviteImage.setOnClickListener(new View.OnClickListener() {
 				@Override
 				public void onClick(View view) {
-					_imageForInvite = true;
-					pickImageFromDevice(REQUEST_PICK_CUSTOM_IMAGE);
+					pickImageFromDevice(REQUEST_PICK_CUSTOM_INVITE_IMAGE);
 				}
 			});
+			_buttonRemoveInviteImage.setOnClickListener(new View.OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					_inviteImageView.setVisibility(View.GONE);
+					_buttonRemoveInviteImage.setVisibility(View.GONE);
+				}
+			});
+			_selectVideoButton.setOnClickListener(new View.OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					pickVideoFromDevice(REQUEST_PICK_CUSTOM_VIDEO);
+				}
+			});
+			_removeVideoButton.setOnClickListener(new View.OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					_videoPath = null;
+					_inviteVideoView.setImageDrawable(null);
+					_inviteVideoView.setVisibility(View.GONE);
+					_removeVideoButton.setVisibility(View.GONE);
+					_selectVideoButton.setVisibility(View.VISIBLE);
+				}
+			});
+
+
 			_buttonSelectLandingPageImage.setOnClickListener(new View.OnClickListener() {
 				@Override
 				public void onClick(View v) {
-					_imageForInvite = false;
-					pickImageFromDevice(REQUEST_PICK_CUSTOM_IMAGE);
+					pickImageFromDevice(REQUEST_PICK_CUSTOM_LP_IMAGE);
 				}
 			});
 			_buttonUseSameImage.setOnClickListener(new View.OnClickListener() {

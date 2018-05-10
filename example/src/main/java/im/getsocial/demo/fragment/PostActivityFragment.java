@@ -17,7 +17,9 @@
 package im.getsocial.demo.fragment;
 
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
+import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -26,6 +28,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -39,6 +42,7 @@ import butterknife.OnClick;
 import com.squareup.picasso.MemoryPolicy;
 import com.squareup.picasso.Picasso;
 import im.getsocial.demo.R;
+import im.getsocial.demo.utils.VideoUtils;
 import im.getsocial.sdk.Callback;
 import im.getsocial.sdk.GetSocial;
 import im.getsocial.sdk.GetSocialException;
@@ -49,16 +53,22 @@ import im.getsocial.sdk.ui.UiAction;
 import im.getsocial.sdk.ui.activities.ActionButtonListener;
 import im.getsocial.sdk.ui.activities.ActivityFeedViewBuilder;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 
+import static android.provider.MediaStore.Video.Thumbnails.MINI_KIND;
 import static com.squareup.picasso.Picasso.with;
+import static im.getsocial.demo.utils.VideoUtils.getVideoContent;
 
 public class PostActivityFragment extends BaseFragment implements Callback<ActivityPost> {
 
 	private static final int MAX_WIDTH = 1024;
 	private static final int REQUEST_PICK_CUSTOM_IMAGE = 0x1;
+	private static final int REQUEST_PICK_CUSTOM_VIDEO = 0x2;
 
 	private ViewContainer _viewContainer;
+	private String _videoPath;
 	private Bitmap _originalImage;
 
 	@Override
@@ -95,11 +105,12 @@ public class PostActivityFragment extends BaseFragment implements Callback<Activ
 
 		boolean hasText = !TextUtils.isEmpty(text);
 		boolean hasImage = _viewContainer._hasImage.isChecked() && bitmap != null;
+		boolean hasVideo = _viewContainer._hasVideo.isChecked() && _videoPath != null;
 		boolean hasButton = _viewContainer._hasButton.isChecked()
 				&& !buttonTitle.isEmpty()
 				&& !buttonAction.isEmpty();
 
-		if (!hasText && !hasButton && !hasImage) {
+		if (!hasText && !hasButton && !hasImage && !hasVideo) {
 			hideLoadingAndShowError("Can not post activity without any data");
 			_viewContainer._image.setEnabled(true);
 			return;
@@ -128,6 +139,10 @@ public class PostActivityFragment extends BaseFragment implements Callback<Activ
 		if (hasButton) {
 			builder.withButton(buttonTitle, buttonAction);
 		}
+		if (hasVideo) {
+			builder.withVideo(VideoUtils.getVideoContent(_videoPath));
+		}
+		showLoading("Posting activity", "Wait...");
 
 		if (postToGlobalFeed) {
 			GetSocial.postActivityToGlobalFeed(builder.build(), this);
@@ -191,11 +206,35 @@ public class PostActivityFragment extends BaseFragment implements Callback<Activ
 		}
 	}
 
-
 	@Override
-	public void onDetach() {
-		hideLoading();
-		super.onDetach();
+	protected void onVideoPickedFromDevice(Uri videoUri, int requestCode) {
+		if (requestCode == REQUEST_PICK_CUSTOM_VIDEO) {
+			String realPath;
+			if (videoUri.getScheme().equalsIgnoreCase("content")) {
+				realPath = VideoUtils.getRealPathFromUri(getContext(), videoUri);
+			} else {
+				realPath = videoUri.getPath();
+			}
+			File f = new File(realPath);
+			if (f.exists()) {
+				_videoPath = realPath;
+				Bitmap thumbnail = null;
+				if (realPath.endsWith("gif")) {
+					try {
+						FileInputStream is = new FileInputStream(realPath);
+						thumbnail = BitmapFactory.decodeStream(is);
+					} catch(Exception e) {
+						e.printStackTrace();
+					}
+				} else {
+					thumbnail = ThumbnailUtils.createVideoThumbnail(_videoPath, MINI_KIND);
+				}
+				_viewContainer._video.setImageBitmap(thumbnail);
+				_viewContainer._video.setVisibility(View.VISIBLE);
+				_viewContainer._selectVideo.setVisibility(View.GONE);
+			}
+		}
+
 	}
 
 	class ViewContainer {
@@ -212,10 +251,16 @@ public class PostActivityFragment extends BaseFragment implements Callback<Activ
 		EditText _buttonAction;
 		@BindView(R.id.checkbox_has_image)
 		CheckBox _hasImage;
+		@BindView(R.id.checkbox_has_video)
+		CheckBox _hasVideo;
 		@BindView(R.id.image_view_post_image)
 		ImageView _image;
+		@BindView(R.id.image_view_post_video)
+		ImageView _video;
 		@BindView(R.id.selector_feed)
 		Spinner _feed;
+		@BindView(R.id.select_video)
+		Button _selectVideo;
 
 		ViewContainer(View view) {
 			ButterKnife.bind(this, view);
@@ -236,6 +281,11 @@ public class PostActivityFragment extends BaseFragment implements Callback<Activ
 			pickImageFromDevice(REQUEST_PICK_CUSTOM_IMAGE);
 		}
 
+		@OnClick(R.id.select_video)
+		void changeVideo() {
+			pickVideoFromDevice(REQUEST_PICK_CUSTOM_VIDEO);
+		}
+
 		@OnCheckedChanged(R.id.checkbox_has_button)
 		void toggleHasButton(boolean hasButton) {
 			_buttonDataContainer.setVisibility(hasButton ? View.VISIBLE : View.GONE);
@@ -243,8 +293,24 @@ public class PostActivityFragment extends BaseFragment implements Callback<Activ
 
 		@OnCheckedChanged(R.id.checkbox_has_image)
 		void toggleHasImage(boolean hasImage) {
+			if (hasImage) {
+				_videoPath = null;
+				_hasVideo.setChecked(false);
+			}
 			_image.setVisibility(hasImage ? View.VISIBLE : View.GONE);
 			_originalImage = hasImage ? ((BitmapDrawable)_image.getDrawable()).getBitmap() : null;
+		}
+
+		@OnCheckedChanged(R.id.checkbox_has_video)
+		void toggleHasVideo(boolean hasVideo) {
+			if (hasVideo) {
+				_hasImage.setChecked(false);
+			} else {
+				_video.setImageDrawable(null);
+				_videoPath = null;
+				_video.setVisibility(View.GONE);
+			}
+			_selectVideo.setVisibility(hasVideo ? View.VISIBLE : View.GONE);
 		}
 
 	}

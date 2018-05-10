@@ -47,6 +47,7 @@ import im.getsocial.sdk.ui.UiAction;
 import im.getsocial.sdk.usermanagement.AddAuthIdentityCallback;
 import im.getsocial.sdk.usermanagement.AuthIdentity;
 import im.getsocial.sdk.usermanagement.ConflictUser;
+import im.getsocial.sdk.usermanagement.UserUpdate;
 
 import javax.annotation.Nullable;
 import java.util.Arrays;
@@ -117,12 +118,22 @@ public abstract class BaseFragment extends Fragment implements HasTitle, HasFrag
 		_imagePicker.pickImageFromDevice(createImagePickerCallback());
 	}
 
+	protected void pickVideoFromDevice(int requestCode) {
+		_imagePicker = new ImagePicker(this, requestCode);
+		_imagePicker.pickVideoFromDevice(createImagePickerCallback());
+	}
+
 	private ImagePicker.Callback createImagePickerCallback() {
 		return new ImagePicker.Callback() {
 			@Override
 			public void onImageChosen(Uri imageUri, int requestCode) {
 				onImagePickedFromDevice(imageUri, requestCode);
 				_imagePicker = null;
+			}
+
+			@Override
+			public void onVideoChosen(Uri videoUri, int requestCode) {
+				onVideoPickedFromDevice(videoUri, requestCode);
 			}
 
 			@Override
@@ -134,6 +145,10 @@ public abstract class BaseFragment extends Fragment implements HasTitle, HasFrag
 
 	protected void onImagePickedFromDevice(Uri imageUri, int requestCode) {
 		// Override in children, if you need to handle image picking
+	}
+
+	protected void onVideoPickedFromDevice(Uri videoUri, int requestCode) {
+		// Override in children, if you need to handle video picking
 	}
 
 	protected void showLoading(String title, String text) {
@@ -207,8 +222,7 @@ public abstract class BaseFragment extends Fragment implements HasTitle, HasFrag
 			@Override
 			public void onSuccess() {
 				completionCallback.onSuccess();
-				setFacebookDisplayName();
-				setFacebookAvatar();
+				setFacebookInfo();
 			}
 
 			@Override
@@ -263,10 +277,18 @@ public abstract class BaseFragment extends Fragment implements HasTitle, HasFrag
 		LoginManager.getInstance().logInWithReadPermissions(getActivity(), FACEBOOK_PERMISSIONS);
 	}
 
-	private void setFacebookDisplayName() {
-		Profile fbProfile = Profile.getCurrentProfile();
+	private void setFacebookInfo() {
+		final Profile fbProfile = Profile.getCurrentProfile();
 
-		GetSocial.User.setDisplayName(fbProfile.getFirstName() + " " + fbProfile.getLastName(), new CompletionCallback() {
+		final String userDisplayName = fbProfile.getFirstName() + " " + fbProfile.getLastName();
+		final String profileImageUri = fbProfile.getProfilePictureUri(250, 250).toString();
+
+		final UserUpdate userDetails = UserUpdate.createBuilder()
+				.updateAvatarUrl(profileImageUri)
+				.updateDisplayName(userDisplayName)
+				.build();
+
+		GetSocial.User.setUserDetails(userDetails, new CompletionCallback() {
 			@Override
 			public void onSuccess() {
 				_activityListener.invalidateUi();
@@ -274,24 +296,7 @@ public abstract class BaseFragment extends Fragment implements HasTitle, HasFrag
 
 			@Override
 			public void onFailure(GetSocialException exception) {
-				//failed to set facebook name
-			}
-		});
-	}
-
-	private void setFacebookAvatar() {
-		Profile fbProfile = Profile.getCurrentProfile();
-		String profileImageUri = fbProfile.getProfilePictureUri(250, 250).toString();
-
-		GetSocial.User.setAvatarUrl(profileImageUri, new CompletionCallback() {
-			@Override
-			public void onSuccess() {
-				_activityListener.invalidateUi();
-			}
-
-			@Override
-			public void onFailure(GetSocialException e) {
-				// failed to set avatar url
+				//failed to set facebook details
 			}
 		});
 	}

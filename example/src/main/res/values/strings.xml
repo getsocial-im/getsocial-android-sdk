@@ -62,6 +62,9 @@
 	<string name="hint_value_3">Value3</string>
 	<string name="action_open_invite_view">Open invite view</string>
 	<string name="label_select_image">Image</string>
+	<string name="label_select_video">Video</string>
+	<string name="label_button_select">Select</string>
+	<string name="label_button_remove">Remove</string>
 	<string name="label_title_custom_smart_invite">Custom Invite</string>
 	<string name="title_user_display_name">User Display Name</string>
 	<string name="message_enter_display_name">Enter the new Display Name</string>
@@ -87,6 +90,13 @@
 	<string name="label_landingPageVideoURL">Video URL</string>
 	<string name="hint_landingPageVideoURL">Video URL</string>
 	<string name="label_remove">Remove</string>
+	<string name="label_imageurl">Image Url</string>
+	<string name="label_gifurl">Gif Url</string>
+	<string name="label_videourl">Video Url</string>
+	<string name="hint_imageurl">Image Url</string>
+	<string name="hint_gifurl">Gif Url</string>
+	<string name="hint_videourl">Video Url</string>
+	<string name="hint_image">Image</string>
 
 	<!-- VK -->
 	<integer name="com_vk_sdk_AppId">6437031</integer>

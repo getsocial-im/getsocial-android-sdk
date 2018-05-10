@@ -20,11 +20,14 @@ public class ImagePicker {
 
 	public interface Callback {
 		void onImageChosen(Uri imageUri, int requestCode);
+		void onVideoChosen(Uri videoUri, int requestCode);
 		void onCancel();
 	}
 
 	private static final String KEY_TMP_IMAGE_PATH = "GetSocial_Key_ImagePath";
+	private static final String KEY_TMP_VIDEO_PATH = "GetSocial_Key_VideoPath";
 	private static final int REQUEST_PICK_IMAGE_ACTIVITY = 1984;
+	private static final int REQUEST_PICK_VIDEO_ACTIVITY = 1994;
 	private static final int PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE = 2012;
 
 	private final int _requestCode;
@@ -32,6 +35,7 @@ public class ImagePicker {
 
 	private Callback _callback;
 	private Uri _imageUri;
+	private Uri _videoUri;
 
 	public ImagePicker(Fragment fragment, int requestCode) {
 		_fragment = fragment;
@@ -42,6 +46,9 @@ public class ImagePicker {
 		if (_imageUri != null) {
 			outState.putString(KEY_TMP_IMAGE_PATH, _imageUri.toString());
 		}
+		if (_videoUri != null) {
+			outState.putString(KEY_TMP_VIDEO_PATH, _videoUri.toString());
+		}
 	}
 
 	public void onViewStateRestored(@Nullable Bundle savedInstanceState) {
@@ -49,8 +56,14 @@ public class ImagePicker {
 			_imageUri = savedInstanceState.containsKey(KEY_TMP_IMAGE_PATH)
 					? Uri.parse(savedInstanceState.getString(KEY_TMP_IMAGE_PATH))
 					: null;
+			_videoUri = savedInstanceState.containsKey(KEY_TMP_VIDEO_PATH)
+					? Uri.parse(savedInstanceState.getString(KEY_TMP_VIDEO_PATH))
+					: null;
 			if (_imageUri != null) {
 				handlePickedImage(_imageUri);
+			}
+			if (_videoUri != null) {
+				handlePickedVideo(_videoUri);
 			}
 		}
 	}
@@ -63,6 +76,13 @@ public class ImagePicker {
 				_callback.onCancel();
 			}
 			return true;
+		} else if (REQUEST_PICK_VIDEO_ACTIVITY == requestCode) {
+			if (data != null) {
+				handlePickedVideo(data.getData());
+			} else {
+				_callback.onCancel();
+			}
+			return true;
 		}
 		return false;
 	}
@@ -71,8 +91,13 @@ public class ImagePicker {
 		if (requestCode == PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE) {
 			for (int permission : grantResults) {
 				if (permission == PackageManager.PERMISSION_GRANTED) {
-					handlePickedImage(_imageUri);
-					return true;
+					if (_imageUri != null) {
+						handlePickedImage(_imageUri);
+						return true;
+					} else if (_videoUri != null) {
+						handlePickedVideo(_videoUri);
+						return true;
+					}
 				}
 			}
 			_callback.onCancel();
@@ -82,10 +107,18 @@ public class ImagePicker {
 	}
 
 	public void pickImageFromDevice(Callback callback) {
+		pickContentFromDevice("image/*", REQUEST_PICK_IMAGE_ACTIVITY, callback);
+	}
+
+	public void pickVideoFromDevice(Callback callback) {
+		pickContentFromDevice("video/*|image/gif", REQUEST_PICK_VIDEO_ACTIVITY, callback);
+	}
+
+	private void pickContentFromDevice(String contentType, int requestType, Callback callback) {
 		_callback = callback;
 		Intent imagePickerIntent = new Intent(Intent.ACTION_PICK);
-		imagePickerIntent.setType("image/*");
-		_fragment.startActivityForResult(imagePickerIntent, REQUEST_PICK_IMAGE_ACTIVITY);
+		imagePickerIntent.setType(contentType);
+		_fragment.startActivityForResult(imagePickerIntent, requestType);
 	}
 
 	private void handlePickedImage(final Uri imageUri) {
@@ -94,6 +127,14 @@ public class ImagePicker {
 			return;
 		}
 		_callback.onImageChosen(_imageUri, _requestCode);
+	}
+
+	private void handlePickedVideo(final Uri videoUri) {
+		_videoUri = videoUri;
+		if (!checkPermissionsAndRequestIfNeeded()) {
+			return;
+		}
+		_callback.onVideoChosen(_videoUri, _requestCode);
 	}
 
 	private boolean checkPermissionsAndRequestIfNeeded() {
