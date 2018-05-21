@@ -43,6 +43,8 @@ import com.crashlytics.android.Crashlytics;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookSdk;
 import com.vk.sdk.VKSdk;
+import im.getsocial.demo.dependencies.DependenciesContainer;
+import im.getsocial.demo.dependencies.components.NotificationsManager;
 import im.getsocial.demo.dialog.NewFriendDialog;
 import im.getsocial.demo.dialog.UserInfoDialog;
 import im.getsocial.demo.fragment.BaseFragment;
@@ -66,6 +68,8 @@ import im.getsocial.sdk.invites.InviteChannelIds;
 import im.getsocial.sdk.invites.ReferralData;
 import im.getsocial.sdk.pushnotifications.Notification;
 import im.getsocial.sdk.pushnotifications.NotificationListener;
+import im.getsocial.sdk.pushnotifications.NotificationsCountQuery;
+import im.getsocial.sdk.pushnotifications.NotificationsQuery;
 import im.getsocial.sdk.ui.GetSocialUi;
 import im.getsocial.sdk.usermanagement.OnUserChangedListener;
 import im.getsocial.sdk.usermanagement.PublicUser;
@@ -88,8 +92,19 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Acti
 	private final Map<String, String> _demoAppSessionData = new HashMap<>();
 	private VKInvitePlugin _vkInvitePlugin;
 
+	private DependenciesContainer _dependenciesContainer;
+
 	@Override
 	protected void onCreate(@Nullable Bundle savedInstanceState) {
+		_dependenciesContainer = new DependenciesContainer() {
+
+			private NotificationsManager _notificationsManager = new NotificationsManager(getApplicationContext());
+
+			@Override
+			public NotificationsManager notificationsManager() {
+				return _notificationsManager;
+			}
+		};
 		super.onCreate(savedInstanceState);
 		initCrashlytics();
 		_log = new SimpleLogger(this, getClass().getSimpleName());
@@ -204,7 +219,7 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Acti
 					Toast.makeText(MainActivity.this, notification.getText(), Toast.LENGTH_SHORT).show();
 					return true;
 				}
-				if (notification.getAction() == Notification.Type.OPEN_PROFILE) {
+				if (notification.getActionType() == Notification.ActionType.OPEN_PROFILE) {
 					final String userId = notification.getActionData().get(Notification.Key.OpenProfile.USER_ID);
 					showNewFriend(userId);
 					return true;
@@ -213,6 +228,7 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Acti
 			}
 
 		});
+
 		GetSocial.User.setOnUserChangedListener(this);
 		GetSocial.whenInitialized(new Runnable() {
 			@Override
@@ -324,6 +340,11 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Acti
 		setupGetSocial();
 	}
 
+	@Override
+	public DependenciesContainer dependencies() {
+		return _dependenciesContainer;
+	}
+
 	private void initCrashlytics() {
 		final Fabric fabric = new Fabric.Builder(this)
 				.kits(new Crashlytics())
@@ -353,6 +374,7 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Acti
 				Console.logError(exception.getLocalizedMessage());
 			}
 		});
+		dependencies().notificationsManager().sync();
 	}
 
 	//endregion

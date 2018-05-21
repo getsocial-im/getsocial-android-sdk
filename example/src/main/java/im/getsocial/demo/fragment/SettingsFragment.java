@@ -18,10 +18,15 @@ package im.getsocial.demo.fragment;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.util.Log;
 import im.getsocial.demo.R;
+import im.getsocial.demo.adapter.EnabledCheck;
 import im.getsocial.demo.adapter.MenuItem;
 import im.getsocial.demo.adapter.TextGenerator;
+import im.getsocial.sdk.Callback;
+import im.getsocial.sdk.CompletionCallback;
 import im.getsocial.sdk.GetSocial;
+import im.getsocial.sdk.GetSocialException;
 import im.getsocial.sdk.consts.LanguageCodes;
 
 import java.util.ArrayList;
@@ -30,7 +35,25 @@ import java.util.Map;
 
 public class SettingsFragment extends BaseListFragment {
 
+	private Boolean _notificationsEnabled = null;
+
 	public SettingsFragment() {
+		GetSocial.User.isPushNotificationsEnabled(new Callback<Boolean>() {
+			@Override
+			public void onSuccess(Boolean result) {
+				setNotificationsEnabled(result);
+			}
+
+			@Override
+			public void onFailure(GetSocialException exception) {
+				Log.e("Notifications", "Failed to get notifications status: " + exception);
+			}
+		});
+	}
+
+	private void setNotificationsEnabled(boolean isEnabled) {
+		_notificationsEnabled = isEnabled;
+		invalidateList();
 	}
 
 	@Override
@@ -52,7 +75,29 @@ public class SettingsFragment extends BaseListFragment {
 				})
 				.build());
 
+		listData.add(new MenuItem.Builder("Enable Push Notifications")
+				.withAction(new ChangeNotificationsEnabledAction())
+				.withEnabledCheck(new EnabledCheck() {
+					@Override
+					public boolean isOptionEnabled() {
+						return checkPNStatus(false);
+					}
+				}).build());
+
+		listData.add(new MenuItem.Builder("Disable Push Notifications")
+				.withAction(new ChangeNotificationsEnabledAction())
+				.withEnabledCheck(new EnabledCheck() {
+					@Override
+					public boolean isOptionEnabled() {
+						return checkPNStatus(true);
+					}
+				}).build());
+
 		return listData;
+	}
+
+	private boolean checkPNStatus(boolean pnStatus) {
+		return _notificationsEnabled != null && _notificationsEnabled == pnStatus;
 	}
 
 	//region Presenter
@@ -87,5 +132,23 @@ public class SettingsFragment extends BaseListFragment {
 		return "settings";
 	}
 
+	private class ChangeNotificationsEnabledAction implements MenuItem.Action {
+
+		@Override
+		public void execute() {
+			final boolean shouldEnable = !_notificationsEnabled;
+			GetSocial.User.setPushNotificationsEnabled(shouldEnable, new CompletionCallback() {
+				@Override
+				public void onSuccess() {
+					setNotificationsEnabled(shouldEnable);
+				}
+
+				@Override
+				public void onFailure(GetSocialException exception) {
+					Log.e("Notifications", "Failed to set notifications status: " + exception);
+				}
+			});
+		}
+	}
 	//endregion
 }

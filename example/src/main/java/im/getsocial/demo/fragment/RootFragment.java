@@ -16,9 +16,14 @@
 
 package im.getsocial.demo.fragment;
 
+import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.text.TextUtils;
+import android.view.View;
 import im.getsocial.demo.adapter.MenuItem;
 import im.getsocial.demo.adapter.TextGenerator;
+import im.getsocial.demo.dependencies.DependenciesContainer;
+import im.getsocial.demo.dependencies.components.NotificationsManager;
 import im.getsocial.demo.utils.Console;
 import im.getsocial.sdk.Callback;
 import im.getsocial.sdk.GetSocial;
@@ -27,9 +32,16 @@ import im.getsocial.sdk.GetSocialException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RootFragment extends BaseListFragment {
+public class RootFragment extends BaseListFragment implements NotificationsManager.Listener {
+
+	private NotificationsManager _notificationsManager;
 
 	public RootFragment() {
+	}
+
+	@Override
+	protected void inject(DependenciesContainer dependencies) {
+		_notificationsManager = dependencies.notificationsManager();
 	}
 
 	@Override
@@ -38,6 +50,7 @@ public class RootFragment extends BaseListFragment {
 		if (!GetSocial.isInitialized()) {
 			return;
 		}
+		_notificationsManager.sync();
 		GetSocial.User.getFriendsCount(new Callback<Integer>() {
 			@Override
 			public void onSuccess(Integer friendsCount) {
@@ -50,6 +63,12 @@ public class RootFragment extends BaseListFragment {
 				Console.logError(exception.getLocalizedMessage());
 			}
 		});
+	}
+
+	@Override
+	public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+		super.onViewCreated(view, savedInstanceState);
+		_notificationsManager.addListener(this);
 	}
 
 	@Override
@@ -69,12 +88,9 @@ public class RootFragment extends BaseListFragment {
 				.withSubtitle(new TextGenerator() {
 					@Override
 					public String generateText() {
-						String friendsCount = _activityListener.getSessionValue(FriendsFragment.KEY_FRIENDS_COUNT);
-						if (TextUtils.isEmpty(friendsCount)) {
-							return "You have 0 friends";
-						} else {
-							return "You have " + friendsCount + " friends";
-						}
+						final String friendsCount = _activityListener.getSessionValue(FriendsFragment.KEY_FRIENDS_COUNT);
+						final String count = TextUtils.isEmpty(friendsCount) ? "0" : friendsCount;
+						return "You have " + count + " friends";
 					}
 				})
 				.withAction(new MenuItem.Action() {
@@ -99,6 +115,21 @@ public class RootFragment extends BaseListFragment {
 					@Override
 					public void execute() {
 						openActivities();
+					}
+				})
+				.build());
+
+		listData.add(new MenuItem.Builder("Notifications")
+				.withAction(new MenuItem.Action() {
+					@Override
+					public void execute() {
+						openNotifications();
+					}
+				})
+				.withSubtitle(new TextGenerator() {
+					@Override
+					public String generateText() {
+						return "You have " + _notificationsManager.getNewNotificationsCount() + " new notifications";
 					}
 				})
 				.build());
@@ -160,6 +191,10 @@ public class RootFragment extends BaseListFragment {
 		addContentFragment(new ActivitiesFragment());
 	}
 
+	protected void openNotifications() {
+		addContentFragment(new NotificationsFragment());
+	}
+
 	@Override
 	public String getTitle() {
 		return "";
@@ -168,6 +203,11 @@ public class RootFragment extends BaseListFragment {
 	@Override
 	public String getFragmentTag() {
 		return "root";
+	}
+
+	@Override
+	public void onSync() {
+		invalidateList();
 	}
 
 	//endregion

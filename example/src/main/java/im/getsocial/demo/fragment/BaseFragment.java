@@ -37,6 +37,7 @@ import com.facebook.HttpMethod;
 import com.facebook.Profile;
 import com.facebook.login.LoginManager;
 import im.getsocial.demo.R;
+import im.getsocial.demo.dependencies.DependenciesContainer;
 import im.getsocial.demo.utils.ImagePicker;
 import im.getsocial.demo.utils.SimpleLogger;
 import im.getsocial.sdk.CompletionCallback;
@@ -80,8 +81,13 @@ public abstract class BaseFragment extends Fragment implements HasTitle, HasFrag
 			throw new ClassCastException(activity.toString()
 					+ " must implement ActivityListener");
 		}
+
+		inject(_activityListener.dependencies());
 	}
 
+	protected void inject(DependenciesContainer dependencies) {
+		//
+	}
 
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, @android.support.annotation.Nullable Intent data) {
@@ -445,6 +451,8 @@ public abstract class BaseFragment extends Fragment implements HasTitle, HasFrag
 		String getSessionValue(String key);
 
 		void onSdkReset();
+
+		DependenciesContainer dependencies();
 	}
 
 	protected interface ConflictResolution {
