@@ -19,6 +19,7 @@ package im.getsocial.demo.fragment;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import im.getsocial.demo.adapter.MenuItem;
+import im.getsocial.demo.dialog.ReferralDataDialog;
 import im.getsocial.sdk.Callback;
 import im.getsocial.sdk.GetSocial;
 import im.getsocial.sdk.GetSocialException;
@@ -109,11 +110,9 @@ public class InvitesFragment extends BaseListFragment {
 		GetSocial.getReferralData(new FetchReferralDataCallback() {
 			@Override
 			public void onSuccess(@Nullable ReferralData referralData) {
-				if (referralData == null) {
-					_log.logInfoAndToast("No referral data.");
-				} else {
-					_log.logInfoAndToast("Referral data received: [" + referralData + "]");
-				}
+				final String textToDisplay = referralData == null ?  "No referral data." : "Referral data received: [ " + referralData + " ]";
+				_log.logInfo(textToDisplay);
+				showReferralData(textToDisplay);
 			}
 
 			@Override
@@ -122,6 +121,11 @@ public class InvitesFragment extends BaseListFragment {
 			}
 		});
 	}
+
+	private void showReferralData(String referralData) {
+		ReferralDataDialog.showReferralData(getActivity().getSupportFragmentManager(), referralData);
+	}
+
 
 	private void checkReferredUsers() {
 		GetSocial.getReferredUsers(new Callback<List<ReferredUser>>() {

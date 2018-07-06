@@ -51,13 +51,11 @@ public class MenuAdapter extends RecyclerView.Adapter<MenuAdapter.MenuViewHolder
 		return _listData.size();
 	}
 
-	private MenuItem getItem(int position) {
-		return _listData.get(position);
-	}
-
-	class MenuViewHolder extends RecyclerView.ViewHolder {
+	static class MenuViewHolder extends RecyclerView.ViewHolder {
 
 		final View _view;
+		MenuItem.Action _action;
+
 		@BindView(R.id.textViewTitle)
 		TextView _textViewTitle;
 		@BindView(R.id.textViewSubtitle)
@@ -67,36 +65,30 @@ public class MenuAdapter extends RecyclerView.Adapter<MenuAdapter.MenuViewHolder
 			super(itemView);
 			_view = itemView;
 			ButterKnife.bind(this, itemView);
-
-			itemView.setOnClickListener(new View.OnClickListener() {
+			_action = null;
+			_view.setOnClickListener(new View.OnClickListener() {
 				@Override
 				public void onClick(View view) {
-					MenuItem.Action action = getItem(getAdapterPosition()).getAction();
-					if (action != null) {
-						action.execute();
+					if (_action != null) {
+						_action.execute();
 					}
 				}
 			});
 		}
 
-		void update(MenuItem menuItem) {
+		void update(final MenuItem menuItem) {
 			_textViewTitle.setText(menuItem.getTitle());
 
-			if (menuItem.hasSubtitle()) {
-				_textViewSubtitle.setVisibility(View.VISIBLE);
-				_textViewSubtitle.setText(menuItem.getSubtitle());
-			} else {
-				_textViewSubtitle.setVisibility(View.GONE);
-			}
+			final boolean hasSubtitle = menuItem.hasSubtitle();
+			_textViewSubtitle.setText(hasSubtitle ? menuItem.getSubtitle() : null);
+			_textViewSubtitle.setVisibility(hasSubtitle ? View.VISIBLE : View.GONE);
+			
+			final EnabledCheck enabledCheck = menuItem.getEnabledCheck();
+			final boolean isEnabled = enabledCheck == null || enabledCheck.isOptionEnabled();
+			_view.setEnabled(isEnabled);
+			_textViewTitle.setEnabled(isEnabled);
 
-			EnabledCheck enabledCheck = menuItem.getEnabledCheck();
-			if (enabledCheck == null) {
-				_view.setEnabled(true);
-				_textViewTitle.setEnabled(true);
-			} else {
-				_view.setEnabled(menuItem.getEnabledCheck().isOptionEnabled());
-				_textViewTitle.setEnabled(menuItem.getEnabledCheck().isOptionEnabled());
-			}
+			_action = menuItem.getAction();
 		}
 	}
 }

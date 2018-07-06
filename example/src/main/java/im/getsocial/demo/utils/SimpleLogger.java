@@ -30,6 +30,11 @@ public class SimpleLogger {
 		_tag = tag;
 	}
 
+	public void logInfo(Object message) {
+		Log.i(_tag, message.toString());
+		Console.logInfo(message.toString());
+	}
+
 	public void logInfoAndToast(Object message) {
 		Log.i(_tag, message.toString());
 		Console.logInfo(message.toString());

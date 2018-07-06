@@ -46,6 +46,7 @@ import com.vk.sdk.VKSdk;
 import im.getsocial.demo.dependencies.DependenciesContainer;
 import im.getsocial.demo.dependencies.components.NotificationsManager;
 import im.getsocial.demo.dialog.NewFriendDialog;
+import im.getsocial.demo.dialog.ReferralDataDialog;
 import im.getsocial.demo.dialog.UserInfoDialog;
 import im.getsocial.demo.fragment.BaseFragment;
 import im.getsocial.demo.fragment.ConsoleFragment;
@@ -237,11 +238,9 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Acti
 				GetSocial.getReferralData(new FetchReferralDataCallback() {
 					@Override
 					public void onSuccess(@Nullable ReferralData referralData) {
-						if (referralData == null) {
-							_log.logInfoAndToast("No referral data.");
-						} else {
-							_log.logInfoAndToast("Referral data received: [ " + referralData + " ]");
-						}
+						final String textToDisplay = referralData == null ?  "No referral data." : "Referral data received: [ " + referralData + " ]";
+						_log.logInfo(textToDisplay);
+						showReferralData(textToDisplay);
 					}
 
 					@Override
@@ -280,6 +279,10 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Acti
 		if (GetSocial.isInitialized()) {
 			UserInfoDialog.show(getSupportFragmentManager());
 		}
+	}
+
+	private void showReferralData(String referralData) {
+		ReferralDataDialog.showReferralData(getSupportFragmentManager(), referralData);
 	}
 
 	private void copyUserIdToClipboard() {
