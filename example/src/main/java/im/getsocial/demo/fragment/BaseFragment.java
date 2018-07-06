@@ -168,7 +168,7 @@ public abstract class BaseFragment extends Fragment implements HasTitle, HasFrag
 
 	protected void hideLoading() {
 		if (_currentProgressDialog != null) {
-			_currentProgressDialog.hide();
+			_currentProgressDialog.dismiss();
 			_currentProgressDialog = null;
 		}
 	}
