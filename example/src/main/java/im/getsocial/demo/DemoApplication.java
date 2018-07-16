@@ -2,8 +2,10 @@ package im.getsocial.demo;
 
 import android.app.Activity;
 import android.app.Application;
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.support.multidex.MultiDex;
 import com.adjust.sdk.Adjust;
 import com.adjust.sdk.AdjustConfig;
 import com.appsflyer.AppsFlyerLib;
@@ -16,6 +18,13 @@ import com.vk.sdk.VKSdk;
 public class DemoApplication extends Application {
 
 	private static final String ADJUST_TOKEN = "im.getsocial.demo.adjust.AppToken";
+
+	@Override
+	protected void attachBaseContext(Context base) {
+		super.attachBaseContext(base);
+
+		MultiDex.install(this);
+	}
 
 	@Override
 	public void onCreate() {

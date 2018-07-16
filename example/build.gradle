@@ -7,7 +7,7 @@ buildscript {
 	dependencies {
 		classpath "com.android.tools.build:gradle:2.3.3"
 		classpath 'com.neenbedankt.gradle.plugins:android-apt:1.8'
-		classpath 'com.google.gms:google-services:3.0.0'
+		classpath 'com.google.gms:google-services:4.0.1'
 		classpath 'io.fabric.tools:gradle:1.24.4'
 		classpath "gradle.plugin.im.getsocial:plugin:[0,1)"
 	}
@@ -32,7 +32,7 @@ getsocial {
 
 dependencies {
 	compile 'com.kakao.sdk:kakaolink:1.0.52'
-	compile 'com.facebook.android:facebook-android-sdk:4.18.0'
+	compile 'com.facebook.android:facebook-android-sdk:4.34.0'
 
 	compile('com.vk:androidsdk:1.6.9') {
 		transitive = false
@@ -41,18 +41,20 @@ dependencies {
 	apt 'com.jakewharton:butterknife-compiler:8.4.0'
 	compile 'com.jakewharton:butterknife:8.4.0'
 	compile 'com.google.code.findbugs:jsr305:3.0.1'
-	compile 'com.android.support:appcompat-v7:25.2.0'
-	compile 'com.android.support:recyclerview-v7:25.2.0'
-	compile 'com.android.support:design:25.2.0'
+	compile 'com.android.support:appcompat-v7:27.0.2'
+	compile 'com.android.support:recyclerview-v7:27.0.2'
+	compile 'com.android.support:design:27.0.2'
 	compile 'com.squareup.picasso:picasso:2.5.2'
 
+	compile 'com.android.support:multidex:1.0.3'
+	
 	//  GetSocial supports both FCM and GCM. 
 	//  Uncomment following two dependencies and comment out Firebase one to try
 	//	GetSocial push notifications via GCM. Check documentation for more details.
-	// compile 'com.google.android.gms:google-services:9.8.0'
-	// compile "com.google.android.gms:play-services-gcm:10.2.0"
-	compile "com.google.firebase:firebase-messaging:9.8.0"
-	compile 'com.google.firebase:firebase-core:9.8.0'
+	// compile 'com.google.android.gms:google-services:11.8.0'
+	// compile "com.google.android.gms:play-services-gcm:11.8.0"
+	compile "com.google.firebase:firebase-messaging:17.1.0"
+
 	compile('com.crashlytics.sdk.android:crashlytics:2.7.1@aar') {
 		transitive = true
 	}
@@ -69,16 +71,18 @@ dependencies {
 
 
 android {
-	compileSdkVersion 25
-	buildToolsVersion '25.0.2'
+	compileSdkVersion 27
+	buildToolsVersion '27.0.2'
 
 	defaultConfig {
 		minSdkVersion 15
-		targetSdkVersion 25
+		targetSdkVersion 26
 
 		applicationId 'im.getsocial.demo'
 		versionCode 1
 		versionName '1'
+
+		multiDexEnabled true
 	}
 
 	productFlavors {
@@ -93,5 +97,8 @@ android {
 			keyAlias "androiddebugkey"
 			keyPassword "android"
 		}
+	}
+	dexOptions {
+		jumboMode true
 	}
 }

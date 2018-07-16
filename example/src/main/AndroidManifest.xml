@@ -87,6 +87,7 @@
 
 		<meta-data android:name="im.getsocial.sdk.LargeNotificationIcon" android:resource="@drawable/large_notification_icon"/>
 
+		<meta-data android:name="im.getsocial.sdk.NotificationsChannelDescription" android:resource="@string/social_channel_desc"/>
 
 	</application>
 

@@ -100,4 +100,6 @@
 
 	<!-- VK -->
 	<integer name="com_vk_sdk_AppId">6437031</integer>
+
+	<string name="social_channel_desc">GetSocial notifications about Activity Feeds, Invites and Friends.</string>
 </resources>
