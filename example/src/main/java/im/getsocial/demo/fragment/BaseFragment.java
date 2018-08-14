@@ -450,8 +450,6 @@ public abstract class BaseFragment extends Fragment implements HasTitle, HasFrag
 
 		String getSessionValue(String key);
 
-		void onSdkReset();
-
 		DependenciesContainer dependencies();
 	}
 

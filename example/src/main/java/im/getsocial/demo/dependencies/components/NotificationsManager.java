@@ -114,6 +114,9 @@ public final class NotificationsManager {
 	}
 
 	public void sync() {
+		if (!GetSocial.isInitialized()) {
+			return;
+		}
 		GetSocial.User.getNotificationsCount(createNotificationsCountQuery(), new Callback<Integer>() {
 			@Override
 			public void onSuccess(Integer result) {

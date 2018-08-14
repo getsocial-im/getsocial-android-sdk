@@ -25,8 +25,8 @@
 
 	<string name="title_activity_main">MainActivity</string>
 
-	<string name="kakao_app_key">4d436485d41336a82c47d0142682b4d7</string>
-	<string name="kakao_scheme">kakao4d436485d41336a82c47d0142682b4d7</string>
+	<string name="kakao_app_key">1817939d1a5b05af3601ed50dc3b077d</string>
+	<string name="kakao_scheme">kakao1817939d1a5b05af3601ed50dc3b077d</string>
 	<string name="kakaolink_host">kakaolink</string>
 
 	<string name="action_console">Console</string>

@@ -31,7 +31,9 @@ getsocial {
 }
 
 dependencies {
-	compile 'com.kakao.sdk:kakaolink:1.0.52'
+	compile 'com.kakao.sdk:kakaolink:1.11.1'
+	compile 'com.kakao.sdk:kakaotalk:1.11.0'
+	compile 'com.kakao.sdk:kakaostory:1.11.0'
 	compile 'com.facebook.android:facebook-android-sdk:4.34.0'
 
 	compile('com.vk:androidsdk:1.6.9') {

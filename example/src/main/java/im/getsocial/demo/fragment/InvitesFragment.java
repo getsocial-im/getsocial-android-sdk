@@ -24,6 +24,7 @@ import im.getsocial.sdk.Callback;
 import im.getsocial.sdk.GetSocial;
 import im.getsocial.sdk.GetSocialException;
 import im.getsocial.sdk.invites.FetchReferralDataCallback;
+import im.getsocial.sdk.invites.InviteChannelIds;
 import im.getsocial.sdk.invites.ReferralData;
 import im.getsocial.sdk.invites.ReferredUser;
 import im.getsocial.sdk.ui.GetSocialUi;
@@ -57,6 +58,15 @@ public class InvitesFragment extends BaseListFragment {
 					@Override
 					public void execute() {
 						sendCustomizedInvite();
+					}
+				})
+				.build());
+
+		listData.add(new MenuItem.Builder("Create Invite Url")
+				.withAction(new MenuItem.Action() {
+					@Override
+					public void execute() {
+						createInviteUrl();
 					}
 				})
 				.build());
@@ -146,6 +156,20 @@ public class InvitesFragment extends BaseListFragment {
 			@Override
 			public void onFailure(GetSocialException exception) {
 				_log.logInfoAndToast("Could not get referred users: " + exception.getMessage());
+			}
+		});
+	}
+
+	private void createInviteUrl() {
+		GetSocial.createInviteLink(null, new Callback<String>() {
+			@Override
+			public void onSuccess(String result) {
+				_log.logInfoAndToast("Invite link: " + result);
+			}
+
+			@Override
+			public void onFailure(GetSocialException exception) {
+				_log.logErrorAndToast("Failed to create invite link: " + exception);
 			}
 		});
 	}

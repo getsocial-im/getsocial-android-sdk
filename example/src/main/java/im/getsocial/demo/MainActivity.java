@@ -210,7 +210,7 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Acti
 
 	protected void setupGetSocial() {
 		Console.logInfo(getDemoAppInfo());
-		GetSocial.registerInviteChannelPlugin(InviteChannelIds.KAKAO, new KakaoInvitePlugin(this));
+		GetSocial.registerInviteChannelPlugin(InviteChannelIds.KAKAO, new KakaoInvitePlugin());
 		GetSocial.registerInviteChannelPlugin(InviteChannelIds.FACEBOOK, new FacebookSharePlugin(this, _facebookCallbackManager));
 		GetSocial.registerInviteChannelPlugin(InviteChannelIds.VK, _vkInvitePlugin);
 		GetSocial.setNotificationListener(new NotificationListener() {
@@ -223,6 +223,9 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Acti
 				if (notification.getActionType() == Notification.ActionType.OPEN_PROFILE) {
 					final String userId = notification.getActionData().get(Notification.Key.OpenProfile.USER_ID);
 					showNewFriend(userId);
+					return true;
+				} else if (notification.getActionType() == Notification.ActionType.CUSTOM) {
+					_log.logInfo("Received custom notification:" + notification.getActionData());
 					return true;
 				}
 				return false;
@@ -336,11 +339,6 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Acti
 	@Nullable
 	public String getSessionValue(String key) {
 		return _demoAppSessionData.get(key);
-	}
-
-	@Override
-	public void onSdkReset() {
-		setupGetSocial();
 	}
 
 	@Override
