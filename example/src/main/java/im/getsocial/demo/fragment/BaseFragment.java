@@ -38,6 +38,7 @@ import com.facebook.Profile;
 import com.facebook.login.LoginManager;
 import im.getsocial.demo.R;
 import im.getsocial.demo.dependencies.DependenciesContainer;
+import im.getsocial.demo.utils.EditTextWOCopyPaste;
 import im.getsocial.demo.utils.ImagePicker;
 import im.getsocial.demo.utils.SimpleLogger;
 import im.getsocial.sdk.CompletionCallback;
@@ -313,8 +314,8 @@ public abstract class BaseFragment extends Fragment implements HasTitle, HasFrag
 		LayoutInflater layoutInflater = LayoutInflater.from(getContext());
 		final View view = layoutInflater.inflate(R.layout.dialog_custom_identity, null, false);
 
-		final EditText userdIdEditText = (EditText) view.findViewById(R.id.user_id);
-		final EditText tokenEditText = (EditText) view.findViewById(R.id.user_token);
+		final EditTextWOCopyPaste userdIdEditText = (EditTextWOCopyPaste) view.findViewById(R.id.user_id);
+		final EditTextWOCopyPaste tokenEditText = (EditTextWOCopyPaste) view.findViewById(R.id.user_token);
 
 		final UserManagementFragment.AddUserIdentityOutcomeCallback addUserIdentityOutcomeCallback = new UserManagementFragment.AddUserIdentityOutcomeCallback() {
 			@Override

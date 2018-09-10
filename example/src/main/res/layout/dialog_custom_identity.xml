@@ -12,14 +12,14 @@
 			android:textSize="@dimen/text_title"
 			android:textStyle="bold"/>
 
-	<EditText
+	<im.getsocial.demo.utils.EditTextWOCopyPaste
 			android:id="@+id/user_id"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
 			android:layout_marginTop="@dimen/margin_normal"
 			android:hint="@string/hint_user_id"/>
 
-	<EditText
+	<im.getsocial.demo.utils.EditTextWOCopyPaste
 			android:id="@+id/user_token"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"

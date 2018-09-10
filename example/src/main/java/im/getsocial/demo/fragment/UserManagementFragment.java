@@ -31,6 +31,7 @@ import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
 import im.getsocial.demo.adapter.EnabledCheck;
 import im.getsocial.demo.adapter.MenuItem;
+import im.getsocial.demo.utils.EditTextWOCopyPaste;
 import im.getsocial.demo.utils.PixelUtils;
 import im.getsocial.demo.utils.UserIdentityUtils;
 import im.getsocial.sdk.CompletionCallback;
@@ -241,7 +242,8 @@ public class UserManagementFragment extends BaseListFragment {
 	}
 
 	private void getPublicProperty() {
-		final EditText keyInput = new EditText(getContext());
+		final EditTextWOCopyPaste keyInput = new EditTextWOCopyPaste(getContext());
+		keyInput.setLongClickable(false);
 		final int _8dp = PixelUtils.dp2px(getContext(), 8);
 		FrameLayout frameLayout = new FrameLayout(getContext());
 		frameLayout.setPadding(_8dp, _8dp, _8dp, _8dp);
@@ -267,8 +269,10 @@ public class UserManagementFragment extends BaseListFragment {
 	}
 
 	private void setPublicProperty() {
-		final EditText keyInput = new EditText(getContext());
-		final EditText valInput = new EditText(getContext());
+		final EditTextWOCopyPaste keyInput = new EditTextWOCopyPaste(getContext());
+		keyInput.setLongClickable(false);
+		final EditTextWOCopyPaste valInput = new EditTextWOCopyPaste(getContext());
+		valInput.setLongClickable(false);
 
 		keyInput.setHint("Key");
 		valInput.setHint("Value");
@@ -335,7 +339,9 @@ public class UserManagementFragment extends BaseListFragment {
 	}
 
 	private void changeDisplayName() {
-		final EditText displayNameInput = new EditText(getContext());
+		final EditTextWOCopyPaste displayNameInput = new EditTextWOCopyPaste(getContext());
+		displayNameInput.setLongClickable(false);
+
 		final int _8dp = PixelUtils.dp2px(getContext(), 8);
 		FrameLayout frameLayout = new FrameLayout(getContext());
 		frameLayout.setPadding(_8dp, _8dp, _8dp, _8dp);

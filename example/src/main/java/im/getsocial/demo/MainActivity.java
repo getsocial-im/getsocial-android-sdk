@@ -87,11 +87,12 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Acti
 	private static final String KEY_APP_SESSION = "GetSocial_AppSession_Key";
 	private static final String KEY_IS_INITIALIZING = "GetSocial_IsInitializing_Key";
 
+	protected CallbackManager _facebookCallbackManager;
+	protected VKInvitePlugin _vkInvitePlugin;
+
 	private boolean _isInitializing = false;
-	private CallbackManager _facebookCallbackManager;
 	private ViewContainer _viewContainer;
 	private final Map<String, String> _demoAppSessionData = new HashMap<>();
-	private VKInvitePlugin _vkInvitePlugin;
 
 	private DependenciesContainer _dependenciesContainer;
 
@@ -210,9 +211,6 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Acti
 
 	protected void setupGetSocial() {
 		Console.logInfo(getDemoAppInfo());
-		GetSocial.registerInviteChannelPlugin(InviteChannelIds.KAKAO, new KakaoInvitePlugin());
-		GetSocial.registerInviteChannelPlugin(InviteChannelIds.FACEBOOK, new FacebookSharePlugin(this, _facebookCallbackManager));
-		GetSocial.registerInviteChannelPlugin(InviteChannelIds.VK, _vkInvitePlugin);
 		GetSocial.setNotificationListener(new NotificationListener() {
 
 			public boolean onNotificationReceived(Notification notification, boolean wasClicked) {
@@ -253,6 +251,13 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Acti
 				});
 			}
 		});
+		registerCustomInvitesChannelPlugins();
+	}
+
+	protected void registerCustomInvitesChannelPlugins() {
+		GetSocial.registerInviteChannelPlugin(InviteChannelIds.KAKAO, new KakaoInvitePlugin());
+		GetSocial.registerInviteChannelPlugin(InviteChannelIds.FACEBOOK, new FacebookSharePlugin(this, _facebookCallbackManager));
+		GetSocial.registerInviteChannelPlugin(InviteChannelIds.VK, _vkInvitePlugin);
 	}
 
 	private void showNewFriend(String userId) {
