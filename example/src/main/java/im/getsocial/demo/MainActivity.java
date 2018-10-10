@@ -16,6 +16,7 @@
 
 package im.getsocial.demo;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.ClipData;
 import android.content.ClipboardManager;
@@ -421,6 +422,7 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Acti
 			return true;
 		}
 
+		@SuppressLint("ResourceAsColor")
 		private void updateView() {
 			_versionTextView.setText(getDemoAppInfo());
 
@@ -436,8 +438,7 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Acti
 					HasTitle hasTitle = (HasTitle) fragment;
 					_toolbar.setTitle(hasTitle.getTitle());
 				}
-
-
+				
 				Drawable navigationIcon = CompatibilityUtils.getDrawable(_context, R.drawable.ic_menu_back);
 				Drawable wrappedNavigationIcon = DrawableCompat.wrap(navigationIcon);
 				DrawableCompat.setTint(wrappedNavigationIcon, getResources().getColor(R.color.primary_text));

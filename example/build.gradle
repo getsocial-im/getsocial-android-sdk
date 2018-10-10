@@ -47,6 +47,7 @@ dependencies {
 	compile 'com.android.support:recyclerview-v7:27.0.2'
 	compile 'com.android.support:design:27.0.2'
 	compile 'com.squareup.picasso:picasso:2.5.2'
+	compile 'com.android.billingclient:billing:1.1'
 
 	compile 'com.android.support:multidex:1.0.3'
 	

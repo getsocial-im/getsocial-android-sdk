@@ -24,7 +24,6 @@ import im.getsocial.sdk.Callback;
 import im.getsocial.sdk.GetSocial;
 import im.getsocial.sdk.GetSocialException;
 import im.getsocial.sdk.invites.FetchReferralDataCallback;
-import im.getsocial.sdk.invites.InviteChannelIds;
 import im.getsocial.sdk.invites.ReferralData;
 import im.getsocial.sdk.invites.ReferredUser;
 import im.getsocial.sdk.ui.GetSocialUi;
@@ -136,7 +135,6 @@ public class InvitesFragment extends BaseListFragment {
 		ReferralDataDialog.showReferralData(getActivity().getSupportFragmentManager(), referralData);
 	}
 
-
 	private void checkReferredUsers() {
 		GetSocial.getReferredUsers(new Callback<List<ReferredUser>>() {
 			@Override
@@ -187,7 +185,14 @@ public class InvitesFragment extends BaseListFragment {
 
 	//region private
 	private static String formatReferredUserInfo(ReferredUser referredUser) {
-		return String.format("%s(on %s via %s)", referredUser.getDisplayName(), DateFormat.getDateTimeInstance().format(new Date(referredUser.getInstallationDate() * 1000)), referredUser.getInstallationChannel());
+		return String.format("%s(date=%s; channel=%s, reinstall=%b, suspicious=%b, platform=%s)",
+				referredUser.getDisplayName(),
+				DateFormat.getDateTimeInstance().format(new Date(referredUser.getInstallationDate() * 1000)),
+				referredUser.getInstallationChannel(),
+				referredUser.isReinstall(),
+				referredUser.isInstallSuspicious(),
+				referredUser.getInstallPlatform()
+		);
 	}
 	//endregion
 

@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+			  android:orientation="vertical"
+			  android:layout_width="match_parent"
+			  android:layout_height="match_parent">
+
+	<LinearLayout
+			android:orientation="horizontal"
+			android:layout_width="match_parent"
+			android:layout_height="50dp">
+		<TextView
+				android:text="Product Id"
+				android:layout_width="20dp"
+				android:layout_height="wrap_content"
+				android:id="@+id/product_id_label" android:layout_weight="1"/>
+		<EditText
+				android:layout_width="180dp"
+				android:layout_height="wrap_content"
+				android:text="product id"
+				android:ems="10"
+				android:id="@+id/product_id_input" android:layout_weight="1"/>
+	</LinearLayout>
+	<LinearLayout
+			android:orientation="horizontal"
+			android:layout_width="match_parent"
+			android:layout_height="50dp">
+		<TextView
+				android:text="Product Title"
+				android:layout_width="20dp"
+				android:layout_height="wrap_content"
+				android:id="@+id/product_title_label" android:layout_weight="1"/>
+		<EditText
+				android:layout_width="180dp"
+				android:layout_height="wrap_content"
+				android:text="Name"
+				android:ems="10"
+				android:id="@+id/product_title_input" android:layout_weight="1"/>
+	</LinearLayout>
+	<LinearLayout
+			android:orientation="horizontal"
+			android:layout_width="match_parent"
+			android:layout_height="50dp">
+		<TextView
+				android:text="Product Type"
+				android:layout_width="20dp"
+				android:layout_height="wrap_content"
+				android:id="@+id/product_type_label" android:layout_weight="1"/>
+		<Spinner
+				android:layout_width="180dp"
+				android:layout_height="wrap_content"
+				android:spinnerMode="dropdown"
+				android:ems="10"
+				android:id="@+id/product_type_input" android:layout_weight="1"/>
+	</LinearLayout>
+	<LinearLayout
+			android:orientation="horizontal"
+			android:layout_width="match_parent"
+			android:layout_height="50dp">
+		<TextView
+				android:text="Price"
+				android:layout_width="20dp"
+				android:layout_height="wrap_content"
+				android:id="@+id/product_price_label" android:layout_weight="1"/>
+		<EditText
+				android:layout_width="180dp"
+				android:layout_height="wrap_content"
+				android:text="1.00"
+				android:ems="10"
+				android:id="@+id/product_price_input" android:layout_weight="1"/>
+	</LinearLayout>
+	<LinearLayout
+			android:orientation="horizontal"
+			android:layout_width="match_parent"
+			android:layout_height="50dp">
+		<TextView
+				android:text="Price currency"
+				android:layout_width="20dp"
+				android:layout_height="wrap_content"
+				android:id="@+id/product_price_currency_label" android:layout_weight="1"/>
+		<EditText
+				android:layout_width="180dp"
+				android:layout_height="wrap_content"
+				android:text="EUR"
+				android:ems="10"
+				android:id="@+id/product_price_currency_input" android:layout_weight="1"/>
+	</LinearLayout>
+	<LinearLayout
+			android:orientation="horizontal"
+			android:layout_width="match_parent"
+			android:layout_height="50dp">
+		<Button
+				android:text="Send"
+				android:layout_width="100dp"
+				android:layout_height="wrap_content"
+				android:id="@+id/button_send_purchase" android:layout_weight="1"/>
+	</LinearLayout>
+</LinearLayout>

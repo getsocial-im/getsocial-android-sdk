@@ -163,6 +163,14 @@ public class RootFragment extends BaseListFragment implements NotificationsManag
 				})
 				.build());
 
+		listData.add(new MenuItem.Builder("IAP")
+				.withAction(new MenuItem.Action() {
+					@Override
+					public void execute() {
+						openIAP();
+					}
+				})
+				.build());
 		return listData;
 	}
 
@@ -185,6 +193,10 @@ public class RootFragment extends BaseListFragment implements NotificationsManag
 
 	protected void openSettings() {
 		addContentFragment(new SettingsFragment());
+	}
+
+	protected void openIAP() {
+		addContentFragment(new PurchaseFragment());
 	}
 
 	protected void openActivities() {

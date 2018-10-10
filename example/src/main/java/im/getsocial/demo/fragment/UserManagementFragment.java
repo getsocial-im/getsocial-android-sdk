@@ -22,13 +22,17 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.support.annotation.NonNull;
-import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.Toast;
+
 import com.squareup.picasso.MemoryPolicy;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import im.getsocial.demo.adapter.EnabledCheck;
 import im.getsocial.demo.adapter.MenuItem;
 import im.getsocial.demo.utils.EditTextWOCopyPaste;
@@ -38,9 +42,6 @@ import im.getsocial.sdk.CompletionCallback;
 import im.getsocial.sdk.GetSocial;
 import im.getsocial.sdk.GetSocialException;
 import im.getsocial.sdk.usermanagement.AuthIdentityProviderIds;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import static com.squareup.picasso.Picasso.with;
 
@@ -243,6 +244,7 @@ public class UserManagementFragment extends BaseListFragment {
 
 	private void getPublicProperty() {
 		final EditTextWOCopyPaste keyInput = new EditTextWOCopyPaste(getContext());
+		keyInput.setContentDescription("public_property_key");
 		keyInput.setLongClickable(false);
 		final int _8dp = PixelUtils.dp2px(getContext(), 8);
 		FrameLayout frameLayout = new FrameLayout(getContext());
@@ -275,7 +277,9 @@ public class UserManagementFragment extends BaseListFragment {
 		valInput.setLongClickable(false);
 
 		keyInput.setHint("Key");
+		keyInput.setContentDescription("public_property_key");
 		valInput.setHint("Value");
+		valInput.setContentDescription("public_property_value");
 
 		final int _8dp = PixelUtils.dp2px(getContext(), 8);
 		LinearLayout frameLayout = new LinearLayout(getContext());
@@ -349,6 +353,7 @@ public class UserManagementFragment extends BaseListFragment {
 
 		displayNameInput.setText(UserIdentityUtils.getDisplayName());
 		displayNameInput.setSelection(displayNameInput.getText().length());
+		displayNameInput.setContentDescription("display_name_input");
 
 		new AlertDialog.Builder(getContext())
 				.setView(frameLayout)

@@ -28,7 +28,7 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.EditText;
+
 import com.facebook.AccessToken;
 import com.facebook.AccessTokenTracker;
 import com.facebook.GraphRequest;
@@ -36,6 +36,12 @@ import com.facebook.GraphResponse;
 import com.facebook.HttpMethod;
 import com.facebook.Profile;
 import com.facebook.login.LoginManager;
+
+import java.util.Arrays;
+import java.util.List;
+
+import javax.annotation.Nullable;
+
 import im.getsocial.demo.R;
 import im.getsocial.demo.dependencies.DependenciesContainer;
 import im.getsocial.demo.utils.EditTextWOCopyPaste;
@@ -50,10 +56,6 @@ import im.getsocial.sdk.usermanagement.AddAuthIdentityCallback;
 import im.getsocial.sdk.usermanagement.AuthIdentity;
 import im.getsocial.sdk.usermanagement.ConflictUser;
 import im.getsocial.sdk.usermanagement.UserUpdate;
-
-import javax.annotation.Nullable;
-import java.util.Arrays;
-import java.util.List;
 
 public abstract class BaseFragment extends Fragment implements HasTitle, HasFragmentTag {
 
@@ -314,7 +316,7 @@ public abstract class BaseFragment extends Fragment implements HasTitle, HasFrag
 		LayoutInflater layoutInflater = LayoutInflater.from(getContext());
 		final View view = layoutInflater.inflate(R.layout.dialog_custom_identity, null, false);
 
-		final EditTextWOCopyPaste userdIdEditText = (EditTextWOCopyPaste) view.findViewById(R.id.user_id);
+		final EditTextWOCopyPaste userIdEditText = (EditTextWOCopyPaste) view.findViewById(R.id.user_id);
 		final EditTextWOCopyPaste tokenEditText = (EditTextWOCopyPaste) view.findViewById(R.id.user_token);
 
 		final UserManagementFragment.AddUserIdentityOutcomeCallback addUserIdentityOutcomeCallback = new UserManagementFragment.AddUserIdentityOutcomeCallback() {
@@ -347,7 +349,7 @@ public abstract class BaseFragment extends Fragment implements HasTitle, HasFrag
 				.setPositiveButton("Add", new DialogInterface.OnClickListener() {
 							@Override
 							public void onClick(DialogInterface dialog, int which) {
-								String userId = userdIdEditText.getText().toString().trim();
+								String userId = userIdEditText.getText().toString().trim();
 								String token = tokenEditText.getText().toString().trim();
 								addIdentity(AuthIdentity.createCustomIdentity(providerId, userId, token), addUserIdentityOutcomeCallback);
 							}
