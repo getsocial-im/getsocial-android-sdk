@@ -3,7 +3,6 @@ package im.getsocial.demo.dialog;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentManager;
-import android.text.util.Linkify;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,8 +10,6 @@ import android.view.Window;
 import android.widget.Button;
 import android.widget.TextView;
 import im.getsocial.demo.R;
-import im.getsocial.demo.ui.UserInfoView;
-import im.getsocial.sdk.invites.ReferralData;
 
 public class ReferralDataDialog extends DialogFragment {
 

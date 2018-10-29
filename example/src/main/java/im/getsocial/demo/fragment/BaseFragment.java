@@ -28,7 +28,6 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
-
 import com.facebook.AccessToken;
 import com.facebook.AccessTokenTracker;
 import com.facebook.GraphRequest;
@@ -36,12 +35,6 @@ import com.facebook.GraphResponse;
 import com.facebook.HttpMethod;
 import com.facebook.Profile;
 import com.facebook.login.LoginManager;
-
-import java.util.Arrays;
-import java.util.List;
-
-import javax.annotation.Nullable;
-
 import im.getsocial.demo.R;
 import im.getsocial.demo.dependencies.DependenciesContainer;
 import im.getsocial.demo.utils.EditTextWOCopyPaste;
@@ -56,6 +49,10 @@ import im.getsocial.sdk.usermanagement.AddAuthIdentityCallback;
 import im.getsocial.sdk.usermanagement.AuthIdentity;
 import im.getsocial.sdk.usermanagement.ConflictUser;
 import im.getsocial.sdk.usermanagement.UserUpdate;
+
+import javax.annotation.Nullable;
+import java.util.Arrays;
+import java.util.List;
 
 public abstract class BaseFragment extends Fragment implements HasTitle, HasFragmentTag {
 

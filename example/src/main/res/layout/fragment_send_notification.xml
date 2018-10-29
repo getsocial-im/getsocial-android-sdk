@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+			  android:orientation="vertical"
+			  android:layout_width="match_parent"
+			  android:layout_height="match_parent">
+	<LinearLayout android:layout_width="match_parent"
+				  android:layout_height="wrap_content"
+				  android:orientation="vertical">
+
+		<TextView android:layout_width="wrap_content"
+				  android:layout_height="wrap_content"
+				  android:textSize="25dp"
+				  android:text="Content"/>
+
+		<LinearLayout android:id="@+id/container_template"
+					  android:layout_width="match_parent"
+					  android:layout_height="wrap_content"
+					  android:orientation="vertical">
+
+			<EditText android:id="@+id/template_name"
+					  android:hint="Template name"
+					  android:layout_width="match_parent"
+					  android:layout_height="wrap_content"/>
+
+			<RelativeLayout android:gravity="center"
+							android:layout_margin="10dp"
+							android:layout_width="match_parent"
+							android:layout_height="wrap_content">
+
+				<TextView android:layout_width="wrap_content"
+						  android:layout_centerVertical="true"
+						  android:layout_height="wrap_content"
+						  android:layout_alignParentLeft="true"
+						  android:textSize="20dp"
+						  android:text="Template Data"/>
+
+				<Button android:id="@+id/button_add_template_data"
+						android:layout_centerVertical="true"
+						android:layout_alignParentRight="true"
+						android:text="Add"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"/>
+
+			</RelativeLayout>
+
+			<LinearLayout android:id="@+id/container_template_data"
+						  android:layout_width="match_parent"
+						  android:layout_height="wrap_content"
+						  android:orientation="vertical"/>
+		</LinearLayout>
+
+		<LinearLayout android:id="@+id/container_text"
+					  android:layout_width="match_parent"
+					  android:layout_height="wrap_content"
+					  android:orientation="vertical">
+
+			<EditText android:id="@+id/notification_title"
+					  android:hint="Notification title"
+					  android:layout_width="match_parent"
+					  android:layout_height="wrap_content"/>
+
+			<EditText android:id="@+id/notification_text"
+					  android:hint="Notification text"
+					  android:layout_width="match_parent"
+					  android:layout_height="wrap_content"/>
+
+		</LinearLayout>
+
+		<View android:background="@android:color/black"
+			  android:layout_width = "match_parent"
+			  android:layout_height="1dp"/>
+
+		<TextView android:layout_width="wrap_content"
+				  android:layout_height="wrap_content"
+				  android:textSize="25dp"
+				  android:text="Action"/>
+
+		<Spinner android:id="@+id/spinner_select_notification_type"
+				 android:layout_width="match_parent"
+				 android:layout_height="50dp"/>
+
+		<RelativeLayout android:gravity="center"
+						android:layout_margin="10dp"
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content">
+
+			<TextView android:layout_width="wrap_content"
+					  android:layout_centerVertical="true"
+					  android:layout_height="wrap_content"
+					  android:layout_alignParentLeft="true"
+					  android:textSize="20dp"
+					  android:text="Notification Data"/>
+
+			<Button android:id="@+id/button_add_notification_data"
+					android:layout_centerVertical="true"
+					android:layout_alignParentRight="true"
+					android:text="Add"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"/>
+
+		</RelativeLayout>
+
+		<LinearLayout android:id="@+id/container_notification_data"
+					  android:layout_width="match_parent"
+					  android:layout_height="wrap_content"
+					  android:orientation="vertical"/>
+
+		<View android:background="@android:color/black"
+			  android:layout_width = "match_parent"
+			  android:layout_height="1dp"/>
+
+		<TextView android:layout_width="wrap_content"
+				  android:layout_height="wrap_content"
+				  android:textSize="25dp"
+				  android:text="Recipients"/>
+
+		<CheckBox android:id="@+id/checkbox_friends"
+				  android:text="Friends"
+				  android:layout_width="match_parent"
+				  android:layout_height="wrap_content"/>
+
+		<CheckBox android:id="@+id/checkbox_referred_users"
+				  android:text="Invited Users"
+				  android:layout_width="match_parent"
+				  android:layout_height="wrap_content"/>
+
+		<CheckBox android:id="@+id/checkbox_referrer"
+				  android:text="Referrer"
+				  android:layout_width="match_parent"
+				  android:layout_height="wrap_content"/>
+
+
+		<RelativeLayout android:gravity="center"
+						android:layout_margin="10dp"
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content">
+
+			<TextView android:layout_width="wrap_content"
+					  android:layout_centerVertical="true"
+					  android:layout_height="wrap_content"
+					  android:layout_alignParentLeft="true"
+					  android:textSize="20dp"
+					  android:text="Custom Users"/>
+
+			<Button android:id="@+id/button_add_user_id"
+					android:layout_centerVertical="true"
+					android:layout_alignParentRight="true"
+					android:text="Add"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"/>
+
+		</RelativeLayout>
+
+		<LinearLayout android:id="@+id/container_user_ids"
+					  android:layout_width="match_parent"
+					  android:layout_height="wrap_content"
+					  android:orientation="vertical"/>
+
+		<View android:background="@android:color/black"
+			  android:layout_width = "match_parent"
+			  android:layout_height="1dp"/>
+
+		<Button android:id="@+id/button_send_notification"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:text="Send Notification"/>
+	</LinearLayout>
+</ScrollView>

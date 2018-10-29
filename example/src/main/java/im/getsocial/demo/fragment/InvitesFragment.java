@@ -30,7 +30,7 @@ import im.getsocial.sdk.ui.GetSocialUi;
 import im.getsocial.sdk.ui.invites.InviteUiCallback;
 
 import java.text.DateFormat;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -41,54 +41,41 @@ public class InvitesFragment extends BaseListFragment {
 
 	@NonNull
 	protected List<MenuItem> createListData() {
-		List<MenuItem> listData = new ArrayList<>();
-
-		listData.add(new MenuItem.Builder("Open Invites UI")
-				.withAction(new MenuItem.Action() {
-					@Override
-					public void execute() {
-						openInvitesUi();
-					}
-				})
-				.build());
-
-		listData.add(new MenuItem.Builder("Send Customized Invite")
-				.withAction(new MenuItem.Action() {
-					@Override
-					public void execute() {
-						sendCustomizedInvite();
-					}
-				})
-				.build());
-
-		listData.add(new MenuItem.Builder("Create Invite Url")
-				.withAction(new MenuItem.Action() {
-					@Override
-					public void execute() {
-						createInviteUrl();
-					}
-				})
-				.build());
-
-		listData.add(new MenuItem.Builder("Check Referral Data")
-				.withAction(new MenuItem.Action() {
-					@Override
-					public void execute() {
-						checkReferralData();
-					}
-				})
-				.build());
-
-		listData.add(new MenuItem.Builder("Check Referred Users")
-				.withAction(new MenuItem.Action() {
-					@Override
-					public void execute() {
-						checkReferredUsers();
-					}
-				})
-				.build());
-
-		return listData;
+		return Arrays.asList(
+				new MenuItem.Builder("Open Invites UI")
+						.withAction(new MenuItem.Action() {
+							@Override
+							public void execute() {
+								openInvitesUi();
+							}
+						})
+						.build(),
+				navigationListItem("Send Customized Invite", CustomInviteFragment.class),
+				new MenuItem.Builder("Create Invite Url")
+						.withAction(new MenuItem.Action() {
+							@Override
+							public void execute() {
+								createInviteUrl();
+							}
+						})
+						.build(),
+				new MenuItem.Builder("Check Referral Data")
+						.withAction(new MenuItem.Action() {
+							@Override
+							public void execute() {
+								checkReferralData();
+							}
+						})
+						.build(),
+				new MenuItem.Builder("Check Referred Users")
+						.withAction(new MenuItem.Action() {
+							@Override
+							public void execute() {
+								checkReferredUsers();
+							}
+						})
+						.build()
+		);
 	}
 
 	//region Presenter
@@ -109,10 +96,6 @@ public class InvitesFragment extends BaseListFragment {
 				_log.logErrorAndToast("Error sending invite.");
 			}
 		}).show();
-	}
-
-	private void sendCustomizedInvite() {
-		addContentFragment(new CustomInviteFragment());
 	}
 
 	private void checkReferralData() {

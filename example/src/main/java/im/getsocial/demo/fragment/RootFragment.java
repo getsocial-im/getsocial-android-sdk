@@ -29,7 +29,7 @@ import im.getsocial.sdk.Callback;
 import im.getsocial.sdk.GetSocial;
 import im.getsocial.sdk.GetSocialException;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class RootFragment extends BaseListFragment implements NotificationsManager.Listener {
@@ -73,140 +73,56 @@ public class RootFragment extends BaseListFragment implements NotificationsManag
 
 	@Override
 	protected List<MenuItem> createListData() {
-		List<MenuItem> listData = new ArrayList<>();
-
-		listData.add(new MenuItem.Builder("User Management")
-				.withAction(new MenuItem.Action() {
+		return Arrays.asList(
+				navigationListItem("User Management", UserManagementFragment.class),
+				navigationListItem("Friends", FriendsFragment.class, new NavigationItemDecorator() {
 					@Override
-					public void execute() {
-						openUserManagement();
+					public void decorate(MenuItem.Builder builder) {
+						builder.withSubtitle(new TextGenerator() {
+							@Override
+							public String generateText() {
+								final String friendsCount = _activityListener.getSessionValue(FriendsFragment.KEY_FRIENDS_COUNT);
+								final String count = TextUtils.isEmpty(friendsCount) ? "0" : friendsCount;
+								return "You have " + count + " friends";
+							}
+						});
 					}
-				})
-				.build());
-
-		listData.add(new MenuItem.Builder("Friends")
-				.withSubtitle(new TextGenerator() {
+				}),
+				navigationListItem("Invites", InvitesFragment.class),
+				navigationListItem("Activities", ActivitiesFragment.class),
+				navigationListItem("Notifications", NotificationsFragment.class, new NavigationItemDecorator() {
 					@Override
-					public String generateText() {
-						final String friendsCount = _activityListener.getSessionValue(FriendsFragment.KEY_FRIENDS_COUNT);
-						final String count = TextUtils.isEmpty(friendsCount) ? "0" : friendsCount;
-						return "You have " + count + " friends";
+					public void decorate(MenuItem.Builder builder) {
+						builder.withSubtitle(new TextGenerator() {
+							@Override
+							public String generateText() {
+								return "You have " + _notificationsManager.getNewNotificationsCount() + " new notifications";
+							}
+						});
 					}
-				})
-				.withAction(new MenuItem.Action() {
+				}),
+				navigationListItem("UI Customization", UiCustomizationFragment.class, new NavigationItemDecorator() {
 					@Override
-					public void execute() {
-						openFriendsFragment();
+					public void decorate(MenuItem.Builder builder) {
+						builder.withSubtitle(new TextGenerator() {
+							@Override
+							public String generateText() {
+								String savedName = _activityListener.getSessionValue(UiCustomizationFragment.UI_CONFIGURATION_NAME_KEY);
+								if (TextUtils.isEmpty(savedName)) {
+									return "Current UI: default";
+								} else {
+									return "Current UI: " + savedName;
+								}
+							}
+						});
 					}
-				})
-				.build());
-
-		listData.add(new MenuItem.Builder("Invites")
-				.withAction(new MenuItem.Action() {
-					@Override
-					public void execute() {
-						openInvites();
-					}
-				})
-				.build());
-
-		listData.add(new MenuItem.Builder("Activities")
-				.withAction(new MenuItem.Action() {
-					@Override
-					public void execute() {
-						openActivities();
-					}
-				})
-				.build());
-
-		listData.add(new MenuItem.Builder("Notifications")
-				.withAction(new MenuItem.Action() {
-					@Override
-					public void execute() {
-						openNotifications();
-					}
-				})
-				.withSubtitle(new TextGenerator() {
-					@Override
-					public String generateText() {
-						return "You have " + _notificationsManager.getNewNotificationsCount() + " new notifications";
-					}
-				})
-				.build());
-
-		listData.add(new MenuItem.Builder("UI Customization")
-				.withSubtitle(new TextGenerator() {
-					@Override
-					public String generateText() {
-						String savedName = _activityListener.getSessionValue(UiCustomizationFragment.UI_CONFIGURATION_NAME_KEY);
-						if (TextUtils.isEmpty(savedName)) {
-							return "Current UI: default";
-						} else {
-							return "Current UI: " + savedName;
-						}
-					}
-				})
-				.withAction(new MenuItem.Action() {
-					@Override
-					public void execute() {
-						openUiCustomization();
-					}
-				})
-				.build());
-
-		listData.add(new MenuItem.Builder("Settings")
-				.withAction(new MenuItem.Action() {
-					@Override
-					public void execute() {
-						openSettings();
-					}
-				})
-				.build());
-
-		listData.add(new MenuItem.Builder("IAP")
-				.withAction(new MenuItem.Action() {
-					@Override
-					public void execute() {
-						openIAP();
-					}
-				})
-				.build());
-		return listData;
+				}),
+				navigationListItem("Settings", SettingsFragment.class),
+				navigationListItem("IAP", PurchaseFragment.class)
+		);
 	}
 
 	//region Presenter
-	protected void openUserManagement() {
-		addContentFragment(new UserManagementFragment());
-	}
-
-	protected void openFriendsFragment() {
-		addContentFragment(new FriendsFragment());
-	}
-
-	protected void openInvites() {
-		addContentFragment(new InvitesFragment());
-	}
-
-	protected void openUiCustomization() {
-		addContentFragment(new UiCustomizationFragment());
-	}
-
-	protected void openSettings() {
-		addContentFragment(new SettingsFragment());
-	}
-
-	protected void openIAP() {
-		addContentFragment(new PurchaseFragment());
-	}
-
-	protected void openActivities() {
-		addContentFragment(new ActivitiesFragment());
-	}
-
-	protected void openNotifications() {
-		addContentFragment(new NotificationsFragment());
-	}
-
 	@Override
 	public String getTitle() {
 		return "";

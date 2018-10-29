@@ -18,6 +18,7 @@ package im.getsocial.demo.fragment;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -55,6 +56,19 @@ public abstract class BaseListFragment extends BaseFragment {
 		invalidateList();
 	}
 
+	protected MenuItem navigationListItem(String name, Class<? extends Fragment> fragmentClass) {
+		return navigationListItem(name, fragmentClass, null);
+	}
+
+	protected MenuItem navigationListItem(String name, Class<? extends Fragment> fragmentClass, @Nullable NavigationItemDecorator decorator) {
+		MenuItem.Builder builder = MenuItem.builder(name).withAction(new OpenFragmentAction(fragmentClass));
+		if (decorator != null) {
+			decorator.decorate(builder);
+		}
+		return builder.build();
+	}
+
+
 	public void invalidateList() {
 		_viewContainer._recyclerView.getAdapter().notifyDataSetChanged();
 	}
@@ -79,5 +93,27 @@ public abstract class BaseListFragment extends BaseFragment {
 			MenuAdapter adapter = new MenuAdapter(createListData());
 			_recyclerView.setAdapter(adapter);
 		}
+	}
+
+	protected class OpenFragmentAction implements MenuItem.Action {
+
+		private final Class<? extends Fragment> _fragmentClass;
+
+		OpenFragmentAction(Class<? extends Fragment> fragmentClass) {
+			_fragmentClass = fragmentClass;
+		}
+
+		@Override
+		public void execute() {
+			try {
+				addContentFragment(_fragmentClass.newInstance());
+			} catch (Exception exception) {
+				throw new RuntimeException(exception);
+			}
+		}
+	}
+
+	protected interface NavigationItemDecorator {
+		void decorate(MenuItem.Builder builder);
 	}
 }

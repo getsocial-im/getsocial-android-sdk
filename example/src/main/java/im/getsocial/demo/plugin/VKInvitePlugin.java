@@ -17,7 +17,6 @@
 package im.getsocial.demo.plugin;
 
 import android.app.Activity;
-import android.app.FragmentManager;
 import com.vk.sdk.VKAccessToken;
 import com.vk.sdk.VKCallback;
 import com.vk.sdk.VKScope;
@@ -39,7 +38,7 @@ import im.getsocial.sdk.invites.InvitePackage;
  * Invite Channel Plugin for GetSocial SDK.
  * Register plugin via {@link GetSocial#registerInviteChannelPlugin(String pluginId, InviteChannelPlugin plugin)}.
  */
-public class VKInvitePlugin extends InviteChannelPlugin implements VKCallback<VKAccessToken>{
+public class VKInvitePlugin extends InviteChannelPlugin implements VKCallback<VKAccessToken> {
 
 	private Activity _activity;
 	private InviteCallback _inviteCallback;
@@ -100,6 +99,6 @@ public class VKInvitePlugin extends InviteChannelPlugin implements VKCallback<VK
 
 	@Override
 	public void onError(VKError vkError) {
-		_inviteCallback.onError(new GetSocialException(ErrorCode.UNKNOWN, vkError.errorMessage));
+		_inviteCallback.onError(new GetSocialException(ErrorCode.UNKNOWN, vkError == null ? "Can not sent VK invite" : vkError.errorMessage));
 	}
 }

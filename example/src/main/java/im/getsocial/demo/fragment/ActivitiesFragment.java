@@ -62,9 +62,7 @@ public class ActivitiesFragment extends BaseListFragment {
 				new MenuItem.Builder("My Custom Activity Feed")
 						.withAction(new OpenMyCustomFeedAction(CUSTOM_FEED_NAME))
 						.build(),
-				new MenuItem.Builder("Post Activity")
-						.withAction(new OpenPostFeedFormAction())
-						.build(),
+				navigationListItem("Post Activity", PostActivityFragment.class),
 				new MenuItem.Builder("Open Activity Details From Global Feed")
 						.withAction(new OpenActivityDetailsAction(true))
 						.build(),
@@ -354,14 +352,6 @@ public class ActivitiesFragment extends BaseListFragment {
 						}
 					})
 					.show();
-		}
-	}
-
-	private class OpenPostFeedFormAction implements MenuItem.Action {
-
-		@Override
-		public void execute() {
-			addContentFragment(new PostActivityFragment());
 		}
 	}
 

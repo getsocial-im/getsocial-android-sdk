@@ -70,8 +70,6 @@ import im.getsocial.sdk.invites.InviteChannelIds;
 import im.getsocial.sdk.invites.ReferralData;
 import im.getsocial.sdk.pushnotifications.Notification;
 import im.getsocial.sdk.pushnotifications.NotificationListener;
-import im.getsocial.sdk.pushnotifications.NotificationsCountQuery;
-import im.getsocial.sdk.pushnotifications.NotificationsQuery;
 import im.getsocial.sdk.ui.GetSocialUi;
 import im.getsocial.sdk.usermanagement.OnUserChangedListener;
 import im.getsocial.sdk.usermanagement.PublicUser;

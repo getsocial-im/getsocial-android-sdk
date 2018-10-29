@@ -59,7 +59,6 @@ import java.io.IOException;
 
 import static android.provider.MediaStore.Video.Thumbnails.MINI_KIND;
 import static com.squareup.picasso.Picasso.with;
-import static im.getsocial.demo.utils.VideoUtils.getVideoContent;
 
 public class PostActivityFragment extends BaseFragment implements Callback<ActivityPost> {
 
@@ -265,10 +264,8 @@ public class PostActivityFragment extends BaseFragment implements Callback<Activ
 		ViewContainer(View view) {
 			ButterKnife.bind(this, view);
 
-			ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getContext(),
-					R.array.activityFeedsItems, android.R.layout.simple_spinner_item);
-			adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-			_feed.setAdapter(adapter);
+			_feed.setAdapter(ArrayAdapter.createFromResource(getContext(),
+					R.array.activityFeedsItems, android.R.layout.simple_spinner_item));
 		}
 
 		@OnClick(R.id.button_post)

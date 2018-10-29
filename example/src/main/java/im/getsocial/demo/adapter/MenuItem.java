@@ -40,6 +40,10 @@ public class MenuItem {
 		_enabledCheck = enabledCheck;
 	}
 
+	public static Builder builder(String name) {
+		return new Builder(name);
+	}
+
 	public String getTitle() {
 		return _title;
 	}

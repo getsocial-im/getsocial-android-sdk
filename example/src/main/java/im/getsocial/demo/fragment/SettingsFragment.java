@@ -80,7 +80,7 @@ public class SettingsFragment extends BaseListFragment {
 				.withEnabledCheck(new EnabledCheck() {
 					@Override
 					public boolean isOptionEnabled() {
-						return checkPNStatus(false);
+						return checkPushNotificationStatus(false);
 					}
 				}).build());
 
@@ -89,14 +89,14 @@ public class SettingsFragment extends BaseListFragment {
 				.withEnabledCheck(new EnabledCheck() {
 					@Override
 					public boolean isOptionEnabled() {
-						return checkPNStatus(true);
+						return checkPushNotificationStatus(true);
 					}
 				}).build());
 
 		return listData;
 	}
 
-	private boolean checkPNStatus(boolean pnStatus) {
+	private boolean checkPushNotificationStatus(boolean pnStatus) {
 		return _notificationsEnabled != null && _notificationsEnabled == pnStatus;
 	}
 

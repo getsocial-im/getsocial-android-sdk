@@ -1,8 +1,8 @@
 buildscript {
 	repositories {
-		jcenter()
 		maven { url "https://maven.fabric.io/public" }
 		maven { url "https://plugins.gradle.org/m2/" }
+		jcenter()
 	}
 	dependencies {
 		classpath "com.android.tools.build:gradle:2.3.3"
@@ -14,10 +14,10 @@ buildscript {
 }
 
 repositories {
-	jcenter()
 	mavenLocal()
 	maven { url 'http://devrepo.kakao.com:8088/nexus/content/groups/public/' }
 	maven { url 'https://maven.google.com/' }
+	jcenter()
 }
 
 apply plugin: 'com.android.application'
