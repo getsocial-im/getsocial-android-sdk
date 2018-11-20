@@ -48,6 +48,7 @@ import im.getsocial.sdk.GetSocial;
 import im.getsocial.sdk.GetSocialException;
 import im.getsocial.sdk.activities.ActivityPost;
 import im.getsocial.sdk.activities.ActivityPostContent;
+import im.getsocial.sdk.media.MediaAttachment;
 import im.getsocial.sdk.ui.GetSocialUi;
 import im.getsocial.sdk.ui.UiAction;
 import im.getsocial.sdk.ui.activities.ActionButtonListener;
@@ -132,14 +133,14 @@ public class PostActivityFragment extends BaseFragment implements Callback<Activ
 		if (hasText) {
 			builder.withText(text);
 		}
-		if (hasImage) {
-			builder.withImage(bitmap);
-		}
 		if (hasButton) {
 			builder.withButton(buttonTitle, buttonAction);
 		}
+		if (hasImage) {
+			builder.withMediaAttachment(MediaAttachment.image(bitmap));
+		}
 		if (hasVideo) {
-			builder.withVideo(VideoUtils.getVideoContent(_videoPath));
+			builder.withMediaAttachment(MediaAttachment.video(VideoUtils.getVideoContent(_videoPath)));
 		}
 		showLoading("Posting activity", "Wait...");
 

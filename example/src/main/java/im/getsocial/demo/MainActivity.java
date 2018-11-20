@@ -70,7 +70,6 @@ import im.getsocial.sdk.invites.InviteChannelIds;
 import im.getsocial.sdk.invites.ReferralData;
 import im.getsocial.sdk.pushnotifications.Notification;
 import im.getsocial.sdk.pushnotifications.NotificationListener;
-import im.getsocial.sdk.ui.GetSocialUi;
 import im.getsocial.sdk.usermanagement.OnUserChangedListener;
 import im.getsocial.sdk.usermanagement.PublicUser;
 import io.fabric.sdk.android.Fabric;
@@ -155,12 +154,10 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Acti
 
 	@Override
 	public void onBackPressed() {
-		if (!GetSocialUi.onBackPressed()) {
-			if (getSupportFragmentManager().getBackStackEntryCount() == 1) {
-				finish();
-			} else {
-				super.onBackPressed();
-			}
+		if (getSupportFragmentManager().getBackStackEntryCount() == 1) {
+			finish();
+		} else {
+			super.onBackPressed();
 		}
 	}
 
@@ -299,12 +296,6 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Acti
 		ClipData clip = ClipData.newPlainText("GetSocial User ID", userId);
 		clipboard.setPrimaryClip(clip);
 		Toast.makeText(this, "Copied " + userId + " to clipboard.", Toast.LENGTH_LONG).show();
-	}
-
-	private void popToRoot() {
-		if (getSupportFragmentManager().getBackStackEntryCount() > 0) {
-			getSupportFragmentManager().popBackStackImmediate(findRootFragment().getId(), FragmentManager.POP_BACK_STACK_INCLUSIVE);
-		}
 	}
 
 	private RootFragment findRootFragment() {

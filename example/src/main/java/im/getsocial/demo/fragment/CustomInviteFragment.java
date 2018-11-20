@@ -41,6 +41,7 @@ import im.getsocial.demo.utils.VideoUtils;
 import im.getsocial.sdk.invites.InviteContent;
 import im.getsocial.sdk.invites.InviteTextPlaceholders;
 import im.getsocial.sdk.invites.LinkParams;
+import im.getsocial.sdk.media.MediaAttachment;
 import im.getsocial.sdk.ui.GetSocialUi;
 import im.getsocial.sdk.ui.invites.InviteUiCallback;
 
@@ -89,24 +90,13 @@ public class CustomInviteFragment extends BaseFragment {
 	}
 
 	private void openInviteProviderList() {
-		final Bitmap bitmap = _viewContainer._inviteImageView.getDrawable() == null ? null : ((BitmapDrawable)_viewContainer._inviteImageView.getDrawable()).getBitmap();
-		byte[] videoContent = null;
-		if (_videoPath != null) {
-			videoContent = VideoUtils.getVideoContent(_videoPath);
-		}
-		String imageUrl = null;
-		if (_viewContainer._inviteImageUrlInput.getText().toString().trim().length() > 0) {
-			imageUrl = _viewContainer._inviteImageUrlInput.getText().toString();
-		}
-		InviteContent inviteContent = InviteContent.createBuilder()
+		final InviteContent inviteContent = InviteContent.createBuilder()
 				.withSubject(_viewContainer._inviteSubjectInput.getText().toString())
 				.withText(_viewContainer._inviteTextInput.getText().toString())
-				.withImageUrl(imageUrl)
-				.withImage(bitmap)
-				.withVideo(videoContent)
+				.withMediaAttachment(createMediaAttachment())
 				.build();
 
-		LinkParams params = createLinkParams();
+		final LinkParams params = createLinkParams();
 		GetSocialUi.createInvitesView()
 				.setCustomInviteContent(inviteContent)
 				.setLinkParams(params)
@@ -127,6 +117,19 @@ public class CustomInviteFragment extends BaseFragment {
 					}
 				})
 				.show();
+	}
+
+	private MediaAttachment createMediaAttachment() {
+		final Bitmap bitmap = _viewContainer._inviteImageView.getDrawable() == null ? null : ((BitmapDrawable)_viewContainer._inviteImageView.getDrawable()).getBitmap();
+		final String imageUrl = _viewContainer._inviteImageUrlInput.getText().toString();
+		if (bitmap != null) {
+			return MediaAttachment.image(bitmap);
+		} else if (_videoPath != null) {
+			return MediaAttachment.video(VideoUtils.getVideoContent(_videoPath));
+		} else if (imageUrl.trim().length() > 0) {
+			return MediaAttachment.imageUrl(imageUrl);
+		}
+		return null;
 	}
 
 	private LinkParams createLinkParams() {
@@ -329,6 +332,7 @@ public class CustomInviteFragment extends BaseFragment {
 			_buttonRemoveInviteImage.setOnClickListener(new View.OnClickListener() {
 				@Override
 				public void onClick(View v) {
+					_inviteImageView.setImageDrawable(null);
 					_inviteImageView.setVisibility(View.GONE);
 					_buttonRemoveInviteImage.setVisibility(View.GONE);
 				}

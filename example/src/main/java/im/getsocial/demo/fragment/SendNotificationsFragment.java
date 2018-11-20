@@ -2,6 +2,11 @@ package im.getsocial.demo.fragment;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.Drawable;
+import android.media.ThumbnailUtils;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.Gravity;
@@ -12,8 +17,15 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
+
+import android.widget.Toast;
+import com.squareup.picasso.MemoryPolicy;
+import com.squareup.picasso.Picasso;
+import com.squareup.picasso.Target;
+
 import butterknife.BindView;
 import butterknife.BindViews;
 import butterknife.ButterKnife;
@@ -21,24 +33,36 @@ import butterknife.OnClick;
 import butterknife.OnLongClick;
 import im.getsocial.demo.R;
 import im.getsocial.demo.utils.PixelUtils;
+import im.getsocial.demo.utils.VideoUtils;
 import im.getsocial.sdk.Callback;
 import im.getsocial.sdk.GetSocial;
 import im.getsocial.sdk.GetSocialException;
+import im.getsocial.sdk.media.MediaAttachment;
 import im.getsocial.sdk.pushnotifications.Notification;
 import im.getsocial.sdk.pushnotifications.NotificationContent;
 import im.getsocial.sdk.pushnotifications.NotificationsSummary;
 import im.getsocial.sdk.pushnotifications.SendNotificationPlaceholders;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class SendNotificationsFragment extends BaseFragment implements Callback<NotificationsSummary> {
+import static android.provider.MediaStore.Video.Thumbnails.MINI_KIND;
+import static com.squareup.picasso.Picasso.with;
 
+public class SendNotificationsFragment extends BaseFragment implements Callback<NotificationsSummary> {
 	public static final int DEFAULT_ACTION = -1;
+	private static final int REQUEST_PICK_NOTIFICATION_IMAGE = 0x1;
+	private static final int REQUEST_PICK_NOTIFICATION_VIDEO = 0x2;
+	private static final int MAX_WIDTH = 500;
 
 	private ViewContainer _viewContainer;
+	private byte[] _video;
+	private Bitmap _image;
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -88,9 +112,31 @@ public class SendNotificationsFragment extends BaseFragment implements Callback<
 			notificationContent.withAction(notificationAction());
 		}
 
+		MediaAttachment attachment = getMediaAttachment();
+		if (attachment != null) {
+			notificationContent.withMediaAttachment(attachment);
+		}
+
 		notificationContent.addActionData(actionData());
 
 		GetSocial.User.sendNotification(userIds(), notificationContent, this);
+	}
+
+	@Nullable
+	private MediaAttachment getMediaAttachment() {
+		if (_image != null) {
+			return MediaAttachment.image(_image);
+		}
+		if (_video != null) {
+			return MediaAttachment.video(_video);
+		}
+		if (!customImageUrl().isEmpty()) {
+			return MediaAttachment.imageUrl(customImageUrl());
+		}
+		if (!customVideoUrl().isEmpty()) {
+			return MediaAttachment.videoUrl(customVideoUrl());
+		}
+		return null;
 	}
 
 	private boolean useDefaultAction() {
@@ -152,6 +198,92 @@ public class SendNotificationsFragment extends BaseFragment implements Callback<
 		return _viewContainer._notificationTitle.getText().toString();
 	}
 
+	private String customImageUrl() {
+		return _viewContainer._imageUrl.getText().toString();
+	}
+
+	private String customVideoUrl() {
+		return _viewContainer._videoUrl.getText().toString();
+	}
+
+	@Override
+	protected void onImagePickedFromDevice(Uri imageUri, int requestCode) {
+		if (requestCode == REQUEST_PICK_NOTIFICATION_IMAGE) {
+			_viewContainer._imagePreview.setVisibility(View.VISIBLE);
+			_viewContainer._removeImageButton.setVisibility(View.VISIBLE);
+
+			Target target = new Target() {
+				@Override
+				public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom loadedFrom) {
+					_image = bitmap;
+					_viewContainer._imagePreview.setImageBitmap(bitmap);
+				}
+
+				@Override
+				public void onBitmapFailed(Drawable drawable) {
+					_log.logInfoAndToast("Can't open image");
+				}
+
+				@Override
+				public void onPrepareLoad(Drawable drawable) {
+				}
+			};
+
+			with(getContext())
+					.load(imageUri)
+					.resize(MAX_WIDTH, 0)
+					.memoryPolicy(MemoryPolicy.NO_CACHE)
+					.into(_viewContainer._imagePreview);
+			loadOriginalImage(imageUri);
+		}
+	}
+
+	private void loadOriginalImage(final Uri imageUri) {
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+				try {
+					_image = Picasso.with(getContext()).load(imageUri).get();
+				} catch (IOException e) {
+					_viewContainer._imagePreview = null;
+					Toast.makeText(getContext(), "Could not load original image: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+				}
+			}
+		}).start();
+	}
+
+	@Override
+	protected void onVideoPickedFromDevice(Uri videoUri, int requestCode) {
+		if (requestCode == REQUEST_PICK_NOTIFICATION_VIDEO) {
+			String realPath;
+			if (videoUri.getScheme().equalsIgnoreCase("content")) {
+				realPath = VideoUtils.getRealPathFromUri(getContext(), videoUri);
+			} else {
+				realPath = videoUri.getPath();
+			}
+			File f = new File(realPath);
+			if (f.exists()) {
+				String videoPath = realPath;
+				Bitmap thumbnail = null;
+				if (realPath.endsWith("gif")) {
+					try {
+						FileInputStream is = new FileInputStream(realPath);
+						thumbnail = BitmapFactory.decodeStream(is);
+					} catch(Exception exception) {
+						exception.printStackTrace();
+					}
+				} else {
+					thumbnail = ThumbnailUtils.createVideoThumbnail(videoPath, MINI_KIND);
+				}
+				_viewContainer._videoPreview.setImageBitmap(thumbnail);
+				_viewContainer._videoPreview.setVisibility(View.VISIBLE);
+				_viewContainer._selectVideoButton.setVisibility(View.GONE);
+				_viewContainer._removeVideoButton.setVisibility(View.VISIBLE);
+				_video = VideoUtils.getVideoContent(realPath);
+			}
+		}
+	}
+
 	public class ViewContainer {
 
 		@BindViews({R.id.checkbox_friends, R.id.checkbox_referred_users, R.id.checkbox_referrer})
@@ -175,8 +307,29 @@ public class SendNotificationsFragment extends BaseFragment implements Callback<
 		@BindView(R.id.template_name)
 		EditText _templateName;
 
+		@BindView(R.id.notification_image_url)
+		EditText _imageUrl;
+
+		@BindView(R.id.notification_video_url)
+		EditText _videoUrl;
+
 		@BindView(R.id.container_template_data)
 		LinearLayout _templateDataContainer;
+
+		@BindView(R.id.button_select_image)
+		Button _selectImageButton;
+		@BindView(R.id.button_select_video)
+		Button _selectVideoButton;
+
+		@BindView(R.id.image_preview)
+		ImageView _imagePreview;
+		@BindView(R.id.video_preview)
+		ImageView _videoPreview;
+
+		@BindView(R.id.button_remove_image)
+		Button _removeImageButton;
+		@BindView(R.id.button_remove_video)
+		Button _removeVideoButton;
 
 		final List<DynamicInputHolder> _templateData = new ArrayList<>();
 		final List<DynamicInputHolder> _notificationData = new ArrayList<>();
@@ -186,6 +339,34 @@ public class SendNotificationsFragment extends BaseFragment implements Callback<
 			ButterKnife.bind(this, view);
 
 			_selectNotificationType.setAdapter(new ArrayAdapter<String>(getContext(), android.R.layout.simple_list_item_1, NotificationAction.names()));
+		}
+
+		@OnClick(R.id.button_select_image)
+		void selectImageFromDevice() {
+			pickImageFromDevice(REQUEST_PICK_NOTIFICATION_IMAGE);
+		}
+
+		@OnClick(R.id.button_select_video)
+		void selectVideoFromDevice() {
+			pickVideoFromDevice(REQUEST_PICK_NOTIFICATION_VIDEO);
+		}
+
+		@OnClick(R.id.button_remove_image)
+		void removeImage() {
+			_imagePreview.setImageDrawable(null);
+			_imagePreview.setVisibility(View.GONE);
+			_removeImageButton.setVisibility(View.GONE);
+			_selectImageButton.setVisibility(View.VISIBLE);
+			_image = null;
+		}
+
+		@OnClick(R.id.button_remove_video)
+		void removeVideo() {
+			_videoPreview.setImageDrawable(null);
+			_videoPreview.setVisibility(View.GONE);
+			_removeVideoButton.setVisibility(View.GONE);
+			_selectVideoButton.setVisibility(View.VISIBLE);
+			_video = null;
 		}
 
 		@OnClick(R.id.button_add_template_data)

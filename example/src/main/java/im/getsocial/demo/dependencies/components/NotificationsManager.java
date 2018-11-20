@@ -182,7 +182,7 @@ public final class NotificationsManager {
 			final Notification current = _notifications.get(i);
 			if (ids.contains(current.getId())) {
 				final Notification updated = new Notification(current.getId(), isRead, current.getType(), current.getCreatedAt(),
-						current.getTitle(), current.getText(), current.getActionType(), current.getActionData());
+						current.getTitle(), current.getText(), current.getActionType(), current.getActionData(), current.getImageUrl(), current.getVideoUrl());
 				_notifications.set(i, updated);
 			}
 		}
