@@ -14,31 +14,45 @@ import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
+
+import com.squareup.picasso.Picasso;
+
+import java.text.DateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import im.getsocial.demo.R;
 import im.getsocial.demo.dependencies.DependenciesContainer;
 import im.getsocial.demo.dependencies.components.NotificationsManager;
 import im.getsocial.demo.dialog.NotificationsFilterDialog;
+import im.getsocial.demo.utils.NotificationContext;
+import im.getsocial.demo.utils.NotificationHandler;
+import im.getsocial.sdk.CompletionCallback;
+import im.getsocial.sdk.GetSocialException;
+import im.getsocial.sdk.pushnotifications.ActionButton;
 import im.getsocial.sdk.pushnotifications.Notification;
+import im.getsocial.sdk.pushnotifications.NotificationStatus;
 
-import java.text.DateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-
-public class NotificationsListFragment extends BaseFragment implements NotificationsManager.Listener {
+public class NotificationsListFragment extends BaseFragment implements NotificationsManager.Listener, CompletionCallback {
 
 	private final List<Notification> _notifications = new ArrayList<>();
-	private ViewContainer _viewContainer;
 	private NotificationsManager _notificationsManager;
 	private NotificationsAdapter _notificationsAdapter;
+	private NotificationHandler _notificationHandler;
 
 	@Override
 	protected void inject(DependenciesContainer dependencies) {
 		_notificationsManager = dependencies.notificationsManager();
+		_notificationHandler = dependencies.notificationHandler();
 	}
 
 	@Override
@@ -61,19 +75,19 @@ public class NotificationsListFragment extends BaseFragment implements Notificat
 	@Override
 	public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
 		super.onViewCreated(view, savedInstanceState);
-		_viewContainer = new ViewContainer(view);
-		_viewContainer._notificationsList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+		ViewContainer viewContainer = new ViewContainer(view);
+		viewContainer._notificationsList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 				NotificationsAdapter.ViewHolder viewHolder = (NotificationsAdapter.ViewHolder) view.getTag();
 				if (viewHolder != null) {
 					final Notification notification = viewHolder._notification;
-					_notificationsManager.markAsRead(notification.getId(), !notification.wasRead());
+					_notificationsManager.setStatus(notification.getId(), NotificationStatus.UNREAD.equals(notification.getStatus()) ? NotificationStatus.READ : NotificationStatus.UNREAD);
 				}
 			}
 		});
-		_viewContainer._notificationsList.setAdapter(_notificationsAdapter = new NotificationsAdapter(getContext(), _notifications));
-		_viewContainer._notificationsList.setOnScrollListener(new AbsListView.OnScrollListener() {
+		viewContainer._notificationsList.setAdapter(_notificationsAdapter = new NotificationsAdapter(getContext(), _notifications));
+		viewContainer._notificationsList.setOnScrollListener(new AbsListView.OnScrollListener() {
 			@Override
 			public void onScrollStateChanged(AbsListView view, int scrollState) {
 
@@ -128,6 +142,16 @@ public class NotificationsListFragment extends BaseFragment implements Notificat
 		NotificationsFilterDialog.show(getFragmentManager());
 	}
 
+	@Override
+	public void onSuccess() {
+		//
+	}
+
+	@Override
+	public void onFailure(GetSocialException exception) {
+		_log.logErrorAndToast(exception);
+	}
+
 	class ViewContainer {
 
 		@BindView(R.id.notifications_list)
@@ -171,8 +195,17 @@ public class NotificationsListFragment extends BaseFragment implements Notificat
 			@BindView(R.id.date)
 			TextView _date;
 
+			@BindView(R.id.notification_image)
+			ImageView _image;
+
+			@BindView(R.id.notification_video)
+			TextView _videoUrl;
+
 			@BindView(R.id.unread_indicator)
 			View _unreadIndicator;
+
+			@BindView(R.id.notification_buttons)
+			LinearLayout _notificationButtons;
 
 			View _parent;
 
@@ -185,20 +218,61 @@ public class NotificationsListFragment extends BaseFragment implements Notificat
 
 			void setNotification(Notification notification) {
 				_notification = notification;
-				populate();
+				invalidate();
 			}
 
-			private void populate() {
-				final String notificationTitle = TextUtils.isEmpty(_notification.getTitle()) ? "Notification" : _notification.getTitle();
+			private void invalidate() {
+				String notificationTitle = TextUtils.isEmpty(_notification.getTitle()) ? "Notification" : _notification.getTitle();
+				if (_notification.getStatus().equals(NotificationStatus.CONSUMED)) {
+					notificationTitle += " (CONSUMED)";
+				} else if (_notification.getStatus().equals(NotificationStatus.IGNORED)) {
+					notificationTitle += " (IGNORED)";
+				}
 				_title.setText(notificationTitle);
 				_text.setText(_notification.getText());
 				_date.setText(DateFormat.getDateTimeInstance().format(new Date(_notification.getCreatedAt() * 1000)));
-				if (_notification.wasRead()) {
-					_parent.setBackgroundColor(Color.rgb(200, 200, 200));
-					_unreadIndicator.setVisibility(View.INVISIBLE);
-				} else {
+				if (_notification.getStatus().equals(NotificationStatus.UNREAD)) {
 					_parent.setBackgroundColor(Color.rgb(150, 150, 150));
 					_unreadIndicator.setVisibility(View.VISIBLE);
+				} else {
+					_parent.setBackgroundColor(Color.rgb(200, 200, 200));
+					_unreadIndicator.setVisibility(View.INVISIBLE);
+				}
+
+				if (_notification.getImageUrl() != null) {
+					_image.setVisibility(View.VISIBLE);
+					Picasso.with(getContext()).load(_notification.getImageUrl()).into(_image);
+				} else {
+					_image.setVisibility(View.GONE);
+				}
+
+				if (_notification.getVideoUrl() != null) {
+					_videoUrl.setVisibility(View.VISIBLE);
+					_videoUrl.setText(_notification.getVideoUrl());
+				} else {
+					_videoUrl.setVisibility(View.GONE);
+				}
+
+				_notificationButtons.removeAllViews();
+
+				if (_notification.getActionButtons().isEmpty()
+						|| Arrays.asList(NotificationStatus.CONSUMED, NotificationStatus.IGNORED).contains(_notification.getStatus())) {
+					_notificationButtons.setVisibility(View.GONE);
+				} else {
+					_notificationButtons.setVisibility(View.VISIBLE);
+					for (final ActionButton actionButton : _notification.getActionButtons()) {
+						final Button button = new Button(getContext());
+						button.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.MATCH_PARENT));
+						button.setText(actionButton.getTitle());
+						button.setOnClickListener(new View.OnClickListener() {
+							@Override
+							public void onClick(View view) {
+								final String actionId = actionButton.getId();
+								_notificationHandler.handleNotification(_notification, NotificationContext.actioned(actionId));
+							}
+						});
+						_notificationButtons.addView(button);
+					}
 				}
 			}
 		}

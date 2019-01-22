@@ -18,13 +18,18 @@ package im.getsocial.demo;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.PersistableBundle;
+import android.os.VibrationEffect;
+import android.os.Vibrator;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -36,17 +41,22 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.facebook.CallbackManager;
+import com.vk.sdk.VKSdk;
+
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import butterknife.OnLongClick;
-import com.crashlytics.android.Crashlytics;
-import com.facebook.CallbackManager;
-import com.facebook.FacebookSdk;
-import com.vk.sdk.VKSdk;
 import im.getsocial.demo.dependencies.DependenciesContainer;
 import im.getsocial.demo.dependencies.components.NotificationsManager;
-import im.getsocial.demo.dialog.NewFriendDialog;
+import im.getsocial.demo.dialog.CurrentUserInfoDialog;
 import im.getsocial.demo.dialog.ReferralDataDialog;
 import im.getsocial.demo.dialog.UserInfoDialog;
 import im.getsocial.demo.fragment.BaseFragment;
@@ -58,37 +68,42 @@ import im.getsocial.demo.fragment.RootFragment;
 import im.getsocial.demo.plugin.FacebookSharePlugin;
 import im.getsocial.demo.plugin.KakaoInvitePlugin;
 import im.getsocial.demo.plugin.VKInvitePlugin;
+import im.getsocial.demo.ui.PickActionView;
 import im.getsocial.demo.ui.UserInfoView;
 import im.getsocial.demo.utils.CompatibilityUtils;
 import im.getsocial.demo.utils.Console;
+import im.getsocial.demo.utils.NotificationContext;
+import im.getsocial.demo.utils.NotificationHandler;
 import im.getsocial.demo.utils.SimpleLogger;
 import im.getsocial.sdk.Callback;
 import im.getsocial.sdk.GetSocial;
 import im.getsocial.sdk.GetSocialException;
+import im.getsocial.sdk.actions.Action;
+import im.getsocial.sdk.pushnotifications.ActionButton;
+import im.getsocial.sdk.actions.ActionDataKeys;
+import im.getsocial.sdk.actions.ActionListener;
+import im.getsocial.sdk.actions.ActionTypes;
 import im.getsocial.sdk.invites.FetchReferralDataCallback;
 import im.getsocial.sdk.invites.InviteChannelIds;
 import im.getsocial.sdk.invites.ReferralData;
 import im.getsocial.sdk.pushnotifications.Notification;
+import im.getsocial.sdk.pushnotifications.NotificationContent;
 import im.getsocial.sdk.pushnotifications.NotificationListener;
+import im.getsocial.sdk.pushnotifications.NotificationStatus;
+import im.getsocial.sdk.pushnotifications.NotificationsSummary;
+import im.getsocial.sdk.pushnotifications.SendNotificationPlaceholders;
 import im.getsocial.sdk.usermanagement.OnUserChangedListener;
 import im.getsocial.sdk.usermanagement.PublicUser;
-import io.fabric.sdk.android.Fabric;
 
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
-
-public class MainActivity extends AppCompatActivity implements BaseFragment.ActivityListener, OnUserChangedListener {
+public class MainActivity extends AppCompatActivity implements BaseFragment.ActivityListener, OnUserChangedListener, ActionListener, NotificationHandler {
 
 	protected SimpleLogger _log;
 
 	private static final String KEY_APP_SESSION = "GetSocial_AppSession_Key";
-	private static final String KEY_IS_INITIALIZING = "GetSocial_IsInitializing_Key";
 
-	protected CallbackManager _facebookCallbackManager;
+	protected final CallbackManager _facebookCallbackManager = CallbackManager.Factory.create();
 	protected VKInvitePlugin _vkInvitePlugin;
 
-	private boolean _isInitializing = false;
 	private ViewContainer _viewContainer;
 	private final Map<String, String> _demoAppSessionData = new HashMap<>();
 
@@ -104,10 +119,20 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Acti
 			public NotificationsManager notificationsManager() {
 				return _notificationsManager;
 			}
+
+			@Override
+			public ActionListener actionListener() {
+				return MainActivity.this;
+			}
+
+			@Override
+			public NotificationHandler notificationHandler() {
+				return MainActivity.this;
+			}
 		};
 		super.onCreate(savedInstanceState);
-		initCrashlytics();
 		_log = new SimpleLogger(this, getClass().getSimpleName());
+
 		setContentView(R.layout.activity_main);
 		_viewContainer = new ViewContainer(this);
 
@@ -117,7 +142,6 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Acti
 
 		_vkInvitePlugin = new VKInvitePlugin(this);
 
-		initFacebook();
 		setupGetSocial();
 	}
 
@@ -128,7 +152,6 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Acti
 	@Override
 	public void onSaveInstanceState(Bundle outState, PersistableBundle outPersistentState) {
 		outState.putSerializable(KEY_APP_SESSION, new HashMap<>(_demoAppSessionData));
-		outState.putBoolean(KEY_IS_INITIALIZING, _isInitializing);
 
 		super.onSaveInstanceState(outState, outPersistentState);
 	}
@@ -137,7 +160,6 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Acti
 	protected void onRestoreInstanceState(Bundle savedInstanceState) {
 		super.onRestoreInstanceState(savedInstanceState);
 
-		_isInitializing = savedInstanceState.getBoolean(KEY_IS_INITIALIZING, false);
 		if (savedInstanceState.containsKey(KEY_APP_SESSION)) {
 			Map<String, String> map = (Map<String, String>) savedInstanceState.getSerializable(KEY_APP_SESSION);
 			_demoAppSessionData.putAll(map);
@@ -177,6 +199,7 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Acti
 		_viewContainer.updateView();
 	}
 
+	@Nullable
 	private Fragment getActiveFragment() {
 		if (getSupportFragmentManager().getBackStackEntryCount() == 0) {
 			return null;
@@ -210,21 +233,8 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Acti
 		GetSocial.setNotificationListener(new NotificationListener() {
 
 			public boolean onNotificationReceived(Notification notification, boolean wasClicked) {
-				if (!wasClicked) {
-					Toast.makeText(MainActivity.this, notification.getText(), Toast.LENGTH_SHORT).show();
-					return true;
-				}
-				if (notification.getActionType() == Notification.ActionType.OPEN_PROFILE) {
-					final String userId = notification.getActionData().get(Notification.Key.OpenProfile.USER_ID);
-					showNewFriend(userId);
-					return true;
-				} else if (notification.getActionType() == Notification.ActionType.CUSTOM) {
-					_log.logInfo("Received custom notification:" + notification.getActionData());
-					return true;
-				}
-				return false;
+				return handleNotification(notification, NotificationContext.clicked(wasClicked));
 			}
-
 		});
 
 		GetSocial.User.setOnUserChangedListener(this);
@@ -250,17 +260,108 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Acti
 		registerCustomInvitesChannelPlugins();
 	}
 
+	@Override
+	public boolean handleNotification(final Notification notification, NotificationContext context) {
+		if (context.getAction() == null) {
+			if (PickActionView.ADD_FRIEND.equals(notification.getAction().getType())) {
+				showAddFriendDialog(notification);
+				return true;
+			}
+			if (!context.wasClicked()) {
+				Toast.makeText(MainActivity.this, notification.getText(), Toast.LENGTH_SHORT).show();
+				return true;
+			}
+
+			return handleAction(notification.getAction());
+		} else {
+			return handleCustomAction(notification, context.getAction());
+		}
+	}
+
+	private void showAddFriendDialog(final Notification notification) {
+		final AlertDialog.Builder builder = new AlertDialog.Builder(this)
+				.setTitle(notification.getTitle())
+				.setMessage(notification.getText());
+		for (final ActionButton actionButton : notification.getActionButtons()) {
+			final String actionId = actionButton.getId();
+			final DialogInterface.OnClickListener onClickListener = new DialogInterface.OnClickListener() {
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					dialog.dismiss();
+					handleCustomAction(notification, actionId);
+				}
+			};
+			if (ActionButton.CONSUME_ACTION.equals(actionId)) {
+				builder.setPositiveButton(actionButton.getTitle(), onClickListener);
+			} else if (ActionButton.IGNORE_ACTION.equals(actionId)) {
+				builder.setNegativeButton(actionButton.getTitle(), onClickListener);
+			}
+		}
+		builder.setNeutralButton("Dismiss", new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				dialog.dismiss();
+			}
+		}).create().show();
+	}
+
+	private boolean handleCustomAction(Notification notification, String actionId) {
+		final Action action = notification.getAction();
+		if (actionId.equals(ActionButton.CONSUME_ACTION)) {
+			if (PickActionView.ADD_FRIEND.equals(action.getType())) {
+				final String userId = action.getData().get(PickActionView.KEY_USER_ID);
+				final String userName = action.getData().get(PickActionView.KEY_USER_NAME);
+				addFriend(userId, userName);
+			} else {
+				GetSocial.processAction(action);
+			}
+			_dependenciesContainer.notificationsManager().setStatus(notification.getId(), NotificationStatus.CONSUMED);
+		} else {
+			_dependenciesContainer.notificationsManager().setStatus(notification.getId(), NotificationStatus.IGNORED);
+		}
+		return false;
+	}
+
+	private void addFriend(final String userId, final String userName) {
+		GetSocial.User.addFriend(userId, new Callback<Integer>() {
+			@Override
+			public void onSuccess(Integer result) {
+				notifyFriend(userId);
+				Toast.makeText(MainActivity.this, userName + " is now your friend!", Toast.LENGTH_SHORT).show();
+			}
+
+			@Override
+			public void onFailure(GetSocialException exception) {
+				Toast.makeText(MainActivity.this, "Failed to add " + userName + ", error: " + exception.getMessage(), Toast.LENGTH_SHORT).show();
+			}
+		});
+	}
+
+	private void notifyFriend(String userId) {
+		GetSocial.User.sendNotification(Collections.singletonList(userId), NotificationContent.notificationWithText(SendNotificationPlaceholders.CustomText.SENDER_DISPLAY_NAME + " accepted your friend request!"), new Callback<NotificationsSummary>() {
+			@Override
+			public void onSuccess(NotificationsSummary result) {
+				//
+			}
+
+			@Override
+			public void onFailure(GetSocialException exception) {
+				//
+			}
+		});
+	}
+
 	protected void registerCustomInvitesChannelPlugins() {
 		GetSocial.registerInviteChannelPlugin(InviteChannelIds.KAKAO, new KakaoInvitePlugin());
 		GetSocial.registerInviteChannelPlugin(InviteChannelIds.FACEBOOK, new FacebookSharePlugin(this, _facebookCallbackManager));
 		GetSocial.registerInviteChannelPlugin(InviteChannelIds.VK, _vkInvitePlugin);
 	}
 
-	private void showNewFriend(String userId) {
+	private void showUserInfoDialog(String userId) {
 		GetSocial.getUserById(userId, new Callback<PublicUser>() {
 			@Override
 			public void onSuccess(PublicUser publicUser) {
-				NewFriendDialog.show(getSupportFragmentManager(), publicUser);
+				UserInfoDialog.show(getSupportFragmentManager(), publicUser);
 			}
 
 			@Override
@@ -274,14 +375,9 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Acti
 		return String.format(Locale.getDefault(), "GetSocial Android Demo\nSDK v%s. Build v%d", GetSocial.getSdkVersion(), BuildConfig.VERSION_CODE);
 	}
 
-	private void initFacebook() {
-		_facebookCallbackManager = CallbackManager.Factory.create();
-		FacebookSdk.sdkInitialize(getApplicationContext());
-	}
-
 	private void showUserDetails() {
 		if (GetSocial.isInitialized()) {
-			UserInfoDialog.show(getSupportFragmentManager());
+			CurrentUserInfoDialog.show(getSupportFragmentManager());
 		}
 	}
 
@@ -295,7 +391,21 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Acti
 		ClipboardManager clipboard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
 		ClipData clip = ClipData.newPlainText("GetSocial User ID", userId);
 		clipboard.setPrimaryClip(clip);
+		vibrate();
 		Toast.makeText(this, "Copied " + userId + " to clipboard.", Toast.LENGTH_LONG).show();
+	}
+
+	private void vibrate() {
+		Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+
+		if (vibrator == null) {
+			return;
+		}
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+			vibrator.vibrate(VibrationEffect.createOneShot(500, VibrationEffect.DEFAULT_AMPLITUDE));
+		} else {
+			vibrator.vibrate(500);
+		}
 	}
 
 	private RootFragment findRootFragment() {
@@ -340,14 +450,6 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Acti
 	public DependenciesContainer dependencies() {
 		return _dependenciesContainer;
 	}
-
-	private void initCrashlytics() {
-		final Fabric fabric = new Fabric.Builder(this)
-				.kits(new Crashlytics())
-				.debuggable(true)           // Enables Crashlytics debugger
-				.build();
-		Fabric.with(fabric);
-	}
 	//endregion
 
 	//region GetSocial listeners
@@ -371,6 +473,19 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Acti
 			}
 		});
 		dependencies().notificationsManager().sync();
+	}
+
+	@Override
+	public boolean handleAction(Action action) {
+		if (action.getType().equals(ActionTypes.OPEN_PROFILE)) {
+			final String userId = action.getData().get(ActionDataKeys.OpenProfile.USER_ID);
+			showUserInfoDialog(userId);
+			return true;
+		} else if (action.getType().equals(ActionTypes.CUSTOM)) {
+			_log.logInfo("Received custom action:" + action.getData());
+			return true;
+		}
+		return false;
 	}
 
 	//endregion

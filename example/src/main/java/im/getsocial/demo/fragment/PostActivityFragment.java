@@ -42,10 +42,13 @@ import butterknife.OnClick;
 import com.squareup.picasso.MemoryPolicy;
 import com.squareup.picasso.Picasso;
 import im.getsocial.demo.R;
+import im.getsocial.demo.ui.PickActionView;
 import im.getsocial.demo.utils.VideoUtils;
 import im.getsocial.sdk.Callback;
 import im.getsocial.sdk.GetSocial;
 import im.getsocial.sdk.GetSocialException;
+import im.getsocial.sdk.actions.Action;
+import im.getsocial.sdk.actions.ActionListener;
 import im.getsocial.sdk.activities.ActivityPost;
 import im.getsocial.sdk.activities.ActivityPostContent;
 import im.getsocial.sdk.media.MediaAttachment;
@@ -98,17 +101,16 @@ public class PostActivityFragment extends BaseFragment implements Callback<Activ
 
 		final String text = _viewContainer._postText.getText().toString();
 
-		final Bitmap bitmap = _originalImage == null ? null : _originalImage;
-
 		final String buttonTitle = _viewContainer._buttonTitle.getText().toString();
-		final String buttonAction = _viewContainer._buttonAction.getText().toString();
+		final String oldButtonAction = _viewContainer._buttonAction.getText().toString();
+		final Action action = _viewContainer._pickActionView.getAction();
 
 		boolean hasText = !TextUtils.isEmpty(text);
-		boolean hasImage = _viewContainer._hasImage.isChecked() && bitmap != null;
+		boolean hasImage = _viewContainer._hasImage.isChecked() && _originalImage != null;
 		boolean hasVideo = _viewContainer._hasVideo.isChecked() && _videoPath != null;
 		boolean hasButton = _viewContainer._hasButton.isChecked()
 				&& !buttonTitle.isEmpty()
-				&& !buttonAction.isEmpty();
+				&& (!oldButtonAction.isEmpty() || action != null);
 
 		if (!hasText && !hasButton && !hasImage && !hasVideo) {
 			hideLoadingAndShowError("Can not post activity without any data");
@@ -134,10 +136,15 @@ public class PostActivityFragment extends BaseFragment implements Callback<Activ
 			builder.withText(text);
 		}
 		if (hasButton) {
-			builder.withButton(buttonTitle, buttonAction);
+			if (!oldButtonAction.isEmpty()) {
+				builder.withButton(buttonTitle, oldButtonAction);
+			}
+			if (action != null) {
+				builder.withButton(buttonTitle, action);
+			}
 		}
 		if (hasImage) {
-			builder.withMediaAttachment(MediaAttachment.image(bitmap));
+			builder.withMediaAttachment(MediaAttachment.image(_originalImage));
 		}
 		if (hasVideo) {
 			builder.withMediaAttachment(MediaAttachment.video(VideoUtils.getVideoContent(_videoPath)));
@@ -165,6 +172,11 @@ public class PostActivityFragment extends BaseFragment implements Callback<Activ
 			@Override
 			public void onButtonClicked(String action, ActivityPost post) {
 				Toast.makeText(getContext(), "Activity Feed button clicked, action: " + action, Toast.LENGTH_SHORT).show();
+			}
+		}).setActionListener(new ActionListener() {
+			@Override
+			public boolean handleAction(Action action) {
+				return _activityListener.dependencies().actionListener().handleAction(action);
 			}
 		}).show();
 	}
@@ -209,12 +221,7 @@ public class PostActivityFragment extends BaseFragment implements Callback<Activ
 	@Override
 	protected void onVideoPickedFromDevice(Uri videoUri, int requestCode) {
 		if (requestCode == REQUEST_PICK_CUSTOM_VIDEO) {
-			String realPath;
-			if (videoUri.getScheme().equalsIgnoreCase("content")) {
-				realPath = VideoUtils.getRealPathFromUri(getContext(), videoUri);
-			} else {
-				realPath = videoUri.getPath();
-			}
+			String realPath = VideoUtils.getRealPathFromUri(getContext(), videoUri);
 			File f = new File(realPath);
 			if (f.exists()) {
 				_videoPath = realPath;
@@ -239,6 +246,8 @@ public class PostActivityFragment extends BaseFragment implements Callback<Activ
 
 	class ViewContainer {
 
+		@BindView(R.id.pick_action_view)
+		PickActionView _pickActionView;
 		@BindView(R.id.activity_context_text)
 		EditText _postText;
 		@BindView(R.id.checkbox_has_button)

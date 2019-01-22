@@ -8,6 +8,7 @@ import im.getsocial.sdk.CompletionCallback;
 import im.getsocial.sdk.GetSocial;
 import im.getsocial.sdk.GetSocialException;
 import im.getsocial.sdk.pushnotifications.Notification;
+import im.getsocial.sdk.pushnotifications.NotificationStatus;
 import im.getsocial.sdk.pushnotifications.NotificationsCountQuery;
 import im.getsocial.sdk.pushnotifications.NotificationsQuery;
 
@@ -33,27 +34,33 @@ public final class NotificationsManager {
 	private int _notificationsCount;
 	private List<Notification> _notifications = new ArrayList<>();
 
-	private int _filterStatus = 0;
-	private Set<Integer> _chosenTypes = new HashSet<>();
+	private Set<String> _actionTypes = new HashSet<>();
+	private Set<String> _filterStatus = new HashSet<>();
+	private Set<String> _chosenTypes = new HashSet<>();
 
 	public NotificationsManager(Context context) {
 		_context = context;
 		loadFromPrefs();
 	}
 
-	public void saveFilter(int status, Set<Integer> chosenTypes) {
-		_filterStatus = status;
+	public void saveFilter(Set<String> statuses, Set<String> chosenTypes, Set<String> actionTypes) {
+		_filterStatus = new HashSet<>(statuses);
 		_chosenTypes = new HashSet<>(chosenTypes);
+		_actionTypes = actionTypes;
 		saveToPrefs();
 		sync();
 	}
 
-	public int getFilterStatus() {
+	public Set<String> getFilterStatus() {
 		return _filterStatus;
 	}
 
-	public Set<Integer> getChosenTypes() {
+	public Set<String> getChosenTypes() {
 		return _chosenTypes;
+	}
+
+	public Set<String> getActionTypes() {
+		return _actionTypes;
 	}
 
 	public void addListener(Listener listener) {
@@ -69,11 +76,11 @@ public final class NotificationsManager {
 	}
 
 	public void markAllAsRead() {
-		setRead(collectAllIds(), true);
+		setStatus(collectAllIds(), NotificationStatus.READ);
 	}
 
-	public void markAsRead(String id, boolean isRead) {
-		setRead(Collections.singletonList(id), isRead);
+	public void setStatus(String id, String status) {
+		setStatus(Collections.singletonList(id), status);
 	}
 
 	public void loadMore() {
@@ -99,11 +106,11 @@ public final class NotificationsManager {
 		});
 	}
 
-	private void setRead(final List<String> ids, final boolean isRead) {
-		GetSocial.User.setNotificationsRead(ids, isRead, new CompletionCallback() {
+	private void setStatus(final List<String> ids, final String newStatus) {
+		GetSocial.User.setNotificationsStatus(ids, newStatus, new CompletionCallback() {
 			@Override
 			public void onSuccess() {
-				updateStatuses(ids, isRead);
+				updateStatuses(ids, newStatus);
 			}
 
 			@Override
@@ -149,41 +156,33 @@ public final class NotificationsManager {
 	}
 
 	private NotificationsCountQuery createNotificationsCountQuery() {
-		NotificationsCountQuery query = _filterStatus == 1
-				? NotificationsCountQuery.read()
-				: _filterStatus == 2 ? NotificationsCountQuery.unread() : NotificationsCountQuery.readAndUnread();
-
-		return query.ofTypes(getTypes());
+		return NotificationsCountQuery.withStatuses(_filterStatus.toArray(new String[0]))
+				.withActions(_actionTypes.toArray(new String[0]))
+				.ofTypes(_chosenTypes.toArray(new String[0]));
 	}
 
 	private NotificationsQuery createNotificationsQuery() {
-		NotificationsQuery query = _filterStatus == 1
-				? NotificationsQuery.read()
-				: _filterStatus == 2 ? NotificationsQuery.unread() : NotificationsQuery.readAndUnread();
-
-		return query.ofTypes(getTypes());
+		return NotificationsQuery.withStatuses(_filterStatus.toArray(new String[0]))
+				.withActions(_actionTypes.toArray(new String[0]))
+				.ofTypes(_chosenTypes.toArray(new String[0]));
 	}
 
-	private int[] getTypes() {
-		if (_chosenTypes.isEmpty()) {
-			return new int[0];
-		}
-
-		int[] types = new int[_chosenTypes.size()];
-		int i = 0;
-		for (int type : _chosenTypes) {
-			types[i++] = type;
-		}
-		return types;
-	}
-
-	private void updateStatuses(List<String> ids, boolean isRead) {
+	private void updateStatuses(List<String> ids, String newStatus) {
 		for (int i = 0; i < _notifications.size(); i++) {
 			final Notification current = _notifications.get(i);
 			if (ids.contains(current.getId())) {
-				final Notification updated = new Notification(current.getId(), isRead, current.getType(), current.getCreatedAt(),
-						current.getTitle(), current.getText(), current.getActionType(), current.getActionData(), current.getImageUrl(), current.getVideoUrl());
-				_notifications.set(i, updated);
+				final Notification.Builder updated = Notification.builder(current.getId())
+						.withText(current.getText())
+						.withTitle(current.getTitle())
+						.withType(current.getType())
+						.withAction(current.getAction())
+						.withCreatedAt(current.getCreatedAt())
+						.withImageUrl(current.getImageUrl())
+						.withVideoUrl(current.getVideoUrl())
+						.withStatus(newStatus)
+						.addActionButtons(current.getActionButtons());
+
+				_notifications.set(i, updated.build());
 			}
 		}
 		notifyListeners();
@@ -209,27 +208,19 @@ public final class NotificationsManager {
 	}
 
 	private void saveToPrefs() {
-		final Set<String> types = new HashSet<>();
-		for (int type : _chosenTypes) {
-			types.add(Integer.toString(type));
-		}
 		_context.getSharedPreferences("notifications", Context.MODE_PRIVATE)
 				.edit()
-				.putInt("status", _filterStatus)
-				.putStringSet("types", types)
+				.putStringSet("status", _filterStatus)
+				.putStringSet("types", _chosenTypes)
+				.putStringSet("actions", _actionTypes)
 				.apply();
 	}
 
 	private void loadFromPrefs() {
 		final SharedPreferences sharedPreferences = _context.getSharedPreferences("notifications", Context.MODE_PRIVATE);
-		final Set<String> types = sharedPreferences.getStringSet("types", Collections.<String>emptySet());
 
-		_filterStatus = sharedPreferences.getInt("status", 0);
-
-		final Set<Integer> intSet = new HashSet<>();
-		for (String type : types) {
-			intSet.add(Integer.parseInt(type));
-		}
-		_chosenTypes = new HashSet<>(intSet);
+		_chosenTypes = sharedPreferences.getStringSet("types", Collections.<String>emptySet());
+		_filterStatus = sharedPreferences.getStringSet("status", Collections.<String>emptySet());
+		_actionTypes = sharedPreferences.getStringSet("actions", Collections.<String>emptySet());
 	}
 }

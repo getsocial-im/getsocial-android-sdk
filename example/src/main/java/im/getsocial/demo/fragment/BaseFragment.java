@@ -44,6 +44,7 @@ import im.getsocial.sdk.CompletionCallback;
 import im.getsocial.sdk.ErrorCode;
 import im.getsocial.sdk.GetSocial;
 import im.getsocial.sdk.GetSocialException;
+import im.getsocial.sdk.actions.Action;
 import im.getsocial.sdk.ui.UiAction;
 import im.getsocial.sdk.usermanagement.AddAuthIdentityCallback;
 import im.getsocial.sdk.usermanagement.AuthIdentity;

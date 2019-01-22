@@ -28,6 +28,9 @@ import java.io.IOException;
 public class VideoUtils {
 
 	public static String getRealPathFromUri(Context context, Uri contentUri) {
+		if (!contentUri.getScheme().equalsIgnoreCase("content")) {
+			return contentUri.getPath();
+		}
 		Cursor cursor = null;
 		try {
 			String[] proj = { MediaStore.Images.Media.DATA };

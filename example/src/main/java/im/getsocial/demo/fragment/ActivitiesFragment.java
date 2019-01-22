@@ -18,14 +18,19 @@ package im.getsocial.demo.fragment;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.text.TextUtils;
 import android.widget.Toast;
 import im.getsocial.demo.adapter.MenuItem;
 import im.getsocial.demo.dialog.action_dialog.ActionDialog;
 import im.getsocial.sdk.Callback;
 import im.getsocial.sdk.GetSocial;
 import im.getsocial.sdk.GetSocialException;
+import im.getsocial.sdk.actions.Action;
+import im.getsocial.sdk.actions.ActionListener;
+import im.getsocial.sdk.actions.ActionTypes;
 import im.getsocial.sdk.activities.ActivitiesQuery;
 import im.getsocial.sdk.activities.ActivityPost;
+import im.getsocial.sdk.pushnotifications.Notification;
 import im.getsocial.sdk.ui.AvatarClickListener;
 import im.getsocial.sdk.ui.GetSocialUi;
 import im.getsocial.sdk.ui.MentionClickListener;
@@ -39,7 +44,7 @@ import im.getsocial.sdk.usermanagement.PublicUser;
 import java.util.Arrays;
 import java.util.List;
 
-public class ActivitiesFragment extends BaseListFragment {
+public class ActivitiesFragment extends BaseListFragment implements ActionListener, ActionButtonListener {
 
 	public static final String CUSTOM_FEED_NAME = "DemoFeed";
 	private static final List<UiAction> FORBIDDEN_FOR_ANONYMOUS = Arrays.asList(UiAction.LIKE_ACTIVITY, UiAction.LIKE_COMMENT, UiAction.POST_ACTIVITY, UiAction.POST_COMMENT);
@@ -144,12 +149,8 @@ public class ActivitiesFragment extends BaseListFragment {
 				.setFilterByUser(id)
 				.setWindowTitle(title)
 				.setReadOnly(true)
-				.setButtonActionListener(new ActionButtonListener() {
-					@Override
-					public void onButtonClicked(String action, ActivityPost post) {
-						Toast.makeText(getContext(), "Activity Feed button clicked, action: " + action, Toast.LENGTH_SHORT).show();
-					}
-				})
+				.setButtonActionListener(actionListener())
+				.setActionListener(actionListener())
 				.show();
 	}
 
@@ -214,33 +215,46 @@ public class ActivitiesFragment extends BaseListFragment {
 		});
 	}
 
+	@Override
+	public boolean handleAction(Action action) {
+		return _activityListener.dependencies().actionListener().handleAction(action);
+	}
+
+	@Override
+	public void onButtonClicked(String action, ActivityPost post) {
+		if ("CloseAndRestore".equalsIgnoreCase(action)) {
+			GetSocialUi.closeView(true);
+			new AlertDialog.Builder(getContext())
+					.setPositiveButton("Restore View", new DialogInterface.OnClickListener() {
+						@Override
+						public void onClick(DialogInterface dialogInterface, int i) {
+							GetSocialUi.restoreView();
+						}
+					})
+					.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+						@Override
+						public void onClick(DialogInterface dialog, int which) {
+
+						}
+					}).show();
+		}
+
+		if (!TextUtils.isEmpty(action)) {
+			Toast.makeText(getContext(), "Activity Feed button clicked, action: " + action, Toast.LENGTH_SHORT).show();
+		}
+	}
+
+	private <T extends ActionButtonListener & ActionListener> T actionListener() {
+		return (T) this;
+	}
+
 	private class OpenGlobalFeedAction implements MenuItem.Action {
 
 		@Override
 		public void execute() {
 			GetSocialUi.createGlobalActivityFeedView()
-					.setButtonActionListener(new ActionButtonListener() {
-						@Override
-						public void onButtonClicked(String action, ActivityPost post) {
-							if ("CloseAndRestore".equalsIgnoreCase(action)) {
-								GetSocialUi.closeView(true);
-								new AlertDialog.Builder(getContext())
-										.setPositiveButton("Restore View", new DialogInterface.OnClickListener() {
-											@Override
-											public void onClick(DialogInterface dialogInterface, int i) {
-												GetSocialUi.restoreView();
-											}
-										})
-										.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-											@Override
-											public void onClick(DialogInterface dialog, int which) {
-
-											}
-										}).show();
-							}
-							Toast.makeText(getContext(), "Activity Feed button clicked, action: " + action, Toast.LENGTH_SHORT).show();
-						}
-					})
+					.setButtonActionListener(actionListener())
+					.setActionListener(actionListener())
 					.setViewStateListener(new ViewStateListener() {
 						@Override
 						public void onOpen() {
@@ -297,12 +311,8 @@ public class ActivitiesFragment extends BaseListFragment {
 		@Override
 		public void execute() {
 			GetSocialUi.createActivityFeedView(_feed)
-					.setButtonActionListener(new ActionButtonListener() {
-						@Override
-						public void onButtonClicked(String action, ActivityPost post) {
-							Toast.makeText(getContext(), "Activity Feed button clicked, action: " + action, Toast.LENGTH_SHORT).show();
-						}
-					})
+					.setButtonActionListener(actionListener())
+					.setActionListener(actionListener())
 					.show();
 		}
 	}
@@ -320,12 +330,8 @@ public class ActivitiesFragment extends BaseListFragment {
 		@Override
 		public void execute() {
 			GetSocialUi.createGlobalActivityFeedView()
-					.setButtonActionListener(new ActionButtonListener() {
-						@Override
-						public void onButtonClicked(String action, ActivityPost post) {
-							Toast.makeText(getContext(), "Activity Feed button clicked, action: " + action, Toast.LENGTH_SHORT).show();
-						}
-					})
+					.setButtonActionListener(actionListener())
+					.setActionListener(actionListener())
 					.setShowFriendsFeed(true)
 					.show();
 		}
@@ -345,12 +351,8 @@ public class ActivitiesFragment extends BaseListFragment {
 					.setFilterByUser(GetSocial.User.getId())
 					.setWindowTitle("My Custom Feed")
 					.setReadOnly(false)
-					.setButtonActionListener(new ActionButtonListener() {
-						@Override
-						public void onButtonClicked(String action, ActivityPost post) {
-							Toast.makeText(getContext(), "Activity Feed button clicked, action: " + action, Toast.LENGTH_SHORT).show();
-						}
-					})
+					.setButtonActionListener(actionListener())
+					.setActionListener(actionListener())
 					.show();
 		}
 	}
@@ -359,7 +361,7 @@ public class ActivitiesFragment extends BaseListFragment {
 
 		private final boolean _showFeed;
 
-		public OpenActivityDetailsAction(boolean showFeed) {
+		OpenActivityDetailsAction(boolean showFeed) {
 			_showFeed = showFeed;
 		}
 
@@ -374,7 +376,16 @@ public class ActivitiesFragment extends BaseListFragment {
 					}
 					final String[] activityContents = new String[activityPosts.size()];
 					for (int i = 0; i < activityContents.length; i++) {
-						activityContents[i] = activityPosts.get(i).getText();
+						final ActivityPost activityPost = activityPosts.get(i);
+						if (activityPost.hasText()) {
+							activityContents[i] = activityPost.getText();
+						} else if (activityPost.hasImage()) {
+							activityContents[i] = "[IMAGE] " + activityPost.getImageUrl();
+						} else if (activityPost.hasButton()) {
+							activityContents[i] = "[BUTTON] " + activityPost.getButtonTitle();
+						} else {
+							activityContents[i] = activityPost.toString();
+						}
 					}
 					new AlertDialog.Builder(getContext())
 							.setItems(activityContents, new DialogInterface.OnClickListener() {
@@ -394,12 +405,8 @@ public class ActivitiesFragment extends BaseListFragment {
 													Toast.makeText(getContext(), "Activity details view closed", Toast.LENGTH_SHORT).show();
 												}
 											})
-											.setButtonActionListener(new ActionButtonListener() {
-												@Override
-												public void onButtonClicked(String action, ActivityPost post) {
-													Toast.makeText(getContext(), "Activity action button pressed: " + action, Toast.LENGTH_SHORT).show();
-												}
-											})
+											.setButtonActionListener(actionListener())
+											.setActionListener(actionListener())
 											.setWindowTitle("Activity Details")
 											.setUiActionListener(new UiActionListener() {
 												@Override

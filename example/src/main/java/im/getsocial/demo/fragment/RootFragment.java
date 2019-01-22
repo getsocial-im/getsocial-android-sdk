@@ -118,7 +118,8 @@ public class RootFragment extends BaseListFragment implements NotificationsManag
 					}
 				}),
 				navigationListItem("Settings", SettingsFragment.class),
-				navigationListItem("IAP", PurchaseFragment.class)
+				navigationListItem("IAP", PurchaseFragment.class),
+				navigationListItem("Custom Analytics Events", CustomAnalyticsEventsFragment.class)
 		);
 	}
 

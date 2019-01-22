@@ -208,12 +208,7 @@ public class CustomInviteFragment extends BaseFragment {
 	@Override
 	protected void onVideoPickedFromDevice(Uri videoUri, int requestCode) {
 		if (requestCode == REQUEST_PICK_CUSTOM_VIDEO) {
-			String realPath;
-			if (videoUri.getScheme().equalsIgnoreCase("content")) {
-				realPath = VideoUtils.getRealPathFromUri(getContext(), videoUri);
-			} else {
-				realPath = videoUri.getPath();
-			}
+			final String realPath = VideoUtils.getRealPathFromUri(getContext(), videoUri);
 			File f = new File(realPath);
 			if (f.exists()) {
 				_videoPath = realPath;

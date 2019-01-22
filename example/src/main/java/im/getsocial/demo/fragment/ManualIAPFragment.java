@@ -56,17 +56,11 @@ public class ManualIAPFragment extends BaseFragment {
 				.withPurchaseDate(System.currentTimeMillis() / 1000)
 				.build();
 
-		GetSocial.trackPurchaseData(purchaseData, new CompletionCallback() {
-			@Override
-			public void onSuccess() {
-				_log.logInfoAndToast("Successfully tracked purchase data");
-			}
-
-			@Override
-			public void onFailure(GetSocialException exception) {
-				_log.logErrorAndToast("Failed to track purchase data: " + exception.getMessage());
-			}
-		});
+		if (GetSocial.trackPurchaseEvent(purchaseData)) {
+			_log.logInfoAndToast("Successfully tracked purchase data");
+		} else {
+			_log.logErrorAndToast("Failed to track purchase data.");
+		}
 	}
 
 	class ViewContainer {

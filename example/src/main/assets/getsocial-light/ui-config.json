@@ -184,6 +184,9 @@
         },
         "activity-not-found-placeholder": {
             "bg-image": "activity-not-found.bg-image.png"
+        },
+        "expanded-media-toolbar" : {
+            "bg-color": "0xFFFFFFFF"
         }
     },
     "text-styles": {

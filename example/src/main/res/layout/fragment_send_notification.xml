@@ -198,14 +198,9 @@
 			  android:layout_width = "match_parent"
 			  android:layout_height="1dp"/>
 
-		<TextView android:layout_width="wrap_content"
-				  android:layout_height="wrap_content"
-				  android:textSize="25dp"
-				  android:text="Action"/>
-
-		<Spinner android:id="@+id/spinner_select_notification_type"
-				 android:layout_width="match_parent"
-				 android:layout_height="50dp"/>
+		<im.getsocial.demo.ui.PickActionView android:id="@+id/pick_action_view"
+											 android:layout_width="match_parent"
+											 android:layout_height="wrap_content"/>
 
 		<RelativeLayout android:gravity="center"
 						android:layout_margin="10dp"
@@ -217,9 +212,9 @@
 					  android:layout_height="wrap_content"
 					  android:layout_alignParentLeft="true"
 					  android:textSize="20dp"
-					  android:text="Notification Data"/>
+					  android:text="Action Buttons"/>
 
-			<Button android:id="@+id/button_add_notification_data"
+			<Button android:id="@+id/button_add_action_button"
 					android:layout_centerVertical="true"
 					android:layout_alignParentRight="true"
 					android:text="Add"
@@ -228,7 +223,7 @@
 
 		</RelativeLayout>
 
-		<LinearLayout android:id="@+id/container_notification_data"
+		<LinearLayout android:id="@+id/container_action_buttons"
 					  android:layout_width="match_parent"
 					  android:layout_height="wrap_content"
 					  android:orientation="vertical"/>

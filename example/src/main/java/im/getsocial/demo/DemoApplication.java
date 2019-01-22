@@ -9,7 +9,9 @@ import android.support.multidex.MultiDex;
 import com.adjust.sdk.Adjust;
 import com.adjust.sdk.AdjustConfig;
 import com.appsflyer.AppsFlyerLib;
+import com.crashlytics.android.Crashlytics;
 import com.vk.sdk.VKSdk;
+import io.fabric.sdk.android.Fabric;
 
 /**
  * Created by orestsavchak on 1/4/18.
@@ -32,6 +34,15 @@ public class DemoApplication extends Application {
 		configureVK();
 		configureAdjust();
 		configureAppsFlyer();
+		initCrashlytics();
+	}
+
+	protected void initCrashlytics() {
+		final Fabric fabric = new Fabric.Builder(this)
+				.kits(new Crashlytics())
+				.debuggable(true)           // Enables Crashlytics debugger
+				.build();
+		Fabric.with(fabric);
 	}
 
 	private void configureAdjust() {
