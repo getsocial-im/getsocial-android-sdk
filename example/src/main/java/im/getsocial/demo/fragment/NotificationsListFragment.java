@@ -82,7 +82,11 @@ public class NotificationsListFragment extends BaseFragment implements Notificat
 				NotificationsAdapter.ViewHolder viewHolder = (NotificationsAdapter.ViewHolder) view.getTag();
 				if (viewHolder != null) {
 					final Notification notification = viewHolder._notification;
-					_notificationsManager.setStatus(notification.getId(), NotificationStatus.UNREAD.equals(notification.getStatus()) ? NotificationStatus.READ : NotificationStatus.UNREAD);
+					final String status = notification.getStatus();
+					if (NotificationStatus.CONSUMED.equals(status) || NotificationStatus.IGNORED.equals(status)) {
+						return;
+					}
+					_notificationsManager.setStatus(notification.getId(), NotificationStatus.UNREAD.equals(status) ? NotificationStatus.READ : NotificationStatus.UNREAD);
 				}
 			}
 		});

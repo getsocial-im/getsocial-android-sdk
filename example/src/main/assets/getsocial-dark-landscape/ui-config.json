@@ -52,12 +52,6 @@
         "timestamp": {
             "text-style": "timestamp"
         },
-        "badge": {
-            "text-style": "badge",
-            "bg-image": "badge.bg-image.png",
-            "bg-image-insets": "32 32 32 32",
-            "text-insets": "0 4 0 4"
-        },
         "link": {
             "text-style": "link"
         },
@@ -110,7 +104,7 @@
         "avatar": {
             "border-size": 0,
             "border-color": "0x00000000",
-            "radius": 3,
+            "radius": 20,
             "default-image": "avatar.default-image.png"
         },
         "like-button": {
@@ -141,23 +135,8 @@
             "bg-image-normal": "post-button.bg-image-normal.png",
             "bg-image-pressed": "post-button.bg-image-pressed.png"
         },
-        "segment-bar": {
-            "text-style-normal": "segment",
-            "text-style-selected": "segment",
-            "border-color": "0xCC000000",
-            "border-size": 0,
-            "border-radius": 3,
-            "bg-color-normal": "0xFF488EE7",
-            "bg-color-selected": "0xFF4180CF"
-        },
         "loading-indicator": {
             "bg-image": "loading-indicator.bg-image.png"
-        },
-        "notification-icon-comment": {
-            "bg-image": "notification-icon-comment.bg-image.png"
-        },
-        "notification-icon-like": {
-            "bg-image": "notification-icon-like.bg-image.png"
         },
         "no-network-placeholder": {
             "bg-image": "no-network-placeholder.bg-image.png"
@@ -171,10 +150,6 @@
         "list-item": {
             "bg-color-odd": "0xFF383838",
             "bg-color-even": "0xFF262626"
-        },
-        "notification-list-item": {
-            "bg-color-read": "0xFFFFFFFF",
-            "bg-color-unread": "0xFFD7E2F2"
         },
         "activity-image": {
             "aspect-ratio": "16:9",
@@ -215,11 +190,6 @@
         "segment": {
             "font": "HelveticaNeue-Bold",
             "font-size": 15,
-            "font-color": "0xFFFFFFFF"
-        },
-        "badge": {
-            "font": "HelveticaNeue-Bold",
-            "font-size": 10,
             "font-color": "0xFFFFFFFF"
         },
         "link": {

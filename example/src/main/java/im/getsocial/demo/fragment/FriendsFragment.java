@@ -205,12 +205,12 @@ public class FriendsFragment extends BaseFragment {
 		loadFriends();
 	}
 
-	private void removeFriend(final String userId) {
+	private void removeFriend(final PublicUser user) {
 		showLoading("Removing friend", "Wait...");
-		GetSocial.User.removeFriend(userId, new Callback<Integer>() {
+		GetSocial.User.removeFriend(user.getId(), new Callback<Integer>() {
 			@Override
 			public void onSuccess(Integer numberOfFriends) {
-				Toast.makeText(getContext(), "User " + userId + " was removed from your friends list.", Toast.LENGTH_SHORT).show();
+				Toast.makeText(getContext(), "User " + user.getDisplayName() + " was removed from your friends list.", Toast.LENGTH_SHORT).show();
 				onFriendsUpdated();
 			}
 
@@ -324,7 +324,19 @@ public class FriendsFragment extends BaseFragment {
 
 			@OnClick(R.id.remove_friend_btn)
 			void removeFriend() {
-				FriendsFragment.this.removeFriend(_user.getId());
+				FriendsFragment.this.removeFriend(_user);
+			}
+
+			@OnClick(R.id.message_friend_btn)
+			void openChatDialog() {
+				Bundle bundle = new Bundle();
+				bundle.putString(ChatFragment.KEY_RECIPIENT_ID, _user.getId());
+				bundle.putString(ChatFragment.KEY_RECIPIENT_NAME, _userName.getText().toString());
+
+				ChatFragment chatFragment = new ChatFragment();
+				chatFragment.setArguments(bundle);
+
+				FriendsFragment.this.addContentFragment(chatFragment);
 			}
 		}
 

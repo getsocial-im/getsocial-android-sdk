@@ -60,6 +60,7 @@ import im.getsocial.demo.dialog.CurrentUserInfoDialog;
 import im.getsocial.demo.dialog.ReferralDataDialog;
 import im.getsocial.demo.dialog.UserInfoDialog;
 import im.getsocial.demo.fragment.BaseFragment;
+import im.getsocial.demo.fragment.ChatFragment;
 import im.getsocial.demo.fragment.ConsoleFragment;
 import im.getsocial.demo.fragment.FriendsFragment;
 import im.getsocial.demo.fragment.HasFragmentTag;
@@ -481,11 +482,37 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Acti
 			final String userId = action.getData().get(ActionDataKeys.OpenProfile.USER_ID);
 			showUserInfoDialog(userId);
 			return true;
+		} else if (action.getType().equals(ChatFragment.NOTIFICATION_ACTION_OPEN_MESSAGE)) {
+			final Bundle bundle = new Bundle();
+			bundle.putString(ChatFragment.KEY_RECIPIENT_ID, action.getData().get(ChatFragment.ACTION_KEY_ID));
+			bundle.putString(ChatFragment.KEY_RECIPIENT_NAME, action.getData().get(ChatFragment.ACTION_KEY_NAME));
+			bundle.putString(ChatFragment.KEY_MESSAGE, action.getData().get(ChatFragment.ACTION_KEY_MESSAGE));
+
+			Fragment fragment = getSupportFragmentManager().findFragmentByTag(ChatFragment.TAG);
+			if (fragment == null) {
+				if (GetSocial.isInitialized()) {
+					showChatFragment(bundle);
+				} else {
+					GetSocial.whenInitialized(new Runnable() {
+						@Override
+						public void run() {
+							showChatFragment(bundle);
+						}
+					});
+				}
+			}
+
 		} else if (action.getType().equals(ActionTypes.CUSTOM)) {
 			_log.logInfo("Received custom action:" + action.getData());
 			return true;
 		}
 		return false;
+	}
+
+	private void showChatFragment(Bundle bundle) {
+		ChatFragment chatFragment = new ChatFragment();
+		chatFragment.setArguments(bundle);
+		addContentFragment(chatFragment);
 	}
 
 	//endregion
