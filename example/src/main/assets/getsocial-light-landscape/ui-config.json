@@ -162,8 +162,45 @@
         },
         "expanded-media-toolbar" : {
             "bg-color": "0xFFFFFFFF"
-        }
-    },
+        },
+        "notifications-list-item": {
+            "bg-color-read": "0xFFF7F7F7",
+            "bg-color-unread": "0xFFFFFFFF"
+        },
+        "notifications-section": {
+            "bg-color": "0xFFC4C9D0",
+            "text-style": "notifications-section-title"
+        },
+        "notifications-consume-button": {
+            "text-style": "call-to-action",
+            "bg-image-normal": "notifications-consume-button.bg-image-normal.png",
+            "bg-image-normal-insets": "12 12 12 12",
+            "bg-image-pressed": "notifications-consume-button.bg-image-pressed.png",
+            "bg-image-pressed-insets": "12 12 12 12",
+            "text-y-offset-normal": 0,
+            "text-y-offset-pressed": 0
+        },
+        "notifications-ignore-button": {
+            "text-style": "call-to-negative-action",
+            "bg-image-normal": "notifications-ignore-button.bg-image-normal.png",
+            "bg-image-normal-insets": "12 12 12 12",
+            "bg-image-pressed": "notifications-ignore-button.bg-image-pressed.png",
+            "bg-image-pressed-insets": "12 12 12 12",
+            "text-y-offset-normal": 0,
+            "text-y-offset-pressed": 0
+        },
+        "notifications-button": {
+            "text-style": "call-to-action",
+            "bg-image-normal": "notifications-button.bg-image-normal.png",
+            "bg-image-normal-insets": "12 12 12 12",
+            "bg-image-pressed": "notifications-button.bg-image-pressed.png",
+            "bg-image-pressed-insets": "12 12 12 12",
+            "text-y-offset-normal": 0,
+            "text-y-offset-pressed": 0
+        },
+        "notifications-placeholder": {
+            "bg-image": "no-notifications-placeholder.bg-image.png"
+        }    },
     "text-styles": {
         "header": {
             "font": "Lato-Bold.ttf",
@@ -216,8 +253,18 @@
             "font-color": "0xFF666666"
         },
         "call-to-action": {
-            "font": "HelveticaNeue-Bold",
+            "font": "SourceSansPro-Bold.ttf",
             "font-size": 16,
+            "font-color": "0xFFFFFFFF"
+        },
+        "call-to-negative-action": {
+            "font": "SourceSansPro-Bold.ttf",
+            "font-size": 16,
+            "font-color": "0xFF000000"
+        },
+        "notifications-section-title" : {
+            "font": "SourceSansPro-Bold.ttf",
+            "font-size": 15,
             "font-color": "0xFFFFFFFF"
         }
     }

@@ -45,7 +45,6 @@ import android.widget.Toast;
 import com.facebook.CallbackManager;
 import com.vk.sdk.VKSdk;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -88,11 +87,8 @@ import im.getsocial.sdk.invites.FetchReferralDataCallback;
 import im.getsocial.sdk.invites.InviteChannelIds;
 import im.getsocial.sdk.invites.ReferralData;
 import im.getsocial.sdk.pushnotifications.Notification;
-import im.getsocial.sdk.pushnotifications.NotificationContent;
 import im.getsocial.sdk.pushnotifications.NotificationListener;
 import im.getsocial.sdk.pushnotifications.NotificationStatus;
-import im.getsocial.sdk.pushnotifications.NotificationsSummary;
-import im.getsocial.sdk.pushnotifications.SendNotificationPlaceholders;
 import im.getsocial.sdk.usermanagement.OnUserChangedListener;
 import im.getsocial.sdk.usermanagement.PublicUser;
 
@@ -264,7 +260,7 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Acti
 	@Override
 	public boolean handleNotification(final Notification notification, NotificationContext context) {
 		if (context.getAction() == null) {
-			if (PickActionView.ADD_FRIEND.equals(notification.getAction().getType())) {
+			if (ActionTypes.ADD_FRIEND.equals(notification.getAction().getType())) {
 				showAddFriendDialog(notification);
 				return true;
 			}
@@ -283,21 +279,20 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Acti
 		final AlertDialog.Builder builder = new AlertDialog.Builder(this)
 				.setTitle(notification.getTitle())
 				.setMessage(notification.getText());
-		for (final ActionButton actionButton : notification.getActionButtons()) {
-			final String actionId = actionButton.getId();
-			final DialogInterface.OnClickListener onClickListener = new DialogInterface.OnClickListener() {
-				@Override
-				public void onClick(DialogInterface dialog, int which) {
-					dialog.dismiss();
-					handleCustomAction(notification, actionId);
-				}
-			};
-			if (ActionButton.CONSUME_ACTION.equals(actionId)) {
-				builder.setPositiveButton(actionButton.getTitle(), onClickListener);
-			} else if (ActionButton.IGNORE_ACTION.equals(actionId)) {
-				builder.setNegativeButton(actionButton.getTitle(), onClickListener);
+		builder.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				dialog.dismiss();
+				handleCustomAction(notification, ActionButton.CONSUME_ACTION);
 			}
-		}
+		});
+		builder.setNegativeButton("Delete", new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				dialog.dismiss();
+				handleCustomAction(notification, ActionButton.IGNORE_ACTION);
+			}
+		});
 		builder.setNeutralButton("Dismiss", new DialogInterface.OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
@@ -309,8 +304,8 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Acti
 	private boolean handleCustomAction(Notification notification, String actionId) {
 		final Action action = notification.getAction();
 		if (actionId.equals(ActionButton.CONSUME_ACTION)) {
-			if (PickActionView.ADD_FRIEND.equals(action.getType())) {
-				final String userId = action.getData().get(PickActionView.KEY_USER_ID);
+			if (ActionTypes.ADD_FRIEND.equals(action.getType())) {
+				final String userId = action.getData().get(ActionDataKeys.AddFriend.USER_ID);
 				final String userName = action.getData().get(PickActionView.KEY_USER_NAME);
 				addFriend(userId, userName);
 			} else {
@@ -327,27 +322,12 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Acti
 		GetSocial.User.addFriend(userId, new Callback<Integer>() {
 			@Override
 			public void onSuccess(Integer result) {
-				notifyFriend(userId);
 				Toast.makeText(MainActivity.this, userName + " is now your friend!", Toast.LENGTH_SHORT).show();
 			}
 
 			@Override
 			public void onFailure(GetSocialException exception) {
 				Toast.makeText(MainActivity.this, "Failed to add " + userName + ", error: " + exception.getMessage(), Toast.LENGTH_SHORT).show();
-			}
-		});
-	}
-
-	private void notifyFriend(String userId) {
-		GetSocial.User.sendNotification(Collections.singletonList(userId), NotificationContent.notificationWithText(SendNotificationPlaceholders.CustomText.SENDER_DISPLAY_NAME + " accepted your friend request!"), new Callback<NotificationsSummary>() {
-			@Override
-			public void onSuccess(NotificationsSummary result) {
-				//
-			}
-
-			@Override
-			public void onFailure(GetSocialException exception) {
-				//
 			}
 		});
 	}

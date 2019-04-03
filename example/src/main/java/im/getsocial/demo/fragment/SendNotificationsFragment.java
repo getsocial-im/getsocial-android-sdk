@@ -93,9 +93,8 @@ public class SendNotificationsFragment extends BaseFragment implements Callback<
 					NotificationContent.notificationWithText(SendNotificationPlaceholders.CustomText.SENDER_DISPLAY_NAME + " wants to become friends")
 							.withTitle("Friend request")
 							.withAction(_viewContainer._pickActionView.getAction())
-							.addActionButton(ActionButton.create("Accept", ActionButton.CONSUME_ACTION))
-							.addActionButton(ActionButton.create("Decline", ActionButton.IGNORE_ACTION));
-
+							.addActionButtons(actionButtons());
+			showLoading("Sending notification","Wait please...");
 			GetSocial.User.sendNotification(userIds(), notificationContent, this);
 			return;
 		}
@@ -132,6 +131,7 @@ public class SendNotificationsFragment extends BaseFragment implements Callback<
 
 		notificationContent.addActionButtons(actionButtons());
 
+		showLoading("Sending notification","Wait please...");
 		GetSocial.User.sendNotification(userIds(), notificationContent, this);
 	}
 
@@ -154,11 +154,13 @@ public class SendNotificationsFragment extends BaseFragment implements Callback<
 
 	@Override
 	public void onSuccess(NotificationsSummary result) {
+		hideLoading();
 		_log.logInfoAndToast("Successfully sent " + result.getSuccessfullySentCount() + " notifications");
 	}
 
 	@Override
 	public void onFailure(GetSocialException exception) {
+		hideLoading();
 		_log.logErrorAndToast("Failed to send notification: " + exception.getMessage());
 	}
 

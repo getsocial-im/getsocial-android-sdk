@@ -168,6 +168,7 @@ public class ChatFragment extends BaseFragment {
 	private void sendMessage() {
 		if (!_messageInput.getText().toString().isEmpty()) {
 			ActivityPostContent content = ActivityPostContent.createBuilderWithText(_messageInput.getText().toString()).build();
+			showLoading("Sending message", "Wait please...");
 			GetSocial.postActivityToFeed(generateFeedId(), content, new Callback<ActivityPost>() {
 				@Override
 				public void onSuccess(ActivityPost result) {
@@ -178,7 +179,7 @@ public class ChatFragment extends BaseFragment {
 
 				@Override
 				public void onFailure(GetSocialException exception) {
-
+					hideLoading();
 				}
 			});
 		}
@@ -203,11 +204,13 @@ public class ChatFragment extends BaseFragment {
 			@Override
 			public void onSuccess(NotificationsSummary result) {
 				Log.i("GetSocial", "Chat notification sent");
+				hideLoading();
 			}
 
 			@Override
 			public void onFailure(GetSocialException exception) {
 				Log.e("GetSocial", "Failed to send chat notification, error: " + exception.getMessage());
+				hideLoading();
 			}
 		});
 	}

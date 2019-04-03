@@ -34,8 +34,6 @@ import java.util.Map;
 
 public class PickActionView extends LinearLayout {
 
-	public static final String ADD_FRIEND = "custom_add_friend";
-	public static final String KEY_USER_ID = "user_id";
 	public static final String KEY_USER_NAME = "user_name";
 
 	private static final Map<String, List<String>> PLACEHOLDERS = new HashMap<String, List<String>>() {
@@ -86,17 +84,13 @@ public class PickActionView extends LinearLayout {
 		_selectNotificationType.setAdapter(new ArrayAdapter<String>(getContext(), android.R.layout.simple_list_item_1, NotificationAction.names()));
 	}
 
-	private boolean useDefaultAction() {
-		return notificationAction() == DEFAULT_ACTION;
-	}
-
 	private String notificationAction() {
 		return NotificationAction.ALL[_selectNotificationType.getSelectedItemPosition()]._action;
 	}
 
 	@Nullable
 	public Action getAction() {
-		return useDefaultAction() ? null : Action.builder(notificationAction()).addActionData(actionData()).build();
+		return Action.builder(notificationAction()).addActionData(actionData()).build();
 	}
 
 	private Map<String, String> actionData() {
@@ -105,14 +99,14 @@ public class PickActionView extends LinearLayout {
 			actionData.put(inputHolder.getText(0), inputHolder.getText(1));
 		}
 		if (isAddFriendRequest()) {
-			actionData.put(KEY_USER_ID, GetSocial.User.getId());
+			actionData.put(ActionDataKeys.AddFriend.USER_ID, GetSocial.User.getId());
 			actionData.put(KEY_USER_NAME, GetSocial.User.getDisplayName());
 		}
 		return actionData;
 	}
 
 	public boolean isAddFriendRequest() {
-		return notificationAction().equals(ADD_FRIEND);
+		return notificationAction().equals(ActionTypes.ADD_FRIEND);
 	}
 
 	@OnClick(R.id.button_add_notification_data)
@@ -160,7 +154,7 @@ public class PickActionView extends LinearLayout {
 				new NotificationAction("Open Invites", ActionTypes.OPEN_INVITES),
 				new NotificationAction("Open Profile", ActionTypes.OPEN_PROFILE),
 				new NotificationAction("Open URL", ActionTypes.OPEN_URL),
-				new NotificationAction("Add Friend(Custom)", ADD_FRIEND)
+				new NotificationAction("Add Friend", ActionTypes.ADD_FRIEND)
 		};
 
 		private NotificationAction(String name, String action) {

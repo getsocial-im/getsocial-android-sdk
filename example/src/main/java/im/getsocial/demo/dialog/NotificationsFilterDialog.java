@@ -137,7 +137,6 @@ public final class NotificationsFilterDialog extends DialogFragment {
 		for (Pair<String, String> pair : pairs) {
 			actionTypes.add(pair.second);
 		}
-		actionTypes.add(PickActionView.ADD_FRIEND);
 		return actionTypes;
 	}
 
