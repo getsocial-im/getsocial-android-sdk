@@ -53,6 +53,9 @@ public class ActivitiesFragment extends BaseListFragment implements ActionListen
 	protected List<MenuItem> createListData() {
 		return Arrays.asList(
 				new MenuItem.Builder("Global Activity Feed")
+						.withAction(new OpenDefaultGlobalFeedAction())
+						.build(),
+				new MenuItem.Builder("Global Activity Feed With Custom Handlers")
 						.withAction(new OpenGlobalFeedAction())
 						.build(),
 				new MenuItem.Builder(String.format("Custom Activity Feed (%s)", CUSTOM_FEED_NAME))
@@ -246,6 +249,14 @@ public class ActivitiesFragment extends BaseListFragment implements ActionListen
 
 	private <T extends ActionButtonListener & ActionListener> T actionListener() {
 		return (T) this;
+	}
+
+	private class OpenDefaultGlobalFeedAction implements MenuItem.Action {
+
+		@Override
+		public void execute() {
+			GetSocialUi.createGlobalActivityFeedView().show();
+		}
 	}
 
 	private class OpenGlobalFeedAction implements MenuItem.Action {

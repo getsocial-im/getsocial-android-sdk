@@ -70,6 +70,9 @@ public abstract class BaseListFragment extends BaseFragment {
 
 
 	public void invalidateList() {
+		if (_viewContainer == null || _viewContainer._recyclerView == null || _viewContainer._recyclerView.getAdapter() == null) {
+			return;
+		}
 		_viewContainer._recyclerView.getAdapter().notifyDataSetChanged();
 	}
 
