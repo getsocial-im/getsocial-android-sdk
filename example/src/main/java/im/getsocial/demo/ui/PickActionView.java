@@ -42,6 +42,7 @@ public class PickActionView extends LinearLayout {
 			put(ActionTypes.OPEN_ACTIVITY, Arrays.asList(ActionDataKeys.OpenActivity.ACTIVITY_ID, ActionDataKeys.OpenActivity.COMMENT_ID, ActionDataKeys.OpenActivity.FEED_NAME));
 			put(ActionTypes.OPEN_INVITES, Collections.<String>emptyList());
 			put(ActionTypes.OPEN_URL, Collections.singletonList(ActionDataKeys.OpenUrl.URL));
+			put(ActionTypes.CLAIM_PROMO_CODE, Collections.singletonList(ActionDataKeys.ClaimPromoCode.PROMO_CODE));
 		}
 	};
 	private static final String DEFAULT_ACTION = "DEFAULT";
@@ -154,7 +155,8 @@ public class PickActionView extends LinearLayout {
 				new NotificationAction("Open Invites", ActionTypes.OPEN_INVITES),
 				new NotificationAction("Open Profile", ActionTypes.OPEN_PROFILE),
 				new NotificationAction("Open URL", ActionTypes.OPEN_URL),
-				new NotificationAction("Add Friend", ActionTypes.ADD_FRIEND)
+				new NotificationAction("Add Friend", ActionTypes.ADD_FRIEND),
+				new NotificationAction("Claim Promo Code", ActionTypes.CLAIM_PROMO_CODE),
 		};
 
 		private NotificationAction(String name, String action) {

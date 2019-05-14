@@ -242,9 +242,7 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Acti
 				GetSocial.getReferralData(new FetchReferralDataCallback() {
 					@Override
 					public void onSuccess(@Nullable ReferralData referralData) {
-						final String textToDisplay = referralData == null ?  "No referral data." : "Referral data received: [ " + referralData + " ]";
-						_log.logInfo(textToDisplay);
-						showReferralData(textToDisplay);
+						ReferralDataDialog.showReferralData(getSupportFragmentManager(), referralData);
 					}
 
 					@Override
@@ -276,29 +274,31 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Acti
 	}
 
 	private void showAddFriendDialog(final Notification notification) {
-		final AlertDialog.Builder builder = new AlertDialog.Builder(this)
+		new AlertDialog.Builder(this)
 				.setTitle(notification.getTitle())
-				.setMessage(notification.getText());
-		builder.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
-			@Override
-			public void onClick(DialogInterface dialog, int which) {
-				dialog.dismiss();
-				handleCustomAction(notification, ActionButton.CONSUME_ACTION);
-			}
-		});
-		builder.setNegativeButton("Delete", new DialogInterface.OnClickListener() {
-			@Override
-			public void onClick(DialogInterface dialog, int which) {
-				dialog.dismiss();
-				handleCustomAction(notification, ActionButton.IGNORE_ACTION);
-			}
-		});
-		builder.setNeutralButton("Dismiss", new DialogInterface.OnClickListener() {
-			@Override
-			public void onClick(DialogInterface dialog, int which) {
-				dialog.dismiss();
-			}
-		}).create().show();
+				.setMessage(notification.getText())
+				.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						dialog.dismiss();
+						handleCustomAction(notification, ActionButton.CONSUME_ACTION);
+					}
+				})
+				.setNegativeButton("Delete", new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						dialog.dismiss();
+						handleCustomAction(notification, ActionButton.IGNORE_ACTION);
+					}
+				})
+				.setNeutralButton("Dismiss", new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						dialog.dismiss();
+					}
+				})
+				.create()
+				.show();
 	}
 
 	private boolean handleCustomAction(Notification notification, String actionId) {
@@ -360,10 +360,6 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Acti
 		if (GetSocial.isInitialized()) {
 			CurrentUserInfoDialog.show(getSupportFragmentManager());
 		}
-	}
-
-	private void showReferralData(String referralData) {
-		ReferralDataDialog.showReferralData(getSupportFragmentManager(), referralData);
 	}
 
 	private void copyUserIdToClipboard() {

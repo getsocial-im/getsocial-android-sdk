@@ -102,9 +102,7 @@ public class InvitesFragment extends BaseListFragment {
 		GetSocial.getReferralData(new FetchReferralDataCallback() {
 			@Override
 			public void onSuccess(@Nullable ReferralData referralData) {
-				final String textToDisplay = referralData == null ?  "No referral data." : "Referral data received: [ " + referralData + " ]";
-				_log.logInfo(textToDisplay);
-				showReferralData(textToDisplay);
+				ReferralDataDialog.showReferralData(getActivity().getSupportFragmentManager(), referralData);
 			}
 
 			@Override
@@ -112,10 +110,6 @@ public class InvitesFragment extends BaseListFragment {
 				_log.logInfoAndToast("Could not get referral data: " + e.getMessage());
 			}
 		});
-	}
-
-	private void showReferralData(String referralData) {
-		ReferralDataDialog.showReferralData(getActivity().getSupportFragmentManager(), referralData);
 	}
 
 	private void checkReferredUsers() {

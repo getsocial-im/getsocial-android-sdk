@@ -25,6 +25,7 @@ public class ActionDialog {
 				});
 		_actionList = new ArrayList<>();
 	}
+
 	public ActionDialog addAction(Action action) {
 		_actionList.add(action);
 		return this;

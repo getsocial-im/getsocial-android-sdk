@@ -101,6 +101,7 @@ public class RootFragment extends BaseListFragment implements NotificationsManag
 						});
 					}
 				}),
+				navigationListItem("Promo Codes", PromoCodesFragment.class),
 				navigationListItem("UI Customization", UiCustomizationFragment.class, new NavigationItemDecorator() {
 					@Override
 					public void decorate(MenuItem.Builder builder) {

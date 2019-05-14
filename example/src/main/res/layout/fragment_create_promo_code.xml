@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+			  android:orientation="vertical"
+			  android:padding="20dp"
+			  android:layout_width="match_parent"
+			  android:layout_height="match_parent">
+	<EditText android:id="@+id/promo_code"
+			  android:hint="Leave empty to generate random code..."
+			  android:layout_width="match_parent"
+			  android:layout_height="60dp"/>
+
+	<RelativeLayout android:gravity="center"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content">
+
+		<TextView android:layout_width="wrap_content"
+				  android:layout_centerVertical="true"
+				  android:layout_height="wrap_content"
+				  android:layout_alignParentLeft="true"
+				  android:textSize="20dp"
+				  android:text="Custom Data"/>
+
+		<Button android:id="@+id/button_add_custom_data"
+				android:layout_centerVertical="true"
+				android:layout_alignParentRight="true"
+				android:text="Add"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"/>
+
+	</RelativeLayout>
+
+	<LinearLayout android:id="@+id/container_custom_data"
+				  android:layout_width="match_parent"
+				  android:layout_height="wrap_content"
+				  android:orientation="vertical"/>
+	<TextView android:layout_width="match_parent"
+			  android:text="Max Claim Count:"
+			  android:layout_height="wrap_content"/>
+
+	<EditText android:id="@+id/max_claim"
+			  android:hint="Maximum Claim Count(Set 0 for unlimited)..."
+			  android:inputType="numberDecimal"
+			  android:text="0"
+			  android:layout_width="match_parent"
+			  android:layout_height="60dp"/>
+	<TextView android:text="Start time: (Start Now)"
+			  android:id="@+id/start_time"
+			  android:layout_width="wrap_content"
+			  android:layout_height="wrap_content"/>
+	<LinearLayout android:layout_width="match_parent"
+				  android:layout_height="wrap_content"
+				  android:id="@+id/container_start_time"
+				  android:orientation="horizontal">
+		<Button android:id="@+id/button_change_start_time"
+				android:text="Change"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"/>
+		<Button android:id="@+id/button_reset_start_time"
+				android:text="Start Now"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"/>
+	</LinearLayout>
+	<TextView android:text="End time: (Without Limit)"
+			  android:id="@+id/end_time"
+			  android:layout_width="wrap_content"
+			  android:layout_height="wrap_content"/>
+	<LinearLayout android:layout_width="match_parent"
+				  android:layout_height="wrap_content"
+				  android:id="@+id/container_end_time"
+				  android:orientation="horizontal">
+		<Button android:id="@+id/button_change_end_time"
+				android:text="Change"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"/>
+		<Button android:id="@+id/button_reset_end_time"
+				android:text="Set Without Limit"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"/>
+	</LinearLayout>
+	<Button android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="CREATE"
+			android:id="@+id/create_promo_code"
+			android:layout_gravity="center_horizontal"/>
+
+
+</LinearLayout>
