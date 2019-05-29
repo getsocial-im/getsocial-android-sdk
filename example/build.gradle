@@ -2,27 +2,25 @@ buildscript {
 	repositories {
 		maven { url "https://maven.fabric.io/public" }
 		maven { url "https://plugins.gradle.org/m2/" }
+		mavenCentral()
 		jcenter()
+		google()
 	}
 	dependencies {
-		classpath "com.android.tools.build:gradle:2.3.3"
-		classpath 'com.neenbedankt.gradle.plugins:android-apt:1.8'
-		classpath 'com.google.gms:google-services:4.0.1'
-		classpath 'io.fabric.tools:gradle:1.24.4'
-		classpath "im.getsocial:plugin:0.0.13"
+		classpath "com.android.tools.build:gradle:3.4.1"
+		classpath 'com.google.gms:google-services:4.2.0'
+		classpath 'io.fabric.tools:gradle:1.25.4'
+		classpath "im.getsocial:plugin:0.0.17"
 	}
 }
 
 repositories {
-	mavenLocal()
 	maven { url 'http://devrepo.kakao.com:8088/nexus/content/groups/public/' }
 	maven { url 'https://maven.google.com/' }
 	jcenter()
 }
 
 apply plugin: 'com.android.application'
-apply plugin: 'com.neenbedankt.android-apt'
-apply plugin: 'com.google.gms.google-services'
 apply plugin: 'io.fabric'
 apply plugin: 'im.getsocial'
 
@@ -31,55 +29,53 @@ getsocial {
 }
 
 dependencies {
-	compile 'com.kakao.sdk:kakaolink:1.14.0'
-	compile 'com.kakao.sdk:kakaotalk:1.14.0'
-	compile 'com.kakao.sdk:kakaostory:1.14.0'
-	compile 'com.facebook.android:facebook-android-sdk:4.34.0'
+	implementation 'com.kakao.sdk:kakaolink:1.14.0'
+	implementation 'com.kakao.sdk:kakaotalk:1.14.0'
+	implementation 'com.kakao.sdk:kakaostory:1.14.0'
+	implementation 'com.facebook.android:facebook-android-sdk:4.42.0'
 
-	compile('com.vk:androidsdk:1.6.9') {
+	implementation('com.vk:androidsdk:1.6.9') {
 		transitive = false
 	}
 
-	apt 'com.jakewharton:butterknife-compiler:8.4.0'
-	compile 'com.jakewharton:butterknife:8.4.0'
-	compile 'com.google.code.findbugs:jsr305:3.0.1'
-	compile 'com.android.support:appcompat-v7:27.0.2'
-	compile 'com.android.support:recyclerview-v7:27.0.2'
-	compile 'com.android.support:design:27.0.2'
-	compile 'com.squareup.picasso:picasso:2.5.2'
-	compile 'com.android.billingclient:billing:1.1'
+	annotationProcessor 'com.jakewharton:butterknife-compiler:8.8.1'
+	implementation 'com.jakewharton:butterknife:8.8.1'
+	implementation 'com.google.code.findbugs:jsr305:3.0.2'
+	implementation 'com.android.support:appcompat-v7:28.0.0'
+	implementation 'com.android.support:recyclerview-v7:28.0.0'
+	implementation 'com.android.support:design:28.0.0'
+	implementation 'com.squareup.picasso:picasso:2.5.2'
+	implementation 'com.android.billingclient:billing:1.1'
 
-	compile 'com.android.support:multidex:1.0.3'
+	implementation 'com.android.support:multidex:1.0.3'
 	
 	//  GetSocial supports both FCM and GCM. 
 	//  Uncomment following two dependencies and comment out Firebase one to try
 	//	GetSocial push notifications via GCM. Check documentation for more details.
-	// compile 'com.google.android.gms:google-services:11.8.0'
-	// compile "com.google.android.gms:play-services-gcm:11.8.0"
-	compile "com.google.firebase:firebase-messaging:17.1.0"
+	// implementation 'com.google.android.gms:google-services:11.8.0'
+	// implementation "com.google.android.gms:play-services-gcm:11.8.0"
+	implementation "com.google.firebase:firebase-messaging:18.0.0"
 
-	compile('com.crashlytics.sdk.android:crashlytics:2.7.1@aar') {
+	implementation('com.crashlytics.sdk.android:crashlytics:2.7.1@aar') {
 		transitive = true
 	}
 
 	//adjust partnership
-	compile 'com.adjust.sdk:adjust-android:4.12.0'
+	implementation 'com.adjust.sdk:adjust-android:4.12.0'
 
 	//appsflyer
-	compile 'com.appsflyer:af-android-sdk:4.8.6@aar'
+	implementation 'com.appsflyer:af-android-sdk:4.8.6@aar'
 
 	//needed for adjust and appsflyer
-	compile 'com.android.installreferrer:installreferrer:1.0'
+	implementation 'com.android.installreferrer:installreferrer:1.0'
 }
 
-
 android {
-	compileSdkVersion 27
-	buildToolsVersion '27.0.2'
+	compileSdkVersion 28
 
 	defaultConfig {
-		minSdkVersion 15
-		targetSdkVersion 26
+		minSdkVersion 16
+		targetSdkVersion 28
 
 		applicationId 'im.getsocial.demo'
 		versionCode 1
@@ -88,8 +84,13 @@ android {
 		multiDexEnabled true
 	}
 
+	flavorDimensions "default"
 	productFlavors {
-		publicApp {
+		publicApp {}
+	}
+	buildTypes {
+		release {
+			ext.enableCrashlytics = false
 		}
 	}
 
