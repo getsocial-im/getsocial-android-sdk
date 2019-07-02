@@ -24,10 +24,10 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
+import androidx.annotation.NonNull;
+import androidx.fragment.app.Fragment;
 import com.facebook.AccessToken;
 import com.facebook.AccessTokenTracker;
 import com.facebook.GraphRequest;
@@ -91,7 +91,7 @@ public abstract class BaseFragment extends Fragment implements HasTitle, HasFrag
 	}
 
 	@Override
-	public void onActivityResult(int requestCode, int resultCode, @android.support.annotation.Nullable Intent data) {
+	public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
 		if (!(_imagePicker != null && _imagePicker.onActivityResult(requestCode, resultCode, data))) {
 			super.onActivityResult(requestCode, resultCode, data);
 		}
@@ -113,7 +113,7 @@ public abstract class BaseFragment extends Fragment implements HasTitle, HasFrag
 	}
 
 	@Override
-	public void onViewStateRestored(@android.support.annotation.Nullable Bundle savedInstanceState) {
+	public void onViewStateRestored(@Nullable Bundle savedInstanceState) {
 		if (_imagePicker != null) {
 			_imagePicker.onViewStateRestored(savedInstanceState);
 		}

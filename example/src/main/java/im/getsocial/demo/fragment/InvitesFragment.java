@@ -16,8 +16,8 @@
 
 package im.getsocial.demo.fragment;
 
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import im.getsocial.demo.adapter.MenuItem;
 import im.getsocial.demo.dialog.ReferralDataDialog;
 import im.getsocial.sdk.Callback;

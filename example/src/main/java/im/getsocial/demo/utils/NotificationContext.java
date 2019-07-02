@@ -1,6 +1,6 @@
 package im.getsocial.demo.utils;
 
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 
 public final class NotificationContext {
 

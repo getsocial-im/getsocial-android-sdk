@@ -134,7 +134,7 @@ public class PromoCodesFragment extends BaseListFragment {
 
 	private static void shareCode(final String promoCode) {
 		GetSocialUi.createInvitesView()
-				.setCustomInviteContent(InviteContent.createBuilder().withText("Use my Promo Code to get a personal discount: " + promoCode + " . " + InviteTextPlaceholders.PLACEHOLDER_APP_INVITE_URL).build())
+				.setCustomInviteContent(InviteContent.createBuilder().withText("Use my Promo Code to get a personal discount: " + InviteTextPlaceholders.PLACEHOLDER_PROMO_CODE + " . " + InviteTextPlaceholders.PLACEHOLDER_APP_INVITE_URL).build())
 				.setLinkParams(new LinkParams() {
 					{ put(LinkParams.KEY_PROMO_CODE, promoCode); }
 				})

@@ -21,7 +21,7 @@ import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.Toast;

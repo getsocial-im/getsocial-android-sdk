@@ -61,6 +61,7 @@ public class FacebookSharePlugin extends InviteChannelPlugin {
 			ShareLinkContent.Builder shareLinkBuilder = new ShareLinkContent.Builder();
 
 			shareLinkBuilder.setContentUrl(Uri.parse(invitePackage.getReferralUrl()));
+			shareLinkBuilder.setQuote(invitePackage.getText());
 
 			ShareLinkContent sharedContent = shareLinkBuilder.build();
 

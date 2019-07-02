@@ -24,7 +24,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -55,7 +55,9 @@ import static com.squareup.picasso.Picasso.with;
 public class CustomInviteFragment extends BaseFragment {
 
 	private static final String[] INSERT_OPTIONS = {
-			InviteTextPlaceholders.PLACEHOLDER_APP_INVITE_URL
+			InviteTextPlaceholders.PLACEHOLDER_APP_INVITE_URL,
+			InviteTextPlaceholders.PLACEHOLDER_PROMO_CODE,
+			InviteTextPlaceholders.PLACEHOLDER_USER_NAME
 	};
 
 	private static final int REQUEST_PICK_CUSTOM_INVITE_IMAGE = 0x1;

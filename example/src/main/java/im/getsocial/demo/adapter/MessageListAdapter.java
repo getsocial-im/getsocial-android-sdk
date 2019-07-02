@@ -1,6 +1,5 @@
 package im.getsocial.demo.adapter;
 
-import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,6 +9,7 @@ import android.widget.TextView;
 import java.util.Collections;
 import java.util.List;
 
+import androidx.recyclerview.widget.RecyclerView;
 import im.getsocial.demo.R;
 import im.getsocial.sdk.GetSocial;
 import im.getsocial.sdk.activities.ActivityPost;
