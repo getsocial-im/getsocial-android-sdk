@@ -60,7 +60,9 @@ public class PurchaseFragment extends BaseFragment implements PurchasesUpdatedLi
 	public void onCreate(@Nullable Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		_billingClient = BillingClient.newBuilder(getContext()).setListener(this).build();
+		_billingClient = BillingClient.newBuilder(getContext())
+				.setListener(this)
+				.build();
 	}
 
 	@Override
@@ -73,12 +75,14 @@ public class PurchaseFragment extends BaseFragment implements PurchasesUpdatedLi
 	private void setupBillingConnection() {
 		_billingClient.startConnection(new BillingClientStateListener() {
 			@Override
-			public void onBillingSetupFinished(@BillingClient.BillingResponse int billingResponseCode) {
-				if (billingResponseCode == BillingClient.BillingResponse.OK) {
+			public void onBillingSetupFinished(int result) {
+				if (result == BillingClient.BillingResponse.OK) {
 					// The billing client is ready. You can query purchases here.
 					loadConsumableItems();
 					loadSubscriptions();
 					loadPurchaseHistory();
+				} else {
+					System.out.println("purchase client failed: " + result);
 				}
 			}
 
@@ -93,17 +97,17 @@ public class PurchaseFragment extends BaseFragment implements PurchasesUpdatedLi
 	}
 
 	private void loadConsumableItems() {
-		SkuDetailsParams.Builder detailsParamsBuilder = SkuDetailsParams.newBuilder();
-		detailsParamsBuilder.setSkusList(Collections.singletonList("im.getsocial.sdk.demo.internal.iap.managed"));
-		detailsParamsBuilder.setType(BillingClient.SkuType.INAPP);
-		loadProducts(detailsParamsBuilder.build());
+		loadProducts(SkuDetailsParams.newBuilder()
+				.setSkusList(Collections.singletonList("im.getsocial.sdk.demo.internal.iap.managed"))
+				.setType(BillingClient.SkuType.INAPP)
+				.build());
 	}
 
 	private void loadSubscriptions() {
-		SkuDetailsParams.Builder detailsParamsBuilder = SkuDetailsParams.newBuilder();
-		detailsParamsBuilder.setSkusList(Collections.singletonList("im.getsocial.sdk.demo.internal.iap.subscription"));
-		detailsParamsBuilder.setType(BillingClient.SkuType.SUBS);
-		loadProducts(detailsParamsBuilder.build());
+		loadProducts(SkuDetailsParams.newBuilder()
+				.setSkusList(Collections.singletonList("im.getsocial.sdk.demo.internal.iap.subscription"))
+				.setType(BillingClient.SkuType.SUBS)
+				.build());
 	}
 
 	private void loadPurchaseHistory() {
@@ -116,8 +120,8 @@ public class PurchaseFragment extends BaseFragment implements PurchasesUpdatedLi
 	private void loadProducts(SkuDetailsParams detailsParams) {
 		_billingClient.querySkuDetailsAsync(detailsParams, new SkuDetailsResponseListener() {
 			@Override
-			public void onSkuDetailsResponse(int reponseCode, List<SkuDetails> list) {
-				System.out.println("details response code: " + reponseCode);
+			public void onSkuDetailsResponse(int result, List<SkuDetails> list) {
+				System.out.println("details response code: " + result);
 				if (list != null) {
 					for (SkuDetails detail : list) {
 						_availableProducts.add(new InAppPurchaseProduct(detail));
@@ -128,18 +132,19 @@ public class PurchaseFragment extends BaseFragment implements PurchasesUpdatedLi
 		});
 	}
 
-	private void purchaseItem(String productId, String skuType) {
-		BillingFlowParams.Builder flowParams = BillingFlowParams.newBuilder();
-		flowParams.setSku(productId);
-		flowParams.setType(skuType);
-		_billingClient.launchBillingFlow(getActivity(), flowParams.build());
+	private void purchaseItem(SkuDetails skuDetails) {
+		_billingClient.launchBillingFlow(getActivity(), BillingFlowParams.newBuilder()
+				.setSku(skuDetails.getSku())
+				.setType(skuDetails.getType())
+				.build()
+		);
 
 	}
 
 	private void consumePurchasedItem(Purchase purchase) {
 		_billingClient.consumeAsync(purchase.getPurchaseToken(), new ConsumeResponseListener() {
 			@Override
-			public void onConsumeResponse(int code, String response) {
+			public void onConsumeResponse(int result, String response) {
 				System.out.println("got consumePurchase response");
 			}
 		});
@@ -218,35 +223,22 @@ public class PurchaseFragment extends BaseFragment implements PurchasesUpdatedLi
 
 			@OnClick(R.id.button_buy)
 			void buyItem() {
-				PurchaseFragment.this.purchaseItem(_inAppPurchaseProduct.getProductId(), _inAppPurchaseProduct.getProductType());
+				PurchaseFragment.this.purchaseItem(_inAppPurchaseProduct._skuDetails);
 			}
 
 		}
 
 	}
 
-	class InAppPurchaseProduct {
-		String _productId;
-		String _productTitle;
-		String _productType;
+	static class InAppPurchaseProduct {
+		SkuDetails _skuDetails;
 
 		InAppPurchaseProduct(SkuDetails details) {
-			super();
-			_productId = details.getSku();
-			_productType = details.getType();
-			_productTitle = details.getTitle();
+			_skuDetails = details;
 		}
 
-		public String getProductId() {
-			return _productId;
-		}
-
-		public String getProductTitle() {
-			return _productTitle;
-		}
-
-		public String getProductType() {
-			return _productType;
+		String getProductTitle() {
+			return _skuDetails.getTitle();
 		}
 
 	}

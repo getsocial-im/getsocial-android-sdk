@@ -66,6 +66,7 @@ import im.getsocial.demo.fragment.HasFragmentTag;
 import im.getsocial.demo.fragment.HasTitle;
 import im.getsocial.demo.fragment.RootFragment;
 import im.getsocial.demo.plugin.FacebookSharePlugin;
+import im.getsocial.demo.plugin.InstagramStoriesPlugin;
 import im.getsocial.demo.plugin.KakaoInvitePlugin;
 import im.getsocial.demo.plugin.VKInvitePlugin;
 import im.getsocial.demo.ui.PickActionView;
@@ -89,6 +90,7 @@ import im.getsocial.sdk.invites.ReferralData;
 import im.getsocial.sdk.pushnotifications.Notification;
 import im.getsocial.sdk.pushnotifications.NotificationListener;
 import im.getsocial.sdk.pushnotifications.NotificationStatus;
+import im.getsocial.sdk.pushnotifications.PushTokenListener;
 import im.getsocial.sdk.usermanagement.OnUserChangedListener;
 import im.getsocial.sdk.usermanagement.PublicUser;
 
@@ -252,6 +254,12 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Acti
 				});
 			}
 		});
+		GetSocial.setPushNotificationTokenListener(new PushTokenListener() {
+			@Override
+			public void onTokenReady(String deviceToken) {
+				Console.logInfo(String.format("Push token: %s", deviceToken));
+			}
+		});
 		registerCustomInvitesChannelPlugins();
 	}
 
@@ -336,6 +344,7 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Acti
 		GetSocial.registerInviteChannelPlugin(InviteChannelIds.KAKAO, new KakaoInvitePlugin());
 		GetSocial.registerInviteChannelPlugin(InviteChannelIds.FACEBOOK, new FacebookSharePlugin(this, _facebookCallbackManager));
 		GetSocial.registerInviteChannelPlugin(InviteChannelIds.VK, _vkInvitePlugin);
+		GetSocial.registerInviteChannelPlugin(InviteChannelIds.INSTAGRAM_STORIES, new InstagramStoriesPlugin());
 	}
 
 	private void showUserInfoDialog(String userId) {

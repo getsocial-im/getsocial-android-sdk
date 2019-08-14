@@ -191,6 +191,23 @@
 
 			</LinearLayout>
 
+			<EditText
+					android:id="@+id/notification_background_image_url"
+					android:hint="Background Image (displayed only on Android)"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content" />
+
+			<EditText
+					android:id="@+id/notification_title_color"
+					android:hint="Title color (displayed only on Android)"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content" />
+
+			<EditText
+					android:id="@+id/notification_text_color"
+					android:hint="Text color (displayed only on Android)"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content" />
 
 		</LinearLayout>
 

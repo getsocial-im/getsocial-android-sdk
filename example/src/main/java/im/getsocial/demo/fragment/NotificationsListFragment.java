@@ -211,6 +211,15 @@ public class NotificationsListFragment extends BaseFragment implements Notificat
 			@BindView(R.id.notification_buttons)
 			LinearLayout _notificationButtons;
 
+			@BindView(R.id.customization_bgImage)
+			TextView _customBgImage;
+
+			@BindView(R.id.customization_titleColor)
+			TextView _customTitleColor;
+
+			@BindView(R.id.customization_textColor)
+			TextView _customTextColor;
+
 			View _parent;
 
 			private Notification _notification;
@@ -234,6 +243,11 @@ public class NotificationsListFragment extends BaseFragment implements Notificat
 				}
 				_title.setText(notificationTitle);
 				_text.setText(_notification.getText());
+				if (_notification.getCustomization() != null) {
+					_customBgImage.setText("Bg Image: " + _notification.getCustomization().getBackgroundImageConfiguration());
+					_customTitleColor.setText("Title color: " + _notification.getCustomization().getTitleColor());
+					_customTextColor.setText("Text color: " + _notification.getCustomization().getTextColor());
+				}
 				_date.setText(DateFormat.getDateTimeInstance().format(new Date(_notification.getCreatedAt() * 1000)));
 				if (_notification.getStatus().equals(NotificationStatus.UNREAD)) {
 					_parent.setBackgroundColor(Color.rgb(150, 150, 150));

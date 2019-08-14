@@ -1,5 +1,6 @@
 package im.getsocial.demo.fragment;
 
+import android.util.Log;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.graphics.Bitmap;
@@ -37,6 +38,7 @@ import im.getsocial.sdk.actions.Action;
 import im.getsocial.sdk.pushnotifications.ActionButton;
 import im.getsocial.sdk.media.MediaAttachment;
 import im.getsocial.sdk.pushnotifications.NotificationContent;
+import im.getsocial.sdk.pushnotifications.NotificationCustomization;
 import im.getsocial.sdk.pushnotifications.NotificationsSummary;
 import im.getsocial.sdk.pushnotifications.SendNotificationPlaceholders;
 
@@ -129,6 +131,13 @@ public class SendNotificationsFragment extends BaseFragment implements Callback<
 			notificationContent.withMediaAttachment(attachment);
 		}
 
+		// set customization
+		NotificationCustomization customization = NotificationCustomization
+				.withBackgroundImageConfiguration(backgroundImageUrl())
+				.withTitleColor(titleColor())
+				.withTextColor(textColor());
+		notificationContent.withCustomization(customization);
+
 		notificationContent.addActionButtons(actionButtons());
 
 		showLoading("Sending notification","Wait please...");
@@ -212,11 +221,23 @@ public class SendNotificationsFragment extends BaseFragment implements Callback<
 		return _viewContainer._videoUrl.getText().toString();
 	}
 
+	private String backgroundImageUrl() {
+		return _viewContainer._backgroundImageUrl.getText().toString();
+	}
+
+	private String titleColor() {
+		return _viewContainer._titleColor.getText().toString();
+	}
+
+	private String textColor() {
+		return _viewContainer._textColor.getText().toString();
+	}
+
 	@Override
 	protected void onImagePickedFromDevice(Uri imageUri, int requestCode) {
 		if (requestCode == REQUEST_PICK_NOTIFICATION_IMAGE) {
-			_viewContainer._imagePreview.setVisibility(View.VISIBLE);
-			_viewContainer._removeImageButton.setVisibility(View.VISIBLE);
+			_viewContainer.setImageViewState(ViewState.SELECTED);
+			_viewContainer.setVideoViewState(ViewState.HIDDEN);
 
 			with(getContext())
 					.load(imageUri)
@@ -259,12 +280,17 @@ public class SendNotificationsFragment extends BaseFragment implements Callback<
 					thumbnail = ThumbnailUtils.createVideoThumbnail(realPath, MINI_KIND);
 				}
 				_viewContainer._videoPreview.setImageBitmap(thumbnail);
-				_viewContainer._videoPreview.setVisibility(View.VISIBLE);
-				_viewContainer._selectVideoButton.setVisibility(View.GONE);
-				_viewContainer._removeVideoButton.setVisibility(View.VISIBLE);
+
+				_viewContainer.setImageViewState(ViewState.HIDDEN);
+				_viewContainer.setVideoViewState(ViewState.SELECTED);
+
 				_video = VideoUtils.getVideoContent(realPath);
 			}
 		}
+	}
+
+	private enum ViewState {
+		VISIBLE, SELECTED, HIDDEN
 	}
 
 	public class ViewContainer {
@@ -314,6 +340,15 @@ public class SendNotificationsFragment extends BaseFragment implements Callback<
 		@BindView(R.id.button_remove_video)
 		Button _removeVideoButton;
 
+		@BindView(R.id.notification_background_image_url)
+		EditText _backgroundImageUrl;
+
+		@BindView(R.id.notification_title_color)
+		EditText _titleColor;
+
+		@BindView(R.id.notification_text_color)
+		EditText _textColor;
+
 		final List<DynamicUi.DynamicInputHolder> _templateData = new ArrayList<>();
 		final List<DynamicUi.DynamicInputHolder> _userIds = new ArrayList<>();
 		final List<DynamicUi.DynamicInputHolder> _actionButtons = new ArrayList<>();
@@ -334,20 +369,40 @@ public class SendNotificationsFragment extends BaseFragment implements Callback<
 
 		@OnClick(R.id.button_remove_image)
 		void removeImage() {
-			_imagePreview.setImageDrawable(null);
-			_imagePreview.setVisibility(View.GONE);
-			_removeImageButton.setVisibility(View.GONE);
-			_selectImageButton.setVisibility(View.VISIBLE);
-			_image = null;
+			setImageViewState(ViewState.VISIBLE);
+			setVideoViewState(ViewState.VISIBLE);
 		}
 
 		@OnClick(R.id.button_remove_video)
 		void removeVideo() {
-			_videoPreview.setImageDrawable(null);
-			_videoPreview.setVisibility(View.GONE);
-			_removeVideoButton.setVisibility(View.GONE);
-			_selectVideoButton.setVisibility(View.VISIBLE);
-			_video = null;
+			setImageViewState(ViewState.VISIBLE);
+			setVideoViewState(ViewState.VISIBLE);
+		}
+
+		void setVideoViewState(ViewState state) {
+			Log.d("TAAAG", "Set video view state to " + state);
+			_removeVideoButton.setVisibility(visibleIf(state, ViewState.SELECTED));
+			_selectVideoButton.setVisibility(visibleIf(state, ViewState.VISIBLE));
+			_videoPreview.setVisibility(visibleIf(state, ViewState.SELECTED));
+			if (state != ViewState.SELECTED) {
+				_videoPreview.setImageDrawable(null);
+				_video = null;
+			}
+		}
+
+		void setImageViewState(ViewState state) {
+			Log.d("TAAAG", "Set image view state to " + state);
+			_removeImageButton.setVisibility(visibleIf(state, ViewState.SELECTED));
+			_selectImageButton.setVisibility(visibleIf(state, ViewState.VISIBLE));
+			_imagePreview.setVisibility(visibleIf(state, ViewState.SELECTED));
+			if (state != ViewState.SELECTED) {
+				_imagePreview.setImageDrawable(null);
+				_image = null;
+			}
+		}
+
+		private int visibleIf(ViewState currentState, ViewState visibleState) {
+			return currentState == visibleState ? View.VISIBLE : View.GONE;
 		}
 
 		@OnClick(R.id.button_add_template_data)

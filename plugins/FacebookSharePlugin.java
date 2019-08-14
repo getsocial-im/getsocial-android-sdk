@@ -34,7 +34,7 @@ import im.getsocial.sdk.invites.InviteChannelPlugin;
 import im.getsocial.sdk.invites.InvitePackage;
 
 /**
- * Invite Channel Plugin for GetSocial SDK. 
+ * Invite Channel Plugin for GetSocial SDK.
  * Register plugin via {@link GetSocial#registerInviteChannelPlugin(String pluginId, InviteChannelPlugin plugin)}.
  */
 public class FacebookSharePlugin extends InviteChannelPlugin {

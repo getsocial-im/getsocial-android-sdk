@@ -50,7 +50,7 @@ dependencies {
 	//	GetSocial push notifications via GCM. Check documentation for more details.
 	// implementation 'com.google.android.gms:google-services:11.8.0'
 	// implementation "com.google.android.gms:play-services-gcm:11.8.0"
-	implementation "com.google.firebase:firebase-messaging:18.0.0"
+	implementation "com.google.firebase:firebase-messaging:19.0.1"
 
 	implementation('com.crashlytics.sdk.android:crashlytics:2.7.1@aar') {
 		transitive = true
