@@ -18,6 +18,7 @@ package im.getsocial.demo.plugin;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
@@ -83,10 +84,27 @@ public class FacebookSharePlugin extends InviteChannelPlugin {
 						}
 					}
 			);
-			shareDialog.show(sharedContent, ShareDialog.Mode.WEB);
+			if (isFacebookAppInstalled()) {
+				shareDialog.show(sharedContent, ShareDialog.Mode.NATIVE);
+			} else {
+				shareDialog.show(sharedContent, ShareDialog.Mode.WEB);
+			}
 		} else {
 			onError("Can't reach Facebook. No internet connection.", callback);
 		}
+	}
+
+	private boolean isFacebookAppInstalled() {
+		PackageManager pm = _activity.getPackageManager();
+		boolean app_installed = false;
+		try {
+			pm.getPackageInfo("com.facebook.katana", PackageManager.GET_ACTIVITIES);
+			app_installed = true;
+		}
+		catch (PackageManager.NameNotFoundException exception) {
+			app_installed = false;
+		}
+		return app_installed;
 	}
 
 	private boolean isConnected() {

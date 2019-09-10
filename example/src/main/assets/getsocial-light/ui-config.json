@@ -10,8 +10,8 @@
         "window": {
             "width": "fit-parent",
             "height": "fit-parent",
-            "margin-top": 40,
-            "margin-bottom": 20,
+            "margin-top": 0,
+            "margin-bottom": 0,
             "bg-color": "0xFFFFFFFF",
             "tint-color": "0xCC000000",
             "animation-style": "scale"
