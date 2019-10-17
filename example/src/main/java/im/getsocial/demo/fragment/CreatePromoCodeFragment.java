@@ -42,6 +42,8 @@ public class CreatePromoCodeFragment extends BaseFragment {
 	@Nullable
 	private Date _endTime;
 
+	private boolean _creating = false;
+
 	private final List<DynamicUi.DynamicInputHolder> _customData = new ArrayList<>();
 
 	@Nullable
@@ -67,6 +69,10 @@ public class CreatePromoCodeFragment extends BaseFragment {
 	}
 
 	private void doCreatePromoCode() {
+		if (_creating) {
+			return;
+		}
+		_creating = true;
 		final PromoCodeBuilder promoCodeBuilder = _viewContainer._promoCode.getText().length() == 0
 				? PromoCodeBuilder.createRandomCode()
 				: PromoCodeBuilder.createWithCode(_viewContainer._promoCode.getText().toString());
@@ -80,12 +86,14 @@ public class CreatePromoCodeFragment extends BaseFragment {
 		GetSocial.createPromoCode(promoCodeBuilder, new Callback<PromoCode>() {
 			@Override
 			public void onSuccess(PromoCode result) {
+				_creating = false;
 				hideLoading();
 				((PromoCodesFragment) getFragmentManager().findFragmentByTag("promocodes")).showFullPromoCodeDialog(result);
 			}
 
 			@Override
 			public void onFailure(GetSocialException exception) {
+				_creating = false;
 				hideLoading();
 				Toast.makeText(getContext(), "Failed to create promo code: " + exception.getMessage(), Toast.LENGTH_SHORT).show();
 			}
