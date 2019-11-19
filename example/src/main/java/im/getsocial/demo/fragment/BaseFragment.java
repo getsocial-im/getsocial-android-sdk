@@ -217,6 +217,12 @@ public abstract class BaseFragment extends Fragment implements HasTitle, HasFrag
 		new AlertDialog.Builder(getContext())
 				.setTitle(title)
 				.setMessage(message)
+				.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialogInterface, int i) {
+						dialogInterface.dismiss();
+					}
+				})
 				.show();
 	}
 

@@ -102,4 +102,12 @@
 	<integer name="com_vk_sdk_AppId">6437031</integer>
 
 	<string name="social_channel_desc">GetSocial notifications about Activity Feeds, Invites and Friends.</string>
+
+	<string name="setReferrer_referrerId_label">Referrer Id</string>
+	<string name="setReferrer_referrerId_hint">4214234324</string>
+	<string name="setReferrer_event_label">Event</string>
+	<string name="setReferrer_event_hint">app_install</string>
+	<string name="setReferrer_button">Set Referrer</string>
+
+
 </resources>

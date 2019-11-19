@@ -8,6 +8,8 @@ import android.graphics.BitmapFactory;
 import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.os.Bundle;
+import android.widget.ArrayAdapter;
+import android.widget.Spinner;
 import androidx.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,6 +21,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 
 import android.widget.Toast;
+import butterknife.OnItemSelected;
 import com.squareup.picasso.MemoryPolicy;
 import com.squareup.picasso.Picasso;
 
@@ -140,8 +143,28 @@ public class SendNotificationsFragment extends BaseFragment implements Callback<
 
 		notificationContent.addActionButtons(actionButtons());
 
+		switch (_viewContainer._badgeChangeMode.getSelectedItemPosition()) {
+			case 1:
+				notificationContent.withBadge(NotificationContent.Badge.increaseBy(badgeCount()));
+				break;
+			case 2:
+				notificationContent.withBadge(NotificationContent.Badge.setTo(badgeCount()));
+				break;
+			default:
+				break;
+		}
+
 		showLoading("Sending notification","Wait please...");
 		GetSocial.User.sendNotification(userIds(), notificationContent, this);
+	}
+
+	private int badgeCount() {
+		String badgeCountString = _viewContainer._badgeChange.getText().toString();
+		try {
+			return Integer.parseInt(badgeCountString);
+		} catch (NumberFormatException ignored) {
+			return 0;
+		}
 	}
 
 	@Nullable
@@ -349,12 +372,19 @@ public class SendNotificationsFragment extends BaseFragment implements Callback<
 		@BindView(R.id.notification_text_color)
 		EditText _textColor;
 
+		@BindView(R.id.spinner_select_badge_change)
+		Spinner _badgeChangeMode;
+
+		@BindView(R.id.badge_change)
+		EditText _badgeChange;
+
 		final List<DynamicUi.DynamicInputHolder> _templateData = new ArrayList<>();
 		final List<DynamicUi.DynamicInputHolder> _userIds = new ArrayList<>();
 		final List<DynamicUi.DynamicInputHolder> _actionButtons = new ArrayList<>();
 
 		public ViewContainer(View view) {
 			ButterKnife.bind(this, view);
+			_badgeChangeMode.setAdapter(new ArrayAdapter<String>(getContext(), android.R.layout.simple_list_item_1, new String[] {"None", "Increase by", "Set to"}));
 		}
 
 		@OnClick(R.id.button_select_image)
@@ -377,6 +407,12 @@ public class SendNotificationsFragment extends BaseFragment implements Callback<
 		void removeVideo() {
 			setImageViewState(ViewState.VISIBLE);
 			setVideoViewState(ViewState.VISIBLE);
+		}
+
+		@OnItemSelected(R.id.spinner_select_badge_change)
+		void onBadgeModeChanged(Spinner spinner, int position) {
+			_badgeChange.setVisibility(position == 0 ? View.GONE : View.VISIBLE);
+			_badgeChange.setText("");
 		}
 
 		void setVideoViewState(ViewState state) {

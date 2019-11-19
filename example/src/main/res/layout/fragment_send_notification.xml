@@ -296,6 +296,21 @@
 					  android:layout_height="wrap_content"
 					  android:orientation="vertical"/>
 
+		<LinearLayout android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:orientation="horizontal">
+			<Spinner android:id="@+id/spinner_select_badge_change"
+					android:layout_margin="5dp"
+					android:layout_width="200dp"
+					android:layout_height="match_parent"/>
+			<EditText android:id="@+id/badge_change"
+					android:layout_margin="5dp"
+					android:visibility="gone"
+					android:inputType="numberSigned"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"/>
+		</LinearLayout>
+
 		<View android:background="@android:color/black"
 			  android:layout_width = "match_parent"
 			  android:layout_height="1dp"/>
