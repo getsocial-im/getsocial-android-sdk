@@ -42,6 +42,8 @@ public class UserInfoView extends RelativeLayout {
 	TextView _extraInfoTextView;
 	@BindView(R.id.userInfo_avatar)
 	ImageView _avatarImageView;
+	@BindView(R.id.userInfo_testDevice)
+	ImageView _testDevice;
 
 	public UserInfoView(Context context) {
 		super(context);
@@ -88,6 +90,7 @@ public class UserInfoView extends RelativeLayout {
 
 	private void updateContent() {
 		if (GetSocial.isInitialized()) {
+			_testDevice.setVisibility(GetSocial.Device.isTestDevice() ? VISIBLE : INVISIBLE);
 			if (GetSocial.User.isAnonymous()) {
 				_extraInfoTextView.setText("Anonymous");
 			} else {

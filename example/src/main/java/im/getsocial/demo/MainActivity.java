@@ -54,6 +54,7 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import butterknife.OnLongClick;
 import im.getsocial.demo.dependencies.DependenciesContainer;
+import im.getsocial.demo.dependencies.components.Clipboard;
 import im.getsocial.demo.dependencies.components.NotificationsManager;
 import im.getsocial.demo.dialog.CurrentUserInfoDialog;
 import im.getsocial.demo.dialog.ReferralDataDialog;
@@ -94,7 +95,7 @@ import im.getsocial.sdk.pushnotifications.PushTokenListener;
 import im.getsocial.sdk.usermanagement.OnUserChangedListener;
 import im.getsocial.sdk.usermanagement.PublicUser;
 
-public class MainActivity extends AppCompatActivity implements BaseFragment.ActivityListener, OnUserChangedListener, ActionListener, NotificationHandler {
+public class MainActivity extends AppCompatActivity implements BaseFragment.ActivityListener, OnUserChangedListener, ActionListener, NotificationHandler, Clipboard {
 
 	protected SimpleLogger _log;
 
@@ -126,6 +127,11 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Acti
 
 			@Override
 			public NotificationHandler notificationHandler() {
+				return MainActivity.this;
+			}
+
+			@Override
+			public Clipboard clipboard() {
 				return MainActivity.this;
 			}
 		};
@@ -372,13 +378,15 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Acti
 	}
 
 	private void copyUserIdToClipboard() {
-		final String userId = GetSocial.User.getId();
+		copyToClipboard(GetSocial.User.getId());
+	}
 
+	private void copyToClipboard(String value) {
 		ClipboardManager clipboard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
-		ClipData clip = ClipData.newPlainText("GetSocial User ID", userId);
+		ClipData clip = ClipData.newPlainText("GetSocial Buffer", value);
 		clipboard.setPrimaryClip(clip);
 		vibrate();
-		Toast.makeText(this, "Copied " + userId + " to clipboard.", Toast.LENGTH_LONG).show();
+		Toast.makeText(this, "Copied " + value + " to clipboard.", Toast.LENGTH_LONG).show();
 	}
 
 	private void vibrate() {
@@ -498,6 +506,11 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Acti
 		ChatFragment chatFragment = new ChatFragment();
 		chatFragment.setArguments(bundle);
 		addContentFragment(chatFragment);
+	}
+
+	@Override
+	public void copy(String value) {
+		copyToClipboard(value);
 	}
 
 	//endregion

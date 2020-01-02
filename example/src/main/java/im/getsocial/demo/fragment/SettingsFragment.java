@@ -23,6 +23,8 @@ import im.getsocial.demo.R;
 import im.getsocial.demo.adapter.EnabledCheck;
 import im.getsocial.demo.adapter.MenuItem;
 import im.getsocial.demo.adapter.TextGenerator;
+import im.getsocial.demo.dependencies.DependenciesContainer;
+import im.getsocial.demo.dependencies.components.Clipboard;
 import im.getsocial.sdk.Callback;
 import im.getsocial.sdk.CompletionCallback;
 import im.getsocial.sdk.GetSocial;
@@ -37,6 +39,8 @@ public class SettingsFragment extends BaseListFragment {
 
 	private Boolean _notificationsEnabled = null;
 
+	private Clipboard _clipboard;
+
 	public SettingsFragment() {
 		GetSocial.User.isPushNotificationsEnabled(new Callback<Boolean>() {
 			@Override
@@ -49,6 +53,12 @@ public class SettingsFragment extends BaseListFragment {
 				Log.e("Notifications", "Failed to get notifications status: " + exception);
 			}
 		});
+	}
+
+	@Override
+	protected void inject(DependenciesContainer dependencies) {
+		super.inject(dependencies);
+		_clipboard = dependencies.clipboard();
 	}
 
 	private void setNotificationsEnabled(boolean isEnabled) {
@@ -92,6 +102,17 @@ public class SettingsFragment extends BaseListFragment {
 						return checkPushNotificationStatus(true);
 					}
 				}).build());
+
+		listData.add(MenuItem.builder("Copy Device ID")
+						.withAction(new MenuItem.Action() {
+							@Override
+							public void execute() {
+								String deviceId = GetSocial.Device.getIdentifier();
+								Log.d("GETSOCIAL", "Device ID: " + deviceId);
+								_clipboard.copy(deviceId);
+							}
+						})
+						.build());
 
 		return listData;
 	}

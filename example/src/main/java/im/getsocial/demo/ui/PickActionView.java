@@ -90,6 +90,9 @@ public class PickActionView extends LinearLayout {
 
 	@Nullable
 	public Action getAction() {
+		if (DEFAULT_ACTION.equals(notificationAction())) {
+			return null;
+		}
 		return Action.builder(notificationAction()).addActionData(actionData()).build();
 	}
 
@@ -148,8 +151,8 @@ public class PickActionView extends LinearLayout {
 		final String _action;
 
 		static final NotificationAction[] ALL = new NotificationAction[] {
-				new NotificationAction("Default", DEFAULT_ACTION),
-				new NotificationAction("Custom", ActionTypes.CUSTOM),
+				new NotificationAction("No Action", DEFAULT_ACTION),
+				new NotificationAction("Default", ActionTypes.CUSTOM),
 				new NotificationAction("Open Activity", ActionTypes.OPEN_ACTIVITY),
 				new NotificationAction("Open Invites", ActionTypes.OPEN_INVITES),
 				new NotificationAction("Open Profile", ActionTypes.OPEN_PROFILE),
