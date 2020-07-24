@@ -18,21 +18,13 @@ import javax.annotation.Nullable;
 public class ImagePicker {
 
 
-	public interface Callback {
-		void onImageChosen(Uri imageUri, int requestCode);
-		void onVideoChosen(Uri videoUri, int requestCode);
-		void onCancel();
-	}
-
 	private static final String KEY_TMP_IMAGE_PATH = "GetSocial_Key_ImagePath";
 	private static final String KEY_TMP_VIDEO_PATH = "GetSocial_Key_VideoPath";
 	private static final int REQUEST_PICK_IMAGE_ACTIVITY = 1984;
 	private static final int REQUEST_PICK_VIDEO_ACTIVITY = 1994;
 	private static final int PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE = 2012;
-
 	private final int _requestCode;
 	private final Fragment _fragment;
-
 	private Callback _callback;
 	private Uri _imageUri;
 	private Uri _videoUri;
@@ -141,10 +133,18 @@ public class ImagePicker {
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
 				&& ActivityCompat.checkSelfPermission(_fragment.getActivity(), Manifest.permission.READ_EXTERNAL_STORAGE)
 				!= PackageManager.PERMISSION_GRANTED) {
-			_fragment.requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
+			_fragment.requestPermissions(new String[] {Manifest.permission.READ_EXTERNAL_STORAGE},
 					PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE);
 			return false;
 		}
 		return true;
+	}
+
+	public interface Callback {
+		void onImageChosen(Uri imageUri, int requestCode);
+
+		void onVideoChosen(Uri videoUri, int requestCode);
+
+		void onCancel();
 	}
 }

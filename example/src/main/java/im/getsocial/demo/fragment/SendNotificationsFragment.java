@@ -1,52 +1,49 @@
 package im.getsocial.demo.fragment;
 
-import android.util.Log;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.os.Bundle;
-import android.widget.ArrayAdapter;
-import android.widget.Spinner;
-import androidx.annotation.Nullable;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-
+import android.widget.Spinner;
 import android.widget.Toast;
-import butterknife.OnItemSelected;
-import com.squareup.picasso.MemoryPolicy;
-import com.squareup.picasso.Picasso;
-
+import androidx.annotation.Nullable;
 import butterknife.BindView;
 import butterknife.BindViews;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import butterknife.OnItemSelected;
 import butterknife.OnLongClick;
+import com.squareup.picasso.MemoryPolicy;
+import com.squareup.picasso.Picasso;
 import im.getsocial.demo.R;
 import im.getsocial.demo.ui.PickActionView;
 import im.getsocial.demo.utils.DynamicUi;
 import im.getsocial.demo.utils.VideoUtils;
-import im.getsocial.sdk.Callback;
+import im.getsocial.sdk.CompletionCallback;
+import im.getsocial.sdk.FailureCallback;
 import im.getsocial.sdk.GetSocial;
-import im.getsocial.sdk.GetSocialException;
+import im.getsocial.sdk.GetSocialError;
+import im.getsocial.sdk.Notifications;
 import im.getsocial.sdk.actions.Action;
-import im.getsocial.sdk.pushnotifications.ActionButton;
+import im.getsocial.sdk.communities.UserIdList;
 import im.getsocial.sdk.media.MediaAttachment;
-import im.getsocial.sdk.pushnotifications.NotificationContent;
-import im.getsocial.sdk.pushnotifications.NotificationCustomization;
-import im.getsocial.sdk.pushnotifications.NotificationsSummary;
-import im.getsocial.sdk.pushnotifications.SendNotificationPlaceholders;
+import im.getsocial.sdk.notifications.NotificationButton;
+import im.getsocial.sdk.notifications.NotificationContent;
+import im.getsocial.sdk.notifications.NotificationCustomization;
+import im.getsocial.sdk.notifications.SendNotificationPlaceholders;
+import im.getsocial.sdk.notifications.SendNotificationTarget;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -54,25 +51,32 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static android.provider.MediaStore.Video.Thumbnails.MINI_KIND;
 import static com.squareup.picasso.Picasso.with;
 
-public class SendNotificationsFragment extends BaseFragment implements Callback<NotificationsSummary> {
+public class SendNotificationsFragment extends BaseFragment implements CompletionCallback, FailureCallback {
 	private static final int REQUEST_PICK_NOTIFICATION_IMAGE = 0x1;
 	private static final int REQUEST_PICK_NOTIFICATION_VIDEO = 0x2;
 	private static final int MAX_WIDTH = 500;
 
 	private ViewContainer _viewContainer;
-	private byte[] _video;
+	private VideoUtils.VideoDescriptor _video;
 	private Bitmap _image;
 
+	private static String[] placeholders() {
+		return new String[] {
+						SendNotificationPlaceholders.Receivers.FRIENDS,
+						SendNotificationPlaceholders.Receivers.REFERRED_USERS,
+						SendNotificationPlaceholders.Receivers.REFERRER
+		};
+	}
+
 	@Override
-	public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+	public View onCreateView(final LayoutInflater inflater, @Nullable final ViewGroup container, @Nullable final Bundle savedInstanceState) {
 		return inflater.inflate(R.layout.fragment_send_notification, container, false);
 	}
 
 	@Override
-	public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+	public void onViewCreated(final View view, @Nullable final Bundle savedInstanceState) {
 		super.onViewCreated(view, savedInstanceState);
 		_viewContainer = new ViewContainer(view);
 	}
@@ -95,12 +99,12 @@ public class SendNotificationsFragment extends BaseFragment implements Callback<
 		// if no template specified and selected "friend request" - create everything automatically
 		if (templateName.isEmpty() && _viewContainer._pickActionView.isAddFriendRequest()) {
 			final NotificationContent notificationContent =
-					NotificationContent.notificationWithText(SendNotificationPlaceholders.CustomText.SENDER_DISPLAY_NAME + " wants to become friends")
-							.withTitle("Friend request")
-							.withAction(_viewContainer._pickActionView.getAction())
-							.addActionButtons(actionButtons());
-			showLoading("Sending notification","Wait please...");
-			GetSocial.User.sendNotification(userIds(), notificationContent, this);
+							NotificationContent.notificationWithText(SendNotificationPlaceholders.CustomText.SENDER_DISPLAY_NAME + " wants to become friends")
+											.withTitle("Friend request")
+											.withAction(_viewContainer._pickActionView.getAction())
+											.addActionButtons(actionButtons());
+			showLoading("Sending notification", "Wait please...");
+			Notifications.send(notificationContent, target(), this, this);
 			return;
 		}
 
@@ -110,8 +114,8 @@ public class SendNotificationsFragment extends BaseFragment implements Callback<
 		}
 
 		final NotificationContent notificationContent = text.isEmpty()
-				? NotificationContent.notificationFromTemplate(templateName)
-				: NotificationContent.notificationWithText(text);
+						? NotificationContent.notificationFromTemplate(templateName)
+						: NotificationContent.notificationWithText(text);
 
 		if (!customTitle().isEmpty()) {
 			notificationContent.withTitle(customTitle());
@@ -129,16 +133,16 @@ public class SendNotificationsFragment extends BaseFragment implements Callback<
 			notificationContent.withAction(action);
 		}
 
-		MediaAttachment attachment = getMediaAttachment();
+		final MediaAttachment attachment = getMediaAttachment();
 		if (attachment != null) {
 			notificationContent.withMediaAttachment(attachment);
 		}
 
 		// set customization
-		NotificationCustomization customization = NotificationCustomization
-				.withBackgroundImageConfiguration(backgroundImageUrl())
-				.withTitleColor(titleColor())
-				.withTextColor(textColor());
+		final NotificationCustomization customization = NotificationCustomization
+						.withBackgroundImageConfiguration(backgroundImageUrl())
+						.withTitleColor(titleColor())
+						.withTextColor(textColor());
 		notificationContent.withCustomization(customization);
 
 		notificationContent.addActionButtons(actionButtons());
@@ -154,15 +158,15 @@ public class SendNotificationsFragment extends BaseFragment implements Callback<
 				break;
 		}
 
-		showLoading("Sending notification","Wait please...");
-		GetSocial.User.sendNotification(userIds(), notificationContent, this);
+		showLoading("Sending notification", "Wait please...");
+		Notifications.send(notificationContent, target(), this, this);
 	}
 
 	private int badgeCount() {
-		String badgeCountString = _viewContainer._badgeChange.getText().toString();
+		final String badgeCountString = _viewContainer._badgeChange.getText().toString();
 		try {
 			return Integer.parseInt(badgeCountString);
-		} catch (NumberFormatException ignored) {
+		} catch (final NumberFormatException ignored) {
 			return 0;
 		}
 	}
@@ -173,7 +177,7 @@ public class SendNotificationsFragment extends BaseFragment implements Callback<
 			return MediaAttachment.image(_image);
 		}
 		if (_video != null) {
-			return MediaAttachment.video(_video);
+			return MediaAttachment.video(_video._video);
 		}
 		if (!customImageUrl().isEmpty()) {
 			return MediaAttachment.imageUrl(customImageUrl());
@@ -185,45 +189,50 @@ public class SendNotificationsFragment extends BaseFragment implements Callback<
 	}
 
 	@Override
-	public void onSuccess(NotificationsSummary result) {
+	public void onSuccess() {
 		hideLoading();
-		_log.logInfoAndToast("Successfully sent " + result.getSuccessfullySentCount() + " notifications");
+		_log.logInfoAndToast("Successfully sent  notifications");
 	}
 
 	@Override
-	public void onFailure(GetSocialException exception) {
+	public void onFailure(final GetSocialError error) {
 		hideLoading();
-		_log.logErrorAndToast("Failed to send notification: " + exception.getMessage());
+		_log.logErrorAndToast("Failed to send notification: " + error.getMessage());
 	}
 
-	private List<String> userIds() {
+	private SendNotificationTarget target() {
 		final List<String> userIds = new ArrayList<>();
-		for (DynamicUi.DynamicInputHolder inputHolder : _viewContainer._userIds) {
+		for (final DynamicUi.DynamicInputHolder inputHolder : _viewContainer._userIds) {
 			userIds.add(inputHolder.getText(0));
 		}
+		if (_viewContainer._me.isChecked()) {
+			userIds.add(GetSocial.getCurrentUser().getId());
+		}
+		final SendNotificationTarget target = SendNotificationTarget.users(UserIdList.create(userIds));
 		for (int i = 0; i < placeholders().length; i++) {
 			if (_viewContainer._recipients.get(i).isChecked()) {
-				userIds.add(placeholders()[i]);
+				target.addPlaceholder(placeholders()[i]);
 			}
 		}
-		return userIds;
+		return target;
 	}
+
 	private String templateName() {
 		return _viewContainer._templateName.getText().toString();
 	}
 
 	private Map<String, String> templateData() {
 		final Map<String, String> templateData = new HashMap<>();
-		for (DynamicUi.DynamicInputHolder inputHolder : _viewContainer._templateData) {
+		for (final DynamicUi.DynamicInputHolder inputHolder : _viewContainer._templateData) {
 			templateData.put(inputHolder.getText(0), inputHolder.getText(1));
 		}
 		return templateData;
 	}
 
-	private List<ActionButton> actionButtons() {
-		final List<ActionButton> actionButtons = new ArrayList<>();
-		for (DynamicUi.DynamicInputHolder inputHolder : _viewContainer._actionButtons) {
-			actionButtons.add(ActionButton.create(inputHolder.getText(0), inputHolder.getText(1)));
+	private List<NotificationButton> actionButtons() {
+		final List<NotificationButton> actionButtons = new ArrayList<>();
+		for (final DynamicUi.DynamicInputHolder inputHolder : _viewContainer._actionButtons) {
+			actionButtons.add(NotificationButton.create(inputHolder.getText(0), inputHolder.getText(1)));
 		}
 		return actionButtons;
 	}
@@ -257,17 +266,28 @@ public class SendNotificationsFragment extends BaseFragment implements Callback<
 	}
 
 	@Override
-	protected void onImagePickedFromDevice(Uri imageUri, int requestCode) {
+	protected void onImagePickedFromDevice(final Uri imageUri, final int requestCode) {
 		if (requestCode == REQUEST_PICK_NOTIFICATION_IMAGE) {
 			_viewContainer.setImageViewState(ViewState.SELECTED);
 			_viewContainer.setVideoViewState(ViewState.HIDDEN);
 
 			with(getContext())
-					.load(imageUri)
-					.resize(MAX_WIDTH, 0)
-					.memoryPolicy(MemoryPolicy.NO_CACHE)
-					.into(_viewContainer._imagePreview);
+							.load(imageUri)
+							.resize(MAX_WIDTH, 0)
+							.memoryPolicy(MemoryPolicy.NO_CACHE)
+							.into(_viewContainer._imagePreview);
 			loadOriginalImage(imageUri);
+		}
+	}
+
+	@Override
+	protected void onVideoPickedFromDevice(final Uri videoUri, final int requestCode) {
+		if (requestCode == REQUEST_PICK_NOTIFICATION_VIDEO) {
+			_video = VideoUtils.open(getContext(), videoUri);
+			_viewContainer._videoPreview.setImageBitmap(_video._thumbnail);
+
+			_viewContainer.setImageViewState(ViewState.HIDDEN);
+			_viewContainer.setVideoViewState(ViewState.SELECTED);
 		}
 	}
 
@@ -277,7 +297,7 @@ public class SendNotificationsFragment extends BaseFragment implements Callback<
 			public void run() {
 				try {
 					_image = Picasso.with(getContext()).load(imageUri).get();
-				} catch (IOException e) {
+				} catch (final IOException e) {
 					_viewContainer._imagePreview = null;
 					Toast.makeText(getContext(), "Could not load original image: " + e.getMessage(), Toast.LENGTH_SHORT).show();
 				}
@@ -285,31 +305,19 @@ public class SendNotificationsFragment extends BaseFragment implements Callback<
 		}).start();
 	}
 
-	@Override
-	protected void onVideoPickedFromDevice(Uri videoUri, int requestCode) {
-		if (requestCode == REQUEST_PICK_NOTIFICATION_VIDEO) {
-			String realPath = VideoUtils.getRealPathFromUri(getContext(), videoUri);
-			File f = new File(realPath);
-			if (f.exists()) {
-				Bitmap thumbnail = null;
-				if (realPath.endsWith("gif")) {
-					try {
-						FileInputStream is = new FileInputStream(realPath);
-						thumbnail = BitmapFactory.decodeStream(is);
-					} catch(Exception exception) {
-						exception.printStackTrace();
-					}
-				} else {
-					thumbnail = ThumbnailUtils.createVideoThumbnail(realPath, MINI_KIND);
-				}
-				_viewContainer._videoPreview.setImageBitmap(thumbnail);
-
-				_viewContainer.setImageViewState(ViewState.HIDDEN);
-				_viewContainer.setVideoViewState(ViewState.SELECTED);
-
-				_video = VideoUtils.getVideoContent(realPath);
-			}
-		}
+	private void showActionButtonPlaceholders(final EditText id) {
+		final List<String> placeholders = Arrays.asList(NotificationButton.CONSUME_ACTION, NotificationButton.IGNORE_ACTION);
+		final AlertDialog dialog = new AlertDialog.Builder(getContext())
+						.setCancelable(true)
+						.setTitle("Select Placeholder")
+						.setItems(placeholders.toArray(new String[placeholders.size()]), new DialogInterface.OnClickListener() {
+							public void onClick(final DialogInterface dialog, final int which) {
+								id.setText(placeholders.get(which));
+							}
+						})
+						.create();
+		dialog.setCanceledOnTouchOutside(true);
+		dialog.show();
 	}
 
 	private enum ViewState {
@@ -318,73 +326,57 @@ public class SendNotificationsFragment extends BaseFragment implements Callback<
 
 	public class ViewContainer {
 
+		final List<DynamicUi.DynamicInputHolder> _templateData = new ArrayList<>();
+		final List<DynamicUi.DynamicInputHolder> _userIds = new ArrayList<>();
+		final List<DynamicUi.DynamicInputHolder> _actionButtons = new ArrayList<>();
 		@BindViews({R.id.checkbox_friends, R.id.checkbox_referred_users, R.id.checkbox_referrer})
 		List<CheckBox> _recipients;
-
+		@BindView(R.id.checkbox_me)
+		CheckBox _me;
 		@BindView(R.id.pick_action_view)
 		PickActionView _pickActionView;
-
 		@BindView(R.id.container_action_buttons)
 		LinearLayout _actionButtonsContainer;
-
 		@BindView(R.id.container_user_ids)
 		LinearLayout _userIdsContainer;
-
 		@BindView(R.id.notification_title)
 		EditText _notificationTitle;
-
 		@BindView(R.id.notification_text)
 		EditText _notificationText;
-
 		@BindView(R.id.template_name)
 		EditText _templateName;
-
 		@BindView(R.id.notification_image_url)
 		EditText _imageUrl;
-
 		@BindView(R.id.notification_video_url)
 		EditText _videoUrl;
-
 		@BindView(R.id.container_template_data)
 		LinearLayout _templateDataContainer;
-
 		@BindView(R.id.button_select_image)
 		Button _selectImageButton;
 		@BindView(R.id.button_select_video)
 		Button _selectVideoButton;
-
 		@BindView(R.id.image_preview)
 		ImageView _imagePreview;
 		@BindView(R.id.video_preview)
 		ImageView _videoPreview;
-
 		@BindView(R.id.button_remove_image)
 		Button _removeImageButton;
 		@BindView(R.id.button_remove_video)
 		Button _removeVideoButton;
-
 		@BindView(R.id.notification_background_image_url)
 		EditText _backgroundImageUrl;
-
 		@BindView(R.id.notification_title_color)
 		EditText _titleColor;
-
 		@BindView(R.id.notification_text_color)
 		EditText _textColor;
-
 		@BindView(R.id.spinner_select_badge_change)
 		Spinner _badgeChangeMode;
-
 		@BindView(R.id.badge_change)
 		EditText _badgeChange;
 
-		final List<DynamicUi.DynamicInputHolder> _templateData = new ArrayList<>();
-		final List<DynamicUi.DynamicInputHolder> _userIds = new ArrayList<>();
-		final List<DynamicUi.DynamicInputHolder> _actionButtons = new ArrayList<>();
-
-		public ViewContainer(View view) {
+		public ViewContainer(final View view) {
 			ButterKnife.bind(this, view);
-			_badgeChangeMode.setAdapter(new ArrayAdapter<String>(getContext(), android.R.layout.simple_list_item_1, new String[] {"None", "Increase by", "Set to"}));
+			_badgeChangeMode.setAdapter(new ArrayAdapter<>(getContext(), android.R.layout.simple_list_item_1, new String[] {"None", "Increase by", "Set to"}));
 		}
 
 		@OnClick(R.id.button_select_image)
@@ -410,12 +402,12 @@ public class SendNotificationsFragment extends BaseFragment implements Callback<
 		}
 
 		@OnItemSelected(R.id.spinner_select_badge_change)
-		void onBadgeModeChanged(Spinner spinner, int position) {
+		void onBadgeModeChanged(final Spinner spinner, final int position) {
 			_badgeChange.setVisibility(position == 0 ? View.GONE : View.VISIBLE);
 			_badgeChange.setText("");
 		}
 
-		void setVideoViewState(ViewState state) {
+		void setVideoViewState(final ViewState state) {
 			Log.d("TAAAG", "Set video view state to " + state);
 			_removeVideoButton.setVisibility(visibleIf(state, ViewState.SELECTED));
 			_selectVideoButton.setVisibility(visibleIf(state, ViewState.VISIBLE));
@@ -426,7 +418,7 @@ public class SendNotificationsFragment extends BaseFragment implements Callback<
 			}
 		}
 
-		void setImageViewState(ViewState state) {
+		void setImageViewState(final ViewState state) {
 			Log.d("TAAAG", "Set image view state to " + state);
 			_removeImageButton.setVisibility(visibleIf(state, ViewState.SELECTED));
 			_selectImageButton.setVisibility(visibleIf(state, ViewState.VISIBLE));
@@ -437,7 +429,7 @@ public class SendNotificationsFragment extends BaseFragment implements Callback<
 			}
 		}
 
-		private int visibleIf(ViewState currentState, ViewState visibleState) {
+		private int visibleIf(final ViewState currentState, final ViewState visibleState) {
 			return currentState == visibleState ? View.VISIBLE : View.GONE;
 		}
 
@@ -449,18 +441,18 @@ public class SendNotificationsFragment extends BaseFragment implements Callback<
 		@OnLongClick(R.id.notification_text)
 		public boolean proposeTextPlaceholders() {
 			final String[] placeholders = new String[] {
-					SendNotificationPlaceholders.CustomText.RECEIVER_DISPLAY_NAME,
-					SendNotificationPlaceholders.CustomText.SENDER_DISPLAY_NAME
+							SendNotificationPlaceholders.CustomText.RECEIVER_DISPLAY_NAME,
+							SendNotificationPlaceholders.CustomText.SENDER_DISPLAY_NAME
 			};
 			final AlertDialog dialog = new AlertDialog.Builder(getContext())
-					.setCancelable(true)
-					.setTitle("Select Placeholder")
-					.setItems(placeholders, new DialogInterface.OnClickListener() {
-						public void onClick(DialogInterface dialog, int which) {
-							_notificationText.getText().insert(_notificationText.getSelectionStart(), placeholders[which]);
-						}
-					})
-					.create();
+							.setCancelable(true)
+							.setTitle("Select Placeholder")
+							.setItems(placeholders, new DialogInterface.OnClickListener() {
+								public void onClick(final DialogInterface dialog, final int which) {
+									_notificationText.getText().insert(_notificationText.getSelectionStart(), placeholders[which]);
+								}
+							})
+							.create();
 
 			dialog.setCanceledOnTouchOutside(true);
 			dialog.show();
@@ -476,43 +468,19 @@ public class SendNotificationsFragment extends BaseFragment implements Callback<
 		@OnClick(R.id.button_add_action_button)
 		public void addActionButtons() {
 			DynamicUi.createDynamicTextRow(getContext(), _actionButtonsContainer, _actionButtons, "Title", "Action ID")
-					.getView(1)
-					.setOnLongClickListener(new View.OnLongClickListener() {
-						@Override
-						public boolean onLongClick(View view) {
-							showActionButtonPlaceholders((EditText) view);
-							return true;
-						}
-					});
+							.getView(1)
+							.setOnLongClickListener(new View.OnLongClickListener() {
+								@Override
+								public boolean onLongClick(final View view) {
+									showActionButtonPlaceholders((EditText) view);
+									return true;
+								}
+							});
 		}
 
 		@OnClick(R.id.button_send_notification)
 		public void sendNotificationClicked() {
 			sendNotification();
 		}
-	}
-
-	private void showActionButtonPlaceholders(final EditText id) {
-		final List<String> placeholders = Arrays.asList(ActionButton.CONSUME_ACTION, ActionButton.IGNORE_ACTION);
-		final AlertDialog dialog = new AlertDialog.Builder(getContext())
-				.setCancelable(true)
-				.setTitle("Select Placeholder")
-				.setItems(placeholders.toArray(new String[placeholders.size()]), new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int which) {
-						id.setText(placeholders.get(which));
-					}
-				})
-				.create();
-		dialog.setCanceledOnTouchOutside(true);
-		dialog.show();
-	}
-
-
-	private static String[] placeholders() {
-		return new String[] {
-				SendNotificationPlaceholders.Receivers.FRIENDS,
-				SendNotificationPlaceholders.Receivers.REFERRED_USERS,
-				SendNotificationPlaceholders.Receivers.REFERRER
-		};
 	}
 }

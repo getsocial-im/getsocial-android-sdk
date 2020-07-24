@@ -1,18 +1,18 @@
 /*
-*    	Copyright 2015-2017 GetSocial B.V.
-*
-*	Licensed under the Apache License, Version 2.0 (the "License");
-*	you may not use this file except in compliance with the License.
-*	You may obtain a copy of the License at
-*
-*    	http://www.apache.org/licenses/LICENSE-2.0
-*
-*	Unless required by applicable law or agreed to in writing, software
-*	distributed under the License is distributed on an "AS IS" BASIS,
-*	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-*	See the License for the specific language governing permissions and
-*	limitations under the License.
-*/
+ *    	Copyright 2015-2017 GetSocial B.V.
+ *
+ *	Licensed under the Apache License, Version 2.0 (the "License");
+ *	you may not use this file except in compliance with the License.
+ *	You may obtain a copy of the License at
+ *
+ *    	http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *	Unless required by applicable law or agreed to in writing, software
+ *	distributed under the License is distributed on an "AS IS" BASIS,
+ *	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *	See the License for the specific language governing permissions and
+ *	limitations under the License.
+ */
 
 package im.getsocial.demo;
 
@@ -22,7 +22,6 @@ import android.app.AlertDialog;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
@@ -35,26 +34,18 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.graphics.drawable.DrawableCompat;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import com.facebook.CallbackManager;
-import com.vk.sdk.VKSdk;
-
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
-
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import butterknife.OnLongClick;
+import com.facebook.CallbackManager;
+import com.vk.sdk.VKSdk;
 import im.getsocial.demo.dependencies.DependenciesContainer;
-import im.getsocial.demo.dependencies.components.Clipboard;
 import im.getsocial.demo.dependencies.components.NotificationsManager;
 import im.getsocial.demo.dialog.CurrentUserInfoDialog;
 import im.getsocial.demo.dialog.ReferralDataDialog;
@@ -74,46 +65,51 @@ import im.getsocial.demo.ui.PickActionView;
 import im.getsocial.demo.ui.UserInfoView;
 import im.getsocial.demo.utils.CompatibilityUtils;
 import im.getsocial.demo.utils.Console;
-import im.getsocial.demo.utils.NotificationContext;
-import im.getsocial.demo.utils.NotificationHandler;
 import im.getsocial.demo.utils.SimpleLogger;
-import im.getsocial.sdk.Callback;
+import im.getsocial.sdk.Communities;
 import im.getsocial.sdk.GetSocial;
-import im.getsocial.sdk.GetSocialException;
+import im.getsocial.sdk.Invites;
+import im.getsocial.sdk.Notifications;
 import im.getsocial.sdk.actions.Action;
-import im.getsocial.sdk.pushnotifications.ActionButton;
 import im.getsocial.sdk.actions.ActionDataKeys;
 import im.getsocial.sdk.actions.ActionListener;
 import im.getsocial.sdk.actions.ActionTypes;
-import im.getsocial.sdk.invites.FetchReferralDataCallback;
+import im.getsocial.sdk.communities.CurrentUser;
+import im.getsocial.sdk.communities.FriendsQuery;
+import im.getsocial.sdk.communities.OnCurrentUserChangedListener;
+import im.getsocial.sdk.communities.UserId;
+import im.getsocial.sdk.communities.UserIdList;
+import im.getsocial.sdk.communities.UsersQuery;
 import im.getsocial.sdk.invites.InviteChannelIds;
-import im.getsocial.sdk.invites.ReferralData;
-import im.getsocial.sdk.pushnotifications.Notification;
-import im.getsocial.sdk.pushnotifications.NotificationListener;
-import im.getsocial.sdk.pushnotifications.NotificationStatus;
-import im.getsocial.sdk.pushnotifications.PushTokenListener;
-import im.getsocial.sdk.usermanagement.OnUserChangedListener;
-import im.getsocial.sdk.usermanagement.PublicUser;
+import im.getsocial.sdk.json.serializer.Getson;
+import im.getsocial.sdk.notifications.Notification;
+import im.getsocial.sdk.notifications.NotificationButton;
+import im.getsocial.sdk.notifications.NotificationContext;
+import im.getsocial.sdk.notifications.NotificationStatus;
+import im.getsocial.sdk.notifications.OnNotificationClickedListener;
+import im.getsocial.sdk.notifications.OnNotificationReceivedListener;
+import org.json.JSONException;
+import org.json.JSONObject;
 
-public class MainActivity extends AppCompatActivity implements BaseFragment.ActivityListener, OnUserChangedListener, ActionListener, NotificationHandler, Clipboard {
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
 
-	protected SimpleLogger _log;
+public class MainActivity extends AppCompatActivity implements BaseFragment.ActivityListener, OnCurrentUserChangedListener, ActionListener, OnNotificationClickedListener, OnNotificationReceivedListener {
 
 	private static final String KEY_APP_SESSION = "GetSocial_AppSession_Key";
-
 	protected final CallbackManager _facebookCallbackManager = CallbackManager.Factory.create();
-	protected VKInvitePlugin _vkInvitePlugin;
-
-	private ViewContainer _viewContainer;
 	private final Map<String, String> _demoAppSessionData = new HashMap<>();
-
+	protected SimpleLogger _log;
+	protected VKInvitePlugin _vkInvitePlugin;
+	private ViewContainer _viewContainer;
 	private DependenciesContainer _dependenciesContainer;
 
 	@Override
-	protected void onCreate(@Nullable Bundle savedInstanceState) {
+	protected void onCreate(@Nullable final Bundle savedInstanceState) {
 		_dependenciesContainer = new DependenciesContainer() {
 
-			private NotificationsManager _notificationsManager = new NotificationsManager(getApplicationContext());
+			private final NotificationsManager _notificationsManager = new NotificationsManager(getApplicationContext());
 
 			@Override
 			public NotificationsManager notificationsManager() {
@@ -126,12 +122,7 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Acti
 			}
 
 			@Override
-			public NotificationHandler notificationHandler() {
-				return MainActivity.this;
-			}
-
-			@Override
-			public Clipboard clipboard() {
+			public OnNotificationClickedListener notificationHandler() {
 				return MainActivity.this;
 			}
 		};
@@ -155,24 +146,39 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Acti
 	}
 
 	@Override
-	public void onSaveInstanceState(Bundle outState, PersistableBundle outPersistentState) {
+	protected void onRestoreInstanceState(final Bundle savedInstanceState) {
+		super.onRestoreInstanceState(savedInstanceState);
+
+		if (savedInstanceState.containsKey(KEY_APP_SESSION)) {
+			final Map<String, String> map = (Map<String, String>) savedInstanceState.getSerializable(KEY_APP_SESSION);
+			_demoAppSessionData.putAll(map);
+		}
+	}
+
+	@Override
+	public void onSaveInstanceState(final Bundle outState, final PersistableBundle outPersistentState) {
 		outState.putSerializable(KEY_APP_SESSION, new HashMap<>(_demoAppSessionData));
 
 		super.onSaveInstanceState(outState, outPersistentState);
 	}
 
 	@Override
-	protected void onRestoreInstanceState(Bundle savedInstanceState) {
-		super.onRestoreInstanceState(savedInstanceState);
-
-		if (savedInstanceState.containsKey(KEY_APP_SESSION)) {
-			Map<String, String> map = (Map<String, String>) savedInstanceState.getSerializable(KEY_APP_SESSION);
-			_demoAppSessionData.putAll(map);
-		}
+	public boolean onCreateOptionsMenu(final Menu menu) {
+		getMenuInflater().inflate(R.menu.menu_main, menu);
+		return true;
 	}
 
 	@Override
-	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+	public boolean onOptionsItemSelected(final MenuItem item) {
+		if (item.getItemId() == R.id.action_console) {
+			openConsole();
+			return true;
+		}
+		return super.onOptionsItemSelected(item);
+	}
+
+	@Override
+	protected void onActivityResult(final int requestCode, final int resultCode, final Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
 
 		_facebookCallbackManager.onActivityResult(requestCode, resultCode, data);
@@ -189,7 +195,7 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Acti
 	}
 
 	@Override
-	protected void onNewIntent(Intent intent) {
+	protected void onNewIntent(final Intent intent) {
 		super.onNewIntent(intent);
 
 		// setIntent is needed to call in case your Activity launch mode is set to
@@ -209,24 +215,9 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Acti
 		if (getSupportFragmentManager().getBackStackEntryCount() == 0) {
 			return null;
 		}
-		String tag = getSupportFragmentManager().getBackStackEntryAt(getSupportFragmentManager().getBackStackEntryCount() - 1).getName();
+		final String tag = getSupportFragmentManager().getBackStackEntryAt(getSupportFragmentManager().getBackStackEntryCount() - 1).getName();
 
 		return getSupportFragmentManager().findFragmentByTag(tag);
-	}
-
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		getMenuInflater().inflate(R.menu.menu_main, menu);
-		return true;
-	}
-
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		if (item.getItemId() == R.id.action_console) {
-			openConsole();
-			return true;
-		}
-		return super.onOptionsItemSelected(item);
 	}
 
 	private void openConsole() {
@@ -235,95 +226,79 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Acti
 
 	protected void setupGetSocial() {
 		Console.logInfo(getDemoAppInfo());
-		GetSocial.setNotificationListener(new NotificationListener() {
-
-			public boolean onNotificationReceived(Notification notification, boolean wasClicked) {
-				return handleNotification(notification, NotificationContext.clicked(wasClicked));
+		Notifications.setOnNotificationClickedListener(this);
+		Notifications.setOnNotificationReceivedListener(this);
+		GetSocial.addOnCurrentUserChangedListener(this);
+		GetSocial.addOnInitializeListener(() -> {
+			invalidateUi();
+			final RootFragment rootFragment = findRootFragment();
+			if (rootFragment != null) {
+				rootFragment.invalidateList();
+			}
+			Invites.setReferralDataListener(referralData -> ReferralDataDialog.showReferralData(getSupportFragmentManager(), referralData));
+			final JSONObject object = new JSONObject();
+			try {
+				object.put("query", Getson.toJson(UsersQuery.find("John")));
+				object.put("limit", 42);
+			} catch (final JSONException e) {
+				e.printStackTrace();
 			}
 		});
-
-		GetSocial.User.setOnUserChangedListener(this);
-		GetSocial.whenInitialized(new Runnable() {
-			@Override
-			public void run() {
-				invalidateUi();
-				GetSocial.getReferralData(new FetchReferralDataCallback() {
-					@Override
-					public void onSuccess(@Nullable ReferralData referralData) {
-						ReferralDataDialog.showReferralData(getSupportFragmentManager(), referralData);
-					}
-
-					@Override
-					public void onFailure(GetSocialException e) {
-						_log.logErrorAndToast("Failed to get referral data: " + e.getMessage());
-					}
-				});
-			}
-		});
-		GetSocial.setPushNotificationTokenListener(new PushTokenListener() {
-			@Override
-			public void onTokenReady(String deviceToken) {
-				Console.logInfo(String.format("Push token: %s", deviceToken));
-			}
-		});
+		Notifications.setOnTokenReceivedListener(deviceToken ->
+						Console.logInfo(String.format("Push token: %s", deviceToken))
+		);
 		registerCustomInvitesChannelPlugins();
 	}
 
 	@Override
-	public boolean handleNotification(final Notification notification, NotificationContext context) {
-		if (context.getAction() == null) {
+	public void onNotificationClicked(final Notification notification, final NotificationContext context) {
+		if (context.getActionButtonId() == null) {
 			if (ActionTypes.ADD_FRIEND.equals(notification.getAction().getType())) {
 				showAddFriendDialog(notification);
-				return true;
-			}
-			if (!context.wasClicked()) {
-				Toast.makeText(MainActivity.this, notification.getText(), Toast.LENGTH_SHORT).show();
-				return true;
+				return;
 			}
 
-			return handleAction(notification.getAction());
+			handleAction(notification.getAction());
 		} else {
-			return handleCustomAction(notification, context.getAction());
+			handleCustomAction(notification, context.getActionButtonId());
 		}
+	}
+
+	@Override
+	public void onNotificationReceived(final Notification notification) {
+		if (ActionTypes.ADD_FRIEND.equals(notification.getAction().getType())) {
+			showAddFriendDialog(notification);
+			return;
+		}
+		Toast.makeText(MainActivity.this, notification.getText(), Toast.LENGTH_SHORT).show();
 	}
 
 	private void showAddFriendDialog(final Notification notification) {
 		new AlertDialog.Builder(this)
-				.setTitle(notification.getTitle())
-				.setMessage(notification.getText())
-				.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						dialog.dismiss();
-						handleCustomAction(notification, ActionButton.CONSUME_ACTION);
-					}
-				})
-				.setNegativeButton("Delete", new DialogInterface.OnClickListener() {
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						dialog.dismiss();
-						handleCustomAction(notification, ActionButton.IGNORE_ACTION);
-					}
-				})
-				.setNeutralButton("Dismiss", new DialogInterface.OnClickListener() {
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						dialog.dismiss();
-					}
-				})
-				.create()
-				.show();
+						.setTitle(notification.getTitle())
+						.setMessage(notification.getText())
+						.setPositiveButton("Confirm", (dialog, which) -> {
+							dialog.dismiss();
+							handleCustomAction(notification, NotificationButton.CONSUME_ACTION);
+						})
+						.setNegativeButton("Delete", (dialog, which) -> {
+							dialog.dismiss();
+							handleCustomAction(notification, NotificationButton.IGNORE_ACTION);
+						})
+						.setNeutralButton("Dismiss", (dialog, which) -> dialog.dismiss())
+						.create()
+						.show();
 	}
 
-	private boolean handleCustomAction(Notification notification, String actionId) {
+	private boolean handleCustomAction(final Notification notification, final String actionId) {
 		final Action action = notification.getAction();
-		if (actionId.equals(ActionButton.CONSUME_ACTION)) {
+		if (actionId.equals(NotificationButton.CONSUME_ACTION)) {
 			if (ActionTypes.ADD_FRIEND.equals(action.getType())) {
 				final String userId = action.getData().get(ActionDataKeys.AddFriend.USER_ID);
 				final String userName = action.getData().get(PickActionView.KEY_USER_NAME);
 				addFriend(userId, userName);
 			} else {
-				GetSocial.processAction(action);
+				GetSocial.handle(action);
 			}
 			_dependenciesContainer.notificationsManager().setStatus(notification.getId(), NotificationStatus.CONSUMED);
 		} else {
@@ -333,38 +308,26 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Acti
 	}
 
 	private void addFriend(final String userId, final String userName) {
-		GetSocial.User.addFriend(userId, new Callback<Integer>() {
-			@Override
-			public void onSuccess(Integer result) {
-				Toast.makeText(MainActivity.this, userName + " is now your friend!", Toast.LENGTH_SHORT).show();
-			}
-
-			@Override
-			public void onFailure(GetSocialException exception) {
-				Toast.makeText(MainActivity.this, "Failed to add " + userName + ", error: " + exception.getMessage(), Toast.LENGTH_SHORT).show();
-			}
-		});
+		Communities.addFriends(
+						UserIdList.create(userId),
+						result -> Toast.makeText(MainActivity.this, userName + " is now your friend!", Toast.LENGTH_SHORT).show(),
+						error -> Toast.makeText(MainActivity.this, "Failed to add " + userName + ", error: " + error, Toast.LENGTH_SHORT).show()
+		);
 	}
 
 	protected void registerCustomInvitesChannelPlugins() {
-		GetSocial.registerInviteChannelPlugin(InviteChannelIds.KAKAO, new KakaoInvitePlugin());
-		GetSocial.registerInviteChannelPlugin(InviteChannelIds.FACEBOOK, new FacebookSharePlugin(this, _facebookCallbackManager));
-		GetSocial.registerInviteChannelPlugin(InviteChannelIds.VK, _vkInvitePlugin);
-		GetSocial.registerInviteChannelPlugin(InviteChannelIds.INSTAGRAM_STORIES, new InstagramStoriesPlugin());
+		Invites.registerPlugin(new KakaoInvitePlugin(), InviteChannelIds.KAKAO);
+		Invites.registerPlugin(new FacebookSharePlugin(this, _facebookCallbackManager), InviteChannelIds.FACEBOOK);
+		Invites.registerPlugin(_vkInvitePlugin, InviteChannelIds.VK);
+		Invites.registerPlugin(new InstagramStoriesPlugin(), InviteChannelIds.INSTAGRAM_STORIES);
 	}
 
-	private void showUserInfoDialog(String userId) {
-		GetSocial.getUserById(userId, new Callback<PublicUser>() {
-			@Override
-			public void onSuccess(PublicUser publicUser) {
-				UserInfoDialog.show(getSupportFragmentManager(), publicUser);
-			}
-
-			@Override
-			public void onFailure(GetSocialException e) {
-				_log.logErrorAndToast("Failed to get user: " + e.getMessage());
-			}
-		});
+	private void showUserInfoDialog(final String userId) {
+		Communities.getUser(
+						UserId.create(userId),
+						publicUser -> UserInfoDialog.show(getSupportFragmentManager(), publicUser),
+						error -> _log.logErrorAndToast("Failed to get user: " + error.getMessage())
+		);
 	}
 
 	protected String getDemoAppInfo() {
@@ -378,19 +341,17 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Acti
 	}
 
 	private void copyUserIdToClipboard() {
-		copyToClipboard(GetSocial.User.getId());
-	}
+		final String userId = GetSocial.getCurrentUser().getId();
 
-	private void copyToClipboard(String value) {
-		ClipboardManager clipboard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
-		ClipData clip = ClipData.newPlainText("GetSocial Buffer", value);
+		final ClipboardManager clipboard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
+		final ClipData clip = ClipData.newPlainText("GetSocial User ID", userId);
 		clipboard.setPrimaryClip(clip);
 		vibrate();
-		Toast.makeText(this, "Copied " + value + " to clipboard.", Toast.LENGTH_LONG).show();
+		Toast.makeText(this, "Copied " + userId + " to clipboard.", Toast.LENGTH_LONG).show();
 	}
 
 	private void vibrate() {
-		Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+		final Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
 
 		if (vibrator == null) {
 			return;
@@ -406,7 +367,7 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Acti
 		return findFragment("root");
 	}
 
-	private <T> T findFragment(String tag) {
+	private <T extends Fragment> T findFragment(final String tag) {
 		return (T) getSupportFragmentManager().findFragmentByTag(tag);
 	}
 
@@ -418,25 +379,25 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Acti
 	}
 
 	@Override
-	public void addContentFragment(Fragment fragment) {
+	public void addContentFragment(final Fragment fragment) {
 		String tag = "";
 		if (fragment instanceof HasFragmentTag) {
 			tag = ((HasFragmentTag) fragment).getFragmentTag();
 		}
 		getSupportFragmentManager().beginTransaction()
-				.replace(R.id.content, fragment, tag)
-				.addToBackStack(tag)
-				.commitAllowingStateLoss();
+						.replace(R.id.content, fragment, tag)
+						.addToBackStack(tag)
+						.commitAllowingStateLoss();
 	}
 
 	@Override
-	public void putSessionValue(String key, @Nullable String value) {
+	public void putSessionValue(final String key, @Nullable final String value) {
 		_demoAppSessionData.put(key, value);
 	}
 
 	@Override
 	@Nullable
-	public String getSessionValue(String key) {
+	public String getSessionValue(final String key) {
 		return _demoAppSessionData.get(key);
 	}
 
@@ -449,68 +410,48 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Acti
 	//region GetSocial listeners
 
 	@Override
-	public void onUserChanged() {
-		_viewContainer._userInfoView.updateView();
-		GetSocial.User.getFriendsCount(new Callback<Integer>() {
-			@Override
-			public void onSuccess(Integer friendsCount) {
-				putSessionValue(FriendsFragment.KEY_FRIENDS_COUNT, String.valueOf(friendsCount));
-				RootFragment rootFragment = findRootFragment();
-				if (rootFragment != null) {
-					rootFragment.invalidateList();
-				}
+	public void onUserChanged(final CurrentUser newUser) {
+		_viewContainer._userInfoView.updateView(newUser);
+		Communities.getFriendsCount(FriendsQuery.ofUser(UserId.currentUser()), friendsCount -> {
+			putSessionValue(FriendsFragment.KEY_FRIENDS_COUNT, String.valueOf(friendsCount));
+			final RootFragment rootFragment = findRootFragment();
+			if (rootFragment != null) {
+				rootFragment.invalidateList();
 			}
-
-			@Override
-			public void onFailure(GetSocialException exception) {
-				Console.logError(exception.getLocalizedMessage());
-			}
-		});
+		}, error -> Console.logError(error.getMessage()));
 		dependencies().notificationsManager().sync();
 	}
 
 	@Override
-	public boolean handleAction(Action action) {
-		if (action.getType().equals(ActionTypes.OPEN_PROFILE)) {
-			final String userId = action.getData().get(ActionDataKeys.OpenProfile.USER_ID);
-			showUserInfoDialog(userId);
-			return true;
-		} else if (action.getType().equals(ChatFragment.NOTIFICATION_ACTION_OPEN_MESSAGE)) {
-			final Bundle bundle = new Bundle();
-			bundle.putString(ChatFragment.KEY_RECIPIENT_ID, action.getData().get(ChatFragment.ACTION_KEY_ID));
-			bundle.putString(ChatFragment.KEY_RECIPIENT_NAME, action.getData().get(ChatFragment.ACTION_KEY_NAME));
-			bundle.putString(ChatFragment.KEY_MESSAGE, action.getData().get(ChatFragment.ACTION_KEY_MESSAGE));
+	public void handleAction(final Action action) {
+		_log.logInfoAndToast("Action invoked: " + action);
+		switch (action.getType()) {
+			case ActionTypes.OPEN_PROFILE:
+				final String userId = action.getData().get(ActionDataKeys.OpenProfile.USER_ID);
+				showUserInfoDialog(userId);
+				return;
+			case ChatFragment.NOTIFICATION_ACTION_OPEN_MESSAGE:
 
-			Fragment fragment = getSupportFragmentManager().findFragmentByTag(ChatFragment.TAG);
-			if (fragment == null) {
-				if (GetSocial.isInitialized()) {
-					showChatFragment(bundle);
-				} else {
-					GetSocial.whenInitialized(new Runnable() {
-						@Override
-						public void run() {
-							showChatFragment(bundle);
-						}
-					});
+				final Fragment fragment = findFragment(ChatFragment.TAG);
+				if (fragment == null) {
+					if (GetSocial.isInitialized()) {
+						showChatFragment();
+					} else {
+						GetSocial.addOnInitializeListener(this::showChatFragment);
+					}
 				}
-			}
 
-		} else if (action.getType().equals(ActionTypes.CUSTOM)) {
-			_log.logInfo("Received custom action:" + action.getData());
-			return true;
+				break;
+			case "custom":
+				_log.logInfo("Received custom action:" + action.getData());
+				return;
 		}
-		return false;
+		GetSocial.handle(action);
 	}
 
-	private void showChatFragment(Bundle bundle) {
-		ChatFragment chatFragment = new ChatFragment();
-		chatFragment.setArguments(bundle);
+	private void showChatFragment() {
+		final ChatFragment chatFragment = new ChatFragment();
 		addContentFragment(chatFragment);
-	}
-
-	@Override
-	public void copy(String value) {
-		copyToClipboard(value);
 	}
 
 	//endregion
@@ -524,20 +465,15 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Acti
 		@BindView(R.id.userInfoView)
 		UserInfoView _userInfoView;
 
-		private Context _context;
+		private final Context _context;
 
-		public ViewContainer(Activity activity) {
+		public ViewContainer(final Activity activity) {
 			_context = activity;
 			ButterKnife.bind(this, activity);
 
 			setSupportActionBar(_toolbar);
 
-			getSupportFragmentManager().addOnBackStackChangedListener(
-					new FragmentManager.OnBackStackChangedListener() {
-						public void onBackStackChanged() {
-							updateView();
-						}
-					});
+			getSupportFragmentManager().addOnBackStackChangedListener(this::updateView);
 		}
 
 		@OnClick(R.id.userInfoView)
@@ -558,28 +494,23 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Acti
 			if (getSupportFragmentManager().getBackStackEntryCount() == 1) {
 				_toolbar.setNavigationIcon(null);
 				_userInfoView.setVisibility(View.VISIBLE);
-				_userInfoView.updateView();
+				_userInfoView.updateView(GetSocial.getCurrentUser());
 			} else {
 				_userInfoView.setVisibility(View.GONE);
 
-				Fragment fragment = getActiveFragment();
-				if (fragment != null && fragment instanceof HasTitle) {
-					HasTitle hasTitle = (HasTitle) fragment;
+				final Fragment fragment = getActiveFragment();
+				if (fragment instanceof HasTitle) {
+					final HasTitle hasTitle = (HasTitle) fragment;
 					_toolbar.setTitle(hasTitle.getTitle());
 				}
-				
-				Drawable navigationIcon = CompatibilityUtils.getDrawable(_context, R.drawable.ic_menu_back);
-				Drawable wrappedNavigationIcon = DrawableCompat.wrap(navigationIcon);
+
+				final Drawable navigationIcon = CompatibilityUtils.getDrawable(_context, R.drawable.ic_menu_back);
+				final Drawable wrappedNavigationIcon = DrawableCompat.wrap(navigationIcon);
 				DrawableCompat.setTint(wrappedNavigationIcon, getResources().getColor(R.color.primary_text));
 				_toolbar.setNavigationIcon(navigationIcon);
 
 				_toolbar.setNavigationOnClickListener(
-						new View.OnClickListener() {
-							@Override
-							public void onClick(View view) {
-								onBackPressed();
-							}
-						}
+								view -> onBackPressed()
 				);
 			}
 		}
