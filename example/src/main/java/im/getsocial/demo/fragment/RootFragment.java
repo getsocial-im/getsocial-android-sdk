@@ -17,17 +17,18 @@
 package im.getsocial.demo.fragment;
 
 import android.os.Bundle;
+import androidx.annotation.Nullable;
 import android.text.TextUtils;
 import android.view.View;
-import androidx.annotation.Nullable;
 import im.getsocial.demo.adapter.MenuItem;
+import im.getsocial.demo.adapter.TextGenerator;
 import im.getsocial.demo.dependencies.DependenciesContainer;
 import im.getsocial.demo.dependencies.components.NotificationsManager;
 import im.getsocial.demo.utils.Console;
-import im.getsocial.sdk.Communities;
+import im.getsocial.sdk.Callback;
+import im.getsocial.sdk.CompletionCallback;
 import im.getsocial.sdk.GetSocial;
-import im.getsocial.sdk.communities.FriendsQuery;
-import im.getsocial.sdk.communities.UserId;
+import im.getsocial.sdk.GetSocialException;
 
 import java.util.Arrays;
 import java.util.List;
@@ -40,58 +41,87 @@ public class RootFragment extends BaseListFragment implements NotificationsManag
 	}
 
 	@Override
-	protected void inject(final DependenciesContainer dependencies) {
+	protected void inject(DependenciesContainer dependencies) {
 		_notificationsManager = dependencies.notificationsManager();
-	}
-
-	@Override
-	public void onViewCreated(final View view, @Nullable final Bundle savedInstanceState) {
-		super.onViewCreated(view, savedInstanceState);
-		_notificationsManager.addListener(this);
 	}
 
 	@Override
 	public void onResume() {
 		super.onResume();
-		GetSocial.addOnInitializeListener(_notificationsManager::sync);
 		if (!GetSocial.isInitialized()) {
 			return;
 		}
-		Communities.getFriendsCount(FriendsQuery.ofUser(UserId.currentUser()), friendsCount -> {
-			_activityListener.putSessionValue(FriendsFragment.KEY_FRIENDS_COUNT, String.valueOf(friendsCount));
-			invalidateList();
-		}, error -> Console.logError(error.getMessage()));
+		_notificationsManager.sync();
+		GetSocial.User.getFriendsCount(new Callback<Integer>() {
+			@Override
+			public void onSuccess(Integer friendsCount) {
+				_activityListener.putSessionValue(FriendsFragment.KEY_FRIENDS_COUNT, String.valueOf(friendsCount));
+				invalidateList();
+			}
+
+			@Override
+			public void onFailure(GetSocialException exception) {
+				Console.logError(exception.getLocalizedMessage());
+			}
+		});
+	}
+
+	@Override
+	public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+		super.onViewCreated(view, savedInstanceState);
+		_notificationsManager.addListener(this);
 	}
 
 	@Override
 	protected List<MenuItem> createListData() {
 		return Arrays.asList(
-						navigationListItem("User Management", UserManagementFragment.class, builder -> builder.withEnabledCheck(GetSocial::isInitialized)),
-						navigationListItem("Friends", FriendsFragment.class, builder -> builder.withSubtitle(() -> {
-							final String friendsCount = _activityListener.getSessionValue(FriendsFragment.KEY_FRIENDS_COUNT);
-							final String count = TextUtils.isEmpty(friendsCount) ? "0" : friendsCount;
-							return "You have " + count + " friends";
-						})),
+						navigationListItem("User Management", UserManagementFragment.class),
+						navigationListItem("Friends", FriendsFragment.class, new NavigationItemDecorator() {
+							@Override
+							public void decorate(MenuItem.Builder builder) {
+								builder.withSubtitle(new TextGenerator() {
+									@Override
+									public String generateText() {
+										final String friendsCount = _activityListener.getSessionValue(FriendsFragment.KEY_FRIENDS_COUNT);
+										final String count = TextUtils.isEmpty(friendsCount) ? "0" : friendsCount;
+										return "You have " + count + " friends";
+									}
+								});
+							}
+						}),
 						navigationListItem("Invites", InvitesFragment.class),
 						navigationListItem("Activities", ActivitiesFragment.class),
-						navigationListItem("Topics", TopicsSearchFragment.class),
-						navigationListItem("Tags", TagsListFragment.class),
-//						navigationListItem("Groups", GroupsFragment.class),
-						navigationListItem("Users", UsersSearchFragment.class),
-						navigationListItem("Users by IDs", TestUsersByIdFragment.class),
-						navigationListItem("Notifications", NotificationsFragment.class, builder -> builder.withSubtitle(() -> "You have " + _notificationsManager.getNewNotificationsCount() + " new notifications")),
-						navigationListItem("Promo Codes", PromoCodesFragment.class),
-						navigationListItem("UI Customization", UiCustomizationFragment.class, builder -> builder.withSubtitle(() -> {
-							final String savedName = _activityListener.getSessionValue(UiCustomizationFragment.UI_CONFIGURATION_NAME_KEY);
-							if (TextUtils.isEmpty(savedName)) {
-								return "Current UI: default";
-							} else {
-								return "Current UI: " + savedName;
+						navigationListItem("Notifications", NotificationsFragment.class, new NavigationItemDecorator() {
+							@Override
+							public void decorate(MenuItem.Builder builder) {
+								builder.withSubtitle(new TextGenerator() {
+									@Override
+									public String generateText() {
+										return "You have " + _notificationsManager.getNewNotificationsCount() + " new notifications";
+									}
+								});
 							}
-						})),
+						}),
+						navigationListItem("Promo Codes", PromoCodesFragment.class),
+						navigationListItem("UI Customization", UiCustomizationFragment.class, new NavigationItemDecorator() {
+							@Override
+							public void decorate(MenuItem.Builder builder) {
+								builder.withSubtitle(new TextGenerator() {
+									@Override
+									public String generateText() {
+										String savedName = _activityListener.getSessionValue(UiCustomizationFragment.UI_CONFIGURATION_NAME_KEY);
+										if (TextUtils.isEmpty(savedName)) {
+											return "Current UI: default";
+										} else {
+											return "Current UI: " + savedName;
+										}
+									}
+								});
+							}
+						}),
 						navigationListItem("Settings", SettingsFragment.class),
 						navigationListItem("IAP", PurchaseFragment.class),
-						navigationListItem("Custom Analytics Events", CustomAnalyticsEventsFragment.class)
+						navigationListItem("Custom Analytics,Events", CustomAnalyticsEventsFragment.class)
 		);
 	}
 

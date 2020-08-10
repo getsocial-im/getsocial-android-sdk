@@ -47,48 +47,69 @@ public class CurrentUserInfoDialog extends DialogFragment {
 		// Empty constructor required for DialogFragment
 	}
 
-	public static void show(final FragmentManager fm) {
+	public static void show(FragmentManager fm) {
 		new CurrentUserInfoDialog().show(fm, "current_user_info_dialog");
 	}
 
+	@OnClick(R.id.detailedUserInfo_closeButton)
+	public void closeView() {
+		dismiss();
+	}
+
+	@Override
+	public View onCreateView(LayoutInflater inflater, ViewGroup container,
+							 Bundle savedInstanceState) {
+		getDialog().getWindow().requestFeature(Window.FEATURE_NO_TITLE);
+		
+		View view = inflater.inflate(R.layout.dialog_detailed_user_info, container);
+
+		ButterKnife.bind(this, view);
+
+		_userInfoView.updateView();
+		_detailedTextView.setText(getUserInfo());
+		Linkify.addLinks(_detailedTextView, Linkify.WEB_URLS);
+
+		return view;
+	}
+	
 	private static String getUserInfo() {
 		if (!GetSocial.isInitialized()) {
 			return "";
 		}
 
-		final Map<String, Object> userDetails = new HashMap<>();
-		userDetails.put("Anonymous", GetSocial.getCurrentUser().isAnonymous());
-		userDetails.put("User ID", GetSocial.getCurrentUser().getId());
-		userDetails.put("Display Name", GetSocial.getCurrentUser().getDisplayName());
-		userDetails.put("Avatar URL", GetSocial.getCurrentUser().getAvatarUrl());
-		userDetails.put("Identities", GetSocial.getCurrentUser().getIdentities());
-		userDetails.put("Public Properties", GetSocial.getCurrentUser().getPublicProperties());
-		userDetails.put("Private Properties", GetSocial.getCurrentUser().getPrivateProperties());
+		Map<String, Object> userDetails = new HashMap<String, Object>();
+		userDetails.put("Anonymous", GetSocial.User.isAnonymous());
+		userDetails.put("User ID", GetSocial.User.getId());
+		userDetails.put("Display Name", GetSocial.User.getDisplayName());
+		userDetails.put("Avatar URL", GetSocial.User.getAvatarUrl());
+		userDetails.put("Identities", GetSocial.User.getAuthIdentities());
+		userDetails.put("Public Properties", GetSocial.User.getAllPublicProperties());
+		userDetails.put("Private Properties", GetSocial.User.getAllPrivateProperties());
 
 		final UserInfoBuilder sb = new UserInfoBuilder();
-		sb.append("Anonymous: ").append(GetSocial.getCurrentUser().isAnonymous())
-						.endLine()
-						.append("User ID: ").append(GetSocial.getCurrentUser().getId()).endLine()
-						.append("Avatar URL: ").append(GetSocial.getCurrentUser().getAvatarUrl()).endLine()
-						.endLine();
+		sb.append("Anonymous: ").append(GetSocial.User.isAnonymous())
+				.endLine()
+				.append("User ID: ").append(GetSocial.User.getId()).endLine()
+				.append("Avatar URL: ").append(GetSocial.User.getAvatarUrl()).endLine()
+				.endLine();
 
-		if (!GetSocial.getCurrentUser().isAnonymous()) {
+		if (!GetSocial.User.isAnonymous()) {
 			sb.append("IDENTITIES:").endLine()
-							.append(GetSocial.getCurrentUser().getIdentities());
+					.append(GetSocial.User.getAuthIdentities());
 		}
 		sb.append("PUBLIC PROPERTIES:").endLine()
-						.append(GetSocial.getCurrentUser().getPublicProperties());
+				.append(GetSocial.User.getAllPublicProperties());
 
 		sb.append("PRIVATE PROPERTIES:").endLine()
-						.append(GetSocial.getCurrentUser().getPrivateProperties());
+				.append(GetSocial.User.getAllPrivateProperties());
 
 		sb.append("JSON:").endLine()
-						.append(toJson(userDetails));
+				.append(toJson(userDetails));
 
 		return sb.toString();
 	}
 
-	private static String toJson(final Object object) {
+	private static String toJson(Object object) {
 		if (object instanceof Map) {
 			return mapToJson((Map<String, Object>) object);
 		}
@@ -104,8 +125,8 @@ public class CurrentUserInfoDialog extends DialogFragment {
 		return "\"" + object.toString() + "\"";
 	}
 
-	private static String iterableToJson(final Iterable iterable) {
-		final StringBuilder sb = new StringBuilder();
+	private static String iterableToJson(Iterable iterable) {
+		StringBuilder sb = new StringBuilder();
 		sb.append("{");
 
 		for (final Object entry : iterable) {
@@ -118,40 +139,19 @@ public class CurrentUserInfoDialog extends DialogFragment {
 		return sb.toString();
 	}
 
-	private static String mapToJson(final Map<String, Object> map) {
-		final StringBuilder sb = new StringBuilder();
+	private static String mapToJson(Map<String, Object> map) {
+		StringBuilder sb = new StringBuilder();
 		sb.append("{");
 
 		for (final Map.Entry<String, Object> entry : map.entrySet()) {
 			sb.append("\"").append(entry.getKey()).append("\"").append(":")
-							.append(toJson(entry.getValue())).append(",");
+					.append(toJson(entry.getValue())).append(",");
 		}
 		if (sb.charAt(sb.length() - 1) == ',') {
 			sb.deleteCharAt(sb.length() - 1);
 		}
 		sb.append("}");
 		return sb.toString();
-	}
-
-	@OnClick(R.id.detailedUserInfo_closeButton)
-	public void closeView() {
-		dismiss();
-	}
-
-	@Override
-	public View onCreateView(final LayoutInflater inflater, final ViewGroup container,
-													 final Bundle savedInstanceState) {
-		getDialog().getWindow().requestFeature(Window.FEATURE_NO_TITLE);
-
-		final View view = inflater.inflate(R.layout.dialog_detailed_user_info, container);
-
-		ButterKnife.bind(this, view);
-
-		_userInfoView.updateView(GetSocial.getCurrentUser());
-		_detailedTextView.setText(getUserInfo());
-		Linkify.addLinks(_detailedTextView, Linkify.WEB_URLS);
-
-		return view;
 	}
 
 	private static class UserInfoBuilder {
@@ -161,22 +161,22 @@ public class CurrentUserInfoDialog extends DialogFragment {
 			_stringBuilder = new StringBuilder();
 		}
 
-		UserInfoBuilder append(final String string) {
+		UserInfoBuilder append(String string) {
 			_stringBuilder.append(string);
 			return this;
 		}
 
-		UserInfoBuilder append(final boolean bool) {
+		UserInfoBuilder append(boolean bool) {
 			_stringBuilder.append(bool);
 			return this;
 		}
 
-		UserInfoBuilder append(final Map<String, String> map) {
-			for (final Map.Entry<String, String> entry : map.entrySet()) {
+		UserInfoBuilder append(Map<String, String> map) {
+			for (Map.Entry<String, String> entry : map.entrySet()) {
 				append(entry.getKey())
-								.append(": ")
-								.append(entry.getValue())
-								.endLine();
+						.append(": ")
+						.append(entry.getValue())
+						.endLine();
 			}
 			return this;
 		}

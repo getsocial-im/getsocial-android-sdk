@@ -1,7 +1,6 @@
-<resources xmlns:tools="http://schemas.android.com/tools">
+<resources>
 	<string name="app_name">GetSocial Demo</string>
 	<string name="get_social_app_id">LGa80P9790g4</string>
-	<string name="appcenter_id" tools:ignore="TypographyDashes">-</string>>
 
 	<!-- new sdk -->
 	<string name="facebook_app_id">1283253028421001</string>
