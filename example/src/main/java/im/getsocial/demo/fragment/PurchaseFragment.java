@@ -2,8 +2,6 @@ package im.getsocial.demo.fragment;
 
 import android.content.Context;
 import android.os.Bundle;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,6 +9,8 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -31,9 +31,9 @@ import java.util.List;
 
 public class PurchaseFragment extends BaseFragment implements PurchasesUpdatedListener {
 
+	private final List<InAppPurchaseProduct> _availableProducts = new ArrayList<>();
 	private BillingClient _billingClient;
 	private PurchaseFragment.ViewContainer _viewContainer;
-	private final List<InAppPurchaseProduct> _availableProducts = new ArrayList<>();
 
 	@Override
 	public String getFragmentTag() {
@@ -46,6 +46,15 @@ public class PurchaseFragment extends BaseFragment implements PurchasesUpdatedLi
 	}
 
 	@Override
+	public void onCreate(@Nullable Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+
+		_billingClient = BillingClient.newBuilder(getContext())
+				.setListener(this)
+				.build();
+	}
+
+	@Override
 	public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 		return inflater.inflate(R.layout.fragment_iap, container, false);
 	}
@@ -54,15 +63,6 @@ public class PurchaseFragment extends BaseFragment implements PurchasesUpdatedLi
 	public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
 		super.onViewCreated(view, savedInstanceState);
 		_viewContainer = new ViewContainer(view);
-	}
-
-	@Override
-	public void onCreate(@Nullable Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-
-		_billingClient = BillingClient.newBuilder(getContext())
-				.setListener(this)
-				.build();
 	}
 
 	@Override
@@ -159,6 +159,19 @@ public class PurchaseFragment extends BaseFragment implements PurchasesUpdatedLi
 		}
 	}
 
+	static class InAppPurchaseProduct {
+		SkuDetails _skuDetails;
+
+		InAppPurchaseProduct(SkuDetails details) {
+			_skuDetails = details;
+		}
+
+		String getProductTitle() {
+			return _skuDetails.getTitle();
+		}
+
+	}
+
 	class ViewContainer {
 
 		@BindView(R.id.iap_list)
@@ -203,6 +216,8 @@ public class PurchaseFragment extends BaseFragment implements PurchasesUpdatedLi
 
 		class ViewHolder {
 
+			@BindView(R.id.product_title)
+			TextView _productTitle;
 			private InAppPurchaseProduct _inAppPurchaseProduct;
 
 			ViewHolder(View view) {
@@ -218,27 +233,11 @@ public class PurchaseFragment extends BaseFragment implements PurchasesUpdatedLi
 				_productTitle.setText(_inAppPurchaseProduct.getProductTitle());
 			}
 
-			@BindView(R.id.product_title)
-			TextView _productTitle;
-
 			@OnClick(R.id.button_buy)
 			void buyItem() {
 				PurchaseFragment.this.purchaseItem(_inAppPurchaseProduct._skuDetails);
 			}
 
-		}
-
-	}
-
-	static class InAppPurchaseProduct {
-		SkuDetails _skuDetails;
-
-		InAppPurchaseProduct(SkuDetails details) {
-			_skuDetails = details;
-		}
-
-		String getProductTitle() {
-			return _skuDetails.getTitle();
 		}
 
 	}

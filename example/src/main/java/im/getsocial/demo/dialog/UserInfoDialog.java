@@ -22,7 +22,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.fragment.app.DialogFragment;
@@ -33,21 +32,19 @@ import butterknife.OnClick;
 import com.squareup.picasso.Picasso;
 import im.getsocial.demo.R;
 import im.getsocial.demo.utils.CircleTransform;
-import im.getsocial.sdk.usermanagement.PublicUser;
+import im.getsocial.sdk.communities.User;
 
 public class UserInfoDialog extends DialogFragment {
 
-	private PublicUser _publicUser;
-
 	@BindView(R.id.display_name)
 	TextView _displayName;
-
 	@BindView(R.id.user_avatar)
 	ImageView _avatar;
+	private User _user;
 
-	public static void show(FragmentManager fm, PublicUser publicUser) {
-		UserInfoDialog dialog = new UserInfoDialog();
-		dialog._publicUser = publicUser;
+	public static void show(final FragmentManager fm, final User user) {
+		final UserInfoDialog dialog = new UserInfoDialog();
+		dialog._user = user;
 		dialog.show(fm, "user_info_dialog");
 	}
 
@@ -57,24 +54,24 @@ public class UserInfoDialog extends DialogFragment {
 	}
 
 	@Override
-	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+	public View onCreateView(final LayoutInflater inflater, final ViewGroup container, final Bundle savedInstanceState) {
 		getDialog().getWindow().requestFeature(Window.FEATURE_NO_TITLE);
 
-		View view = inflater.inflate(R.layout.dialog_userinfo, container);
+		final View view = inflater.inflate(R.layout.dialog_userinfo, container);
 		ButterKnife.bind(this, view);
-		_displayName.setText(_publicUser.getDisplayName());
+		_displayName.setText(_user.getDisplayName());
 
-		if (TextUtils.isEmpty(_publicUser.getAvatarUrl())) {
+		if (TextUtils.isEmpty(_user.getAvatarUrl())) {
 			Picasso.with(getContext())
-					.load(R.drawable.avatar_default)
-					.transform(new CircleTransform())
-					.into(_avatar);
+							.load(R.drawable.avatar_default)
+							.transform(new CircleTransform())
+							.into(_avatar);
 		} else {
 			Picasso.with(getContext())
-					.load(_publicUser.getAvatarUrl())
-					.placeholder(R.drawable.avatar_default)
-					.transform(new CircleTransform())
-					.into(_avatar);
+							.load(_user.getAvatarUrl())
+							.placeholder(R.drawable.avatar_default)
+							.transform(new CircleTransform())
+							.into(_avatar);
 		}
 
 		return view;

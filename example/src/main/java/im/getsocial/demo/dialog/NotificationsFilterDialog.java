@@ -4,8 +4,6 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import android.util.Pair;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,6 +11,8 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.FragmentManager;
 import butterknife.BindView;
@@ -22,11 +22,10 @@ import butterknife.OnClick;
 import im.getsocial.demo.R;
 import im.getsocial.demo.dependencies.components.NotificationsManager;
 import im.getsocial.demo.fragment.BaseFragment;
-import im.getsocial.demo.ui.PickActionView;
 import im.getsocial.demo.utils.DynamicUi;
 import im.getsocial.sdk.actions.ActionTypes;
-import im.getsocial.sdk.pushnotifications.Notification;
-import im.getsocial.sdk.pushnotifications.NotificationStatus;
+import im.getsocial.sdk.notifications.Notification;
+import im.getsocial.sdk.notifications.NotificationStatus;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -36,21 +35,17 @@ import java.util.Set;
 
 public final class NotificationsFilterDialog extends DialogFragment {
 
-	@BindView(R.id.statuses_frame)
-	LinearLayout _status;
-
-	@BindView(R.id.checkbox_types)
-	CheckBox _findAllTypes;
-
-	@BindView(R.id.custom_types_frame)
-	LinearLayout _customTypesFrame;
-
-	@BindView(R.id.container_action_types)
-	LinearLayout _actionTypesContainer;
-
 	private final Set<String> _selectedTypes = new HashSet<>();
 	private final Set<String> _selectedStatuses = new HashSet<>();
 	private final List<DynamicUi.DynamicInputHolder> _selectedActionTypes = new ArrayList<>();
+	@BindView(R.id.statuses_frame)
+	LinearLayout _status;
+	@BindView(R.id.checkbox_types)
+	CheckBox _findAllTypes;
+	@BindView(R.id.custom_types_frame)
+	LinearLayout _customTypesFrame;
+	@BindView(R.id.container_action_types)
+	LinearLayout _actionTypesContainer;
 
 	public NotificationsFilterDialog() {
 		//
@@ -58,6 +53,24 @@ public final class NotificationsFilterDialog extends DialogFragment {
 
 	public static void show(FragmentManager fragmentManager) {
 		new NotificationsFilterDialog().show(fragmentManager, "notifications_filter_dialog");
+	}
+
+	private static List<Pair<String, String>> getAllFields(Class clazz) {
+		Field[] allValidIdFields = clazz.getFields();
+		List<Pair<String, String>> allValidIds = new ArrayList<>();
+		for (Field field : allValidIdFields) {
+			final String name = capitalize(field.getName().replace("_", " ").toLowerCase());
+			try {
+				allValidIds.add(new Pair<String, String>(name, (String) field.get(null)));
+			} catch (IllegalAccessException e) {
+				e.printStackTrace();
+			}
+		}
+		return allValidIds;
+	}
+
+	private static String capitalize(final String line) {
+		return Character.toUpperCase(line.charAt(0)) + line.substring(1);
 	}
 
 	@NonNull
@@ -199,23 +212,5 @@ public final class NotificationsFilterDialog extends DialogFragment {
 			actionTypes.add(inputHolder.getText(0));
 		}
 		notificationManager().saveFilter(_selectedStatuses, _selectedTypes, actionTypes);
-	}
-
-	private static List<Pair<String, String>> getAllFields(Class clazz) {
-		Field[] allValidIdFields = clazz.getFields();
-		List<Pair<String, String>> allValidIds = new ArrayList<>();
-		for (Field field : allValidIdFields) {
-			final String name = capitalize(field.getName().replace("_", " ").toLowerCase());
-			try {
-				allValidIds.add(new Pair<String, String>(name, (String) field.get(null)));
-			} catch (IllegalAccessException e) {
-				e.printStackTrace();
-			}
-		}
-		return allValidIds;
-	}
-
-	private static String capitalize(final String line) {
-		return Character.toUpperCase(line.charAt(0)) + line.substring(1);
 	}
 }
