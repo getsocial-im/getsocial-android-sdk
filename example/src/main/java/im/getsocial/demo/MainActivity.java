@@ -230,12 +230,13 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Acti
 		Notifications.setOnNotificationReceivedListener(this);
 		GetSocial.addOnCurrentUserChangedListener(this);
 		GetSocial.addOnInitializeListener(() -> {
+			System.out.println("### OnInitialized listener is invoked");
+			System.out.println("### Current user: " + GetSocial.getCurrentUser());
 			invalidateUi();
 			final RootFragment rootFragment = findRootFragment();
 			if (rootFragment != null) {
 				rootFragment.invalidateList();
 			}
-			Invites.setReferralDataListener(referralData -> ReferralDataDialog.showReferralData(getSupportFragmentManager(), referralData));
 			final JSONObject object = new JSONObject();
 			try {
 				object.put("query", Getson.toJson(UsersQuery.find("John")));
@@ -244,6 +245,7 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Acti
 				e.printStackTrace();
 			}
 		});
+		Invites.setReferralDataListener(referralData -> ReferralDataDialog.showReferralData(getSupportFragmentManager(), referralData));
 		Notifications.setOnTokenReceivedListener(deviceToken ->
 						Console.logInfo(String.format("Push token: %s", deviceToken))
 		);

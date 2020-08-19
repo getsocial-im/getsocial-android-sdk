@@ -67,6 +67,7 @@ public class SetReferrerFragment extends BaseFragment {
 
 	private void invokeSetReferrer() {
 		final String referrerId = _viewContainer._referrerIdInput.getText().toString();
+		final String providerId = _viewContainer._providerIdInput.getText().toString();
 		final String event = _viewContainer._referrerEventInput.getText().toString();
 
 		// collect custom data
@@ -80,7 +81,7 @@ public class SetReferrerFragment extends BaseFragment {
 		}
 
 		// invoke set referrer
-		Invites.setReferrer(UserId.create(referrerId), event, customData, () -> {
+		Invites.setReferrer(UserId.createWithProvider(providerId, referrerId), event, customData, () -> {
 			showAlert("Set Referrer", "Referrer was set.");
 		}, error -> {
 			showAlert("Set Referrer", "Error: " + error.getMessage());
@@ -91,6 +92,8 @@ public class SetReferrerFragment extends BaseFragment {
 
 		@BindView(R.id.setReferrer_referrerId)
 		EditText _referrerIdInput;
+		@BindView(R.id.setReferrer_providerId)
+		EditText _providerIdInput;
 		@BindView(R.id.setReferrer_event)
 		EditText _referrerEventInput;
 

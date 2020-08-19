@@ -106,6 +106,8 @@
 
 	<string name="setReferrer_referrerId_label">Referrer Id</string>
 	<string name="setReferrer_referrerId_hint">4214234324</string>
+	<string name="setReferrer_providerId_label">Provider Id</string>
+	<string name="setReferrer_providerId_hint">facebook</string>
 	<string name="setReferrer_event_label">Event</string>
 	<string name="setReferrer_event_hint">app_install</string>
 	<string name="setReferrer_button">Set Referrer</string>
