@@ -17,8 +17,12 @@ import butterknife.OnClick;
 import com.android.billingclient.api.BillingClient;
 import com.android.billingclient.api.BillingClientStateListener;
 import com.android.billingclient.api.BillingFlowParams;
+import com.android.billingclient.api.BillingResult;
+import com.android.billingclient.api.ConsumeParams;
 import com.android.billingclient.api.ConsumeResponseListener;
 import com.android.billingclient.api.Purchase;
+import com.android.billingclient.api.PurchaseHistoryRecord;
+import com.android.billingclient.api.PurchaseHistoryResponseListener;
 import com.android.billingclient.api.PurchasesUpdatedListener;
 import com.android.billingclient.api.SkuDetails;
 import com.android.billingclient.api.SkuDetailsParams;
@@ -50,6 +54,7 @@ public class PurchaseFragment extends BaseFragment implements PurchasesUpdatedLi
 		super.onCreate(savedInstanceState);
 
 		_billingClient = BillingClient.newBuilder(getContext())
+				.enablePendingPurchases()
 				.setListener(this)
 				.build();
 	}
@@ -74,9 +79,10 @@ public class PurchaseFragment extends BaseFragment implements PurchasesUpdatedLi
 
 	private void setupBillingConnection() {
 		_billingClient.startConnection(new BillingClientStateListener() {
+
 			@Override
-			public void onBillingSetupFinished(int result) {
-				if (result == BillingClient.BillingResponse.OK) {
+			public void onBillingSetupFinished(BillingResult result) {
+				if (result.getResponseCode() == BillingClient.BillingResponseCode.OK) {
 					// The billing client is ready. You can query purchases here.
 					loadConsumableItems();
 					loadSubscriptions();
@@ -97,8 +103,11 @@ public class PurchaseFragment extends BaseFragment implements PurchasesUpdatedLi
 	}
 
 	private void loadConsumableItems() {
+		List<String> list = new ArrayList<>();
+		list.add("im.getsocial.sdk.demo.internal.iap.managed2");
+		list.add("im.getsocial.sdk.demo.internal.iap.managed.new");
 		loadProducts(SkuDetailsParams.newBuilder()
-				.setSkusList(Collections.singletonList("im.getsocial.sdk.demo.internal.iap.managed"))
+				.setSkusList(list)
 				.setType(BillingClient.SkuType.INAPP)
 				.build());
 	}
@@ -113,15 +122,18 @@ public class PurchaseFragment extends BaseFragment implements PurchasesUpdatedLi
 	private void loadPurchaseHistory() {
 		Purchase.PurchasesResult result = _billingClient.queryPurchases(BillingClient.SkuType.INAPP);
 		for (Purchase purchase : result.getPurchasesList()) {
-			consumePurchasedItem(purchase);
+			System.out.println("PURCHASE IS " + purchase.getPurchaseToken());
+			if (purchase.getPurchaseState() == Purchase.PurchaseState.PURCHASED) {
+				consumePurchasedItem(purchase);
+			}
 		}
 	}
 
 	private void loadProducts(SkuDetailsParams detailsParams) {
 		_billingClient.querySkuDetailsAsync(detailsParams, new SkuDetailsResponseListener() {
 			@Override
-			public void onSkuDetailsResponse(int result, List<SkuDetails> list) {
-				System.out.println("details response code: " + result);
+			public void onSkuDetailsResponse(BillingResult billingResult, List<SkuDetails> list) {
+				System.out.println("details response code: " + billingResult.getResponseCode());
 				if (list != null) {
 					for (SkuDetails detail : list) {
 						_availableProducts.add(new InAppPurchaseProduct(detail));
@@ -134,27 +146,32 @@ public class PurchaseFragment extends BaseFragment implements PurchasesUpdatedLi
 
 	private void purchaseItem(SkuDetails skuDetails) {
 		_billingClient.launchBillingFlow(getActivity(), BillingFlowParams.newBuilder()
-				.setSku(skuDetails.getSku())
-				.setType(skuDetails.getType())
+				.setSkuDetails(skuDetails)
 				.build()
 		);
 
 	}
 
 	private void consumePurchasedItem(Purchase purchase) {
-		_billingClient.consumeAsync(purchase.getPurchaseToken(), new ConsumeResponseListener() {
+		ConsumeParams params = ConsumeParams.newBuilder().setPurchaseToken(purchase.getPurchaseToken()).build();
+		_billingClient.consumeAsync(params, new ConsumeResponseListener() {
 			@Override
-			public void onConsumeResponse(int result, String response) {
+			public void onConsumeResponse(BillingResult billingResult, String purchaseToken) {
 				System.out.println("got consumePurchase response");
 			}
+
 		});
 	}
 
 	@Override
-	public void onPurchasesUpdated(int status, @Nullable List<Purchase> list) {
-		if (status == BillingClient.BillingResponse.OK && list != null) {
-			for (Purchase purchase : list) {
-				consumePurchasedItem(purchase);
+	public void onPurchasesUpdated(BillingResult billingResult, @Nullable List<Purchase> purchases) {
+		if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK && purchases != null) {
+			for (Purchase purchase : purchases) {
+				if (purchase.getPurchaseState() == Purchase.PurchaseState.PURCHASED) {
+					consumePurchasedItem(purchase);
+				} else {
+					System.out.println("Status is PENDING");
+				}
 			}
 		}
 	}
