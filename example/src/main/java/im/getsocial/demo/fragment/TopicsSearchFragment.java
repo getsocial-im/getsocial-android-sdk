@@ -18,9 +18,11 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import com.squareup.picasso.Picasso;
 import im.getsocial.demo.R;
+import im.getsocial.demo.Utils;
 import im.getsocial.demo.dialog.action_dialog.ActionDialog;
 import im.getsocial.sdk.Callback;
 import im.getsocial.sdk.Communities;
+import im.getsocial.sdk.ErrorCode;
 import im.getsocial.sdk.FailureCallback;
 import im.getsocial.sdk.GetSocial;
 import im.getsocial.sdk.common.PagingQuery;
@@ -33,6 +35,7 @@ import im.getsocial.sdk.communities.Topic;
 import im.getsocial.sdk.communities.TopicsQuery;
 import im.getsocial.sdk.communities.UserId;
 import im.getsocial.sdk.media.MediaAttachment;
+import im.getsocial.sdk.ui.CustomErrorMessageProvider;
 import im.getsocial.sdk.ui.UiAction;
 import im.getsocial.sdk.ui.ViewStateListener;
 import im.getsocial.sdk.ui.communities.ActivityFeedViewBuilder;
@@ -255,7 +258,7 @@ public class TopicsSearchFragment extends BaseSearchFragment<TopicsQuery, Topic>
 		}
 
 		void openFeed() {
-			ActivityFeedViewBuilder.create(ActivitiesQuery.activitiesInTopic(_item.getId()))
+			ActivityFeedViewBuilder builder = ActivityFeedViewBuilder.create(ActivitiesQuery.activitiesInTopic(_item.getId()))
 							.setActionListener(_activityListener.dependencies().actionListener())
 							.setViewStateListener(new ViewStateListener() {
 								@Override
@@ -288,8 +291,19 @@ public class TopicsSearchFragment extends BaseSearchFragment<TopicsQuery, Topic>
 								_log.logInfoAndToast("User clicked: " + mention);
 								getUserAndShowActionDialog(mention);
 							})
-							.setTagClickListener(tag -> _log.logInfoAndToast("Tag clicked: " + tag))
-							.show();
+							.setTagClickListener(tag -> _log.logInfoAndToast("Tag clicked: " + tag));
+							if (Utils.isCustomErrorMesageEnabled(getContext())) {
+								builder.setCustomErrorMessageProvider(new CustomErrorMessageProvider() {
+									@Override
+									public String onError(int errorCode, String errorMessage) {
+										if (errorCode == ErrorCode.ACTIVITY_REJECTED) {
+											return "Be careful what you say :)";
+										}
+										return errorMessage;
+									}
+								});
+							}
+							builder.show();
 		}
 
 		void postToTopic() {

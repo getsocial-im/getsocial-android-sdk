@@ -18,9 +18,13 @@ package im.getsocial.demo.fragment;
 
 import android.app.AlertDialog;
 import android.widget.Toast;
+
+import im.getsocial.demo.Utils;
 import im.getsocial.demo.adapter.MenuItem;
 import im.getsocial.sdk.Communities;
+import im.getsocial.sdk.ErrorCode;
 import im.getsocial.sdk.GetSocial;
+import im.getsocial.sdk.GetSocialError;
 import im.getsocial.sdk.actions.Action;
 import im.getsocial.sdk.actions.ActionListener;
 import im.getsocial.sdk.common.PagingQuery;
@@ -28,6 +32,7 @@ import im.getsocial.sdk.communities.ActivitiesQuery;
 import im.getsocial.sdk.communities.GetSocialActivity;
 import im.getsocial.sdk.communities.UserId;
 import im.getsocial.sdk.media.MediaAttachment;
+import im.getsocial.sdk.ui.CustomErrorMessageProvider;
 import im.getsocial.sdk.ui.UiAction;
 import im.getsocial.sdk.ui.ViewStateListener;
 import im.getsocial.sdk.ui.communities.ActivityDetailsViewBuilder;
@@ -50,6 +55,9 @@ public class ActivitiesFragment extends BaseListFragment implements ActionListen
 										.withAction(new OpenMyFeed())
 										.withSubtitle("Is not available in phase 1")
 										.withEnabledCheck(() -> false)
+										.build(),
+						new MenuItem.Builder("Demo Feed")
+										.withAction(new OpenTopicFeedAction("DemoFeed"))
 										.build(),
 						new MenuItem.Builder("Timeline")
 										.withAction(new OpenTimeline())
@@ -103,10 +111,21 @@ public class ActivitiesFragment extends BaseListFragment implements ActionListen
 
 
 	private void showCurrentUserFeed() {
-		ActivityFeedViewBuilder.create(ActivitiesQuery.feedOf(UserId.currentUser()))
+		ActivityFeedViewBuilder builder = ActivityFeedViewBuilder.create(ActivitiesQuery.feedOf(UserId.currentUser()))
 						.setWindowTitle("My Feed")
-						.setActionListener(actionListener())
-						.show();
+						.setActionListener(actionListener());
+		if (Utils.isCustomErrorMesageEnabled(getContext())) {
+			builder.setCustomErrorMessageProvider(new CustomErrorMessageProvider() {
+				@Override
+				public String onError(int errorCode, String errorMessage) {
+					if (errorCode == ErrorCode.ACTIVITY_REJECTED) {
+						return "Be careful what you say :)";
+					}
+					return errorMessage;
+				}
+			});
+		}
+		builder.show();
 	}
 
 	@Override
@@ -122,7 +141,7 @@ public class ActivitiesFragment extends BaseListFragment implements ActionListen
 
 		@Override
 		public void execute() {
-			ActivityFeedViewBuilder.create(ActivitiesQuery.timeline())
+			ActivityFeedViewBuilder builder = ActivityFeedViewBuilder.create(ActivitiesQuery.timeline())
 							.setActionListener(actionListener())
 							.setViewStateListener(new ViewStateListener() {
 								@Override
@@ -146,8 +165,19 @@ public class ActivitiesFragment extends BaseListFragment implements ActionListen
 							})
 							.setAvatarClickListener(ActivitiesFragment.this::showUserActionDialog)
 							.setMentionClickListener(mention -> getUserAndShowActionDialog(mention))
-							.setTagClickListener(ActivitiesFragment.this::openGlobalFeedForTag)
-							.show();
+							.setTagClickListener(ActivitiesFragment.this::openGlobalFeedForTag);
+			if (Utils.isCustomErrorMesageEnabled(getContext())) {
+				builder.setCustomErrorMessageProvider(new CustomErrorMessageProvider() {
+					@Override
+					public String onError(int errorCode, String errorMessage) {
+						if (errorCode == ErrorCode.ACTIVITY_REJECTED) {
+							return "Be careful what you say :)";
+						}
+						return errorMessage;
+					}
+				});
+			}
+			builder.show();
 		}
 	}
 
@@ -161,9 +191,20 @@ public class ActivitiesFragment extends BaseListFragment implements ActionListen
 
 		@Override
 		public void execute() {
-			ActivityFeedViewBuilder.create(ActivitiesQuery.activitiesInTopic(_feed))
-							.setActionListener(actionListener())
-							.show();
+			ActivityFeedViewBuilder builder =  ActivityFeedViewBuilder.create(ActivitiesQuery.activitiesInTopic(_feed))
+							.setActionListener(actionListener());
+							if (Utils.isCustomErrorMesageEnabled(getContext())) {
+								builder.setCustomErrorMessageProvider(new CustomErrorMessageProvider() {
+									@Override
+									public String onError(int errorCode, String errorMessage) {
+										if (errorCode == ErrorCode.ACTIVITY_REJECTED) {
+											return "Be careful what you say :)";
+										}
+										return errorMessage;
+									}
+								});
+							}
+							builder.show();
 		}
 	}
 
@@ -179,9 +220,20 @@ public class ActivitiesFragment extends BaseListFragment implements ActionListen
 
 		@Override
 		public void execute() {
-			ActivityFeedViewBuilder.create(ActivitiesQuery.timeline())
-							.setActionListener(actionListener())
-							.show();
+			ActivityFeedViewBuilder builder = ActivityFeedViewBuilder.create(ActivitiesQuery.timeline())
+							.setActionListener(actionListener());
+			if (Utils.isCustomErrorMesageEnabled(getContext())) {
+				builder.setCustomErrorMessageProvider(new CustomErrorMessageProvider() {
+					@Override
+					public String onError(int errorCode, String errorMessage) {
+						if (errorCode == ErrorCode.ACTIVITY_REJECTED) {
+							return "Be careful what you say :)";
+						}
+						return errorMessage;
+					}
+				});
+			}
+			builder.show();
 		}
 	}
 

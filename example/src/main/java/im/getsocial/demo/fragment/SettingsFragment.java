@@ -19,6 +19,8 @@ package im.getsocial.demo.fragment;
 import android.app.AlertDialog;
 import android.util.Log;
 import im.getsocial.demo.R;
+import im.getsocial.demo.Utils;
+import im.getsocial.demo.adapter.EnabledCheck;
 import im.getsocial.demo.adapter.MenuItem;
 import im.getsocial.sdk.GetSocial;
 import im.getsocial.sdk.Notifications;
@@ -52,6 +54,30 @@ public class SettingsFragment extends BaseListFragment {
 						.withAction(this::changeLanguage)
 						.withSubtitle(() -> String.format("Current language: %s", LanguageCodes.all().get(GetSocial.getLanguage())))
 						.build());
+
+		listData.add(new MenuItem.Builder("Enable Custom Error Message")
+				.withAction(() -> {
+					Utils.setCustomErrorMesageEnabled(getContext(), true);
+					invalidateList();
+				})
+				.withEnabledCheck(new EnabledCheck() {
+					@Override
+					public boolean isOptionEnabled() {
+						return !Utils.isCustomErrorMesageEnabled(getContext());
+					}
+				}).build());
+
+		listData.add(new MenuItem.Builder("Disable Custom Error Message")
+				.withAction(() -> {
+					Utils.setCustomErrorMesageEnabled(getContext(), false);
+					invalidateList();
+				})
+				.withEnabledCheck(new EnabledCheck() {
+					@Override
+					public boolean isOptionEnabled() {
+						return Utils.isCustomErrorMesageEnabled(getContext());
+					}
+				}).build());
 
 		listData.add(new MenuItem.Builder("Enable Push Notifications")
 						.withAction(new ChangeNotificationsEnabledAction())
