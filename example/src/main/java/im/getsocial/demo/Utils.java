@@ -25,8 +25,8 @@ public final class Utils {
 	private static final String KEY_HADES_CONFIGS = "hades_configuration";
 	private static final String KEY_CUSTOM_FB = "custom_fb";
 	private static final String KEY_OPEN_UI = "open_ui";
-	private static final String KEY_CUSTOM_ERROR_MESSAGE = "custom_error_message";
 	private static final String KEY_REFERRAL_DATA_CHECK = "referral_data_check";
+	private static final String KEY_CUSTOM_ERROR_MESSAGE = "custom_error_message";
 	private static final String TAG = "GETSOCIAL_RESTART";
 
 	private Utils() {
@@ -101,6 +101,14 @@ public final class Utils {
 				.commit();
 	}
 
+	public static boolean isCustomErrorMesageEnabled(Context context) {
+		return preferences(context).getBoolean(KEY_CUSTOM_ERROR_MESSAGE, false);
+	}
+
+	public static void setCustomErrorMesageEnabled(Context context, boolean newValue) {
+		preferences(context).edit().putBoolean(KEY_CUSTOM_ERROR_MESSAGE, newValue).commit();
+	}
+
 	@SuppressLint("ApplySharedPref")
 	public static void setForceBillingService(@Nullable Context context, int value) {
 		preferences(context).edit()
@@ -120,14 +128,6 @@ public final class Utils {
 
 	public static boolean shouldOpenUiImmediately(Context context) {
 		return preferences(context).getBoolean(KEY_OPEN_UI, false);
-	}
-
-	public static boolean isCustomErrorMesageEnabled(Context context) {
-		return preferences(context).getBoolean(KEY_CUSTOM_ERROR_MESSAGE, false);
-	}
-
-	public static void setCustomErrorMesageEnabled(Context context, boolean newValue) {
-		preferences(context).edit().putBoolean(KEY_CUSTOM_ERROR_MESSAGE, newValue).commit();
 	}
 
 	public static boolean isReferralDataCheckEnabled(Context context) {

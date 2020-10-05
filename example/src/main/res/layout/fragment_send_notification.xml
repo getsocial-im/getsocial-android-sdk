@@ -1,202 +1,187 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-		android:orientation="vertical"
-		android:layout_width="match_parent"
-		android:layout_height="match_parent">
+			  android:orientation="vertical"
+			  android:layout_width="match_parent"
+			  android:layout_height="match_parent">
+	<LinearLayout android:layout_width="match_parent"
+				  android:layout_height="wrap_content"
+				  android:orientation="vertical">
 
-	<LinearLayout
-			android:layout_width="match_parent"
-			android:layout_height="wrap_content"
-			android:orientation="vertical">
+		<TextView android:layout_width="wrap_content"
+				  android:layout_height="wrap_content"
+				  android:textSize="25dp"
+				  android:text="Content"/>
 
-		<TextView
-				android:layout_width="wrap_content"
-				android:layout_height="wrap_content"
-				android:textSize="25dp"
-				android:text="Content" />
+		<LinearLayout android:id="@+id/container_template"
+					  android:layout_width="match_parent"
+					  android:layout_height="wrap_content"
+					  android:orientation="vertical">
 
-		<LinearLayout
-				android:id="@+id/container_template"
-				android:layout_width="match_parent"
-				android:layout_height="wrap_content"
-				android:orientation="vertical">
+			<EditText android:id="@+id/template_name"
+					  android:hint="Template name"
+					  android:layout_width="match_parent"
+					  android:layout_height="wrap_content"/>
 
-			<EditText
-					android:id="@+id/template_name"
-					android:hint="Template name"
-					android:layout_width="match_parent"
-					android:layout_height="wrap_content" />
+			<RelativeLayout android:gravity="center"
+							android:layout_margin="10dp"
+							android:layout_width="match_parent"
+							android:layout_height="wrap_content">
 
-			<RelativeLayout
-					android:gravity="center"
-					android:layout_margin="10dp"
-					android:layout_width="match_parent"
-					android:layout_height="wrap_content">
+				<TextView android:layout_width="wrap_content"
+						  android:layout_centerVertical="true"
+						  android:layout_height="wrap_content"
+						  android:layout_alignParentLeft="true"
+						  android:textSize="20dp"
+						  android:text="Template Data"/>
 
-				<TextView
-						android:layout_width="wrap_content"
-						android:layout_centerVertical="true"
-						android:layout_height="wrap_content"
-						android:layout_alignParentLeft="true"
-						android:textSize="20dp"
-						android:text="Template Data" />
-
-				<Button
-						android:id="@+id/button_add_template_data"
+				<Button android:id="@+id/button_add_template_data"
 						android:layout_centerVertical="true"
 						android:layout_alignParentRight="true"
 						android:text="Add"
 						android:layout_width="wrap_content"
-						android:layout_height="wrap_content" />
+						android:layout_height="wrap_content"/>
 
 			</RelativeLayout>
 
-			<LinearLayout
-					android:id="@+id/container_template_data"
-					android:layout_width="match_parent"
-					android:layout_height="wrap_content"
-					android:orientation="vertical" />
+			<LinearLayout android:id="@+id/container_template_data"
+						  android:layout_width="match_parent"
+						  android:layout_height="wrap_content"
+						  android:orientation="vertical"/>
 		</LinearLayout>
 
-		<LinearLayout
-				android:id="@+id/container_text"
+		<LinearLayout android:id="@+id/container_text"
+					  android:layout_width="match_parent"
+					  android:layout_height="wrap_content"
+					  android:orientation="vertical">
+
+			<EditText android:id="@+id/notification_title"
+					  android:hint="Notification title"
+					  android:layout_width="match_parent"
+					  android:layout_height="wrap_content"/>
+
+			<EditText android:id="@+id/notification_text"
+					  android:hint="Notification text"
+					  android:layout_width="match_parent"
+					  android:layout_height="wrap_content"/>
+
+			<EditText
+				android:id="@+id/notification_image_url"
+				android:hint="Image url"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content" />
+
+			<EditText
+				android:id="@+id/notification_video_url"
+				android:hint="Video url"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content" />
+
+			<LinearLayout
+				android:id="@+id/invite_image"
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
-				android:orientation="vertical">
-
-			<EditText
-					android:id="@+id/notification_title"
-					android:hint="Notification title"
-					android:layout_width="match_parent"
-					android:layout_height="wrap_content" />
-
-			<EditText
-					android:id="@+id/notification_text"
-					android:hint="Notification text"
-					android:layout_width="match_parent"
-					android:layout_height="wrap_content" />
-
-			<EditText
-					android:id="@+id/notification_image_url"
-					android:hint="Image url"
-					android:layout_width="match_parent"
-					android:layout_height="wrap_content" />
-
-			<EditText
-					android:id="@+id/notification_video_url"
-					android:hint="Video url"
-					android:layout_width="match_parent"
-					android:layout_height="wrap_content" />
-
-			<LinearLayout
-					android:id="@+id/invite_image"
-					android:layout_width="match_parent"
-					android:layout_height="wrap_content"
-					android:orientation="horizontal">
+				android:orientation="horizontal">
 
 				<TextView
-						style="?android:textAppearanceMedium"
-						android:layout_width="0dp"
-						android:layout_height="wrap_content"
-						android:layout_weight=".3"
-						android:text="@string/label_select_image" />
+					style="?android:textAppearanceMedium"
+					android:layout_width="0dp"
+					android:layout_height="wrap_content"
+					android:layout_weight=".3"
+					android:text="@string/label_select_image"/>
 
 				<Button
-						android:id="@+id/button_select_image"
-						android:visibility="visible"
-						android:layout_width="80dp"
-						android:layout_height="40dp"
-						android:layout_marginLeft="10dp"
-						android:text="Select" />
+					android:id="@+id/button_select_image"
+					android:visibility="visible"
+					android:layout_width="80dp"
+					android:layout_height="40dp"
+					android:layout_marginLeft="10dp"
+					android:text="Select"/>
 
 			</LinearLayout>
-
 			<LinearLayout
-					android:layout_width="match_parent"
-					android:layout_height="wrap_content"
-					android:orientation="horizontal">
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:orientation="horizontal">
 
 				<LinearLayout
-						android:layout_width="match_parent"
-						android:layout_height="wrap_content"
-						android:orientation="vertical">
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:orientation="vertical">
 
 					<ImageView
-							android:id="@+id/image_preview"
-							android:layout_width="match_parent"
-							android:layout_height="100dp"
-							android:layout_weight=".7"
-							android:visibility="gone"
-							android:hint="@string/hint_image" />
+						android:id="@+id/image_preview"
+						android:layout_width="match_parent"
+						android:layout_height="100dp"
+						android:layout_weight=".7"
+						android:visibility="gone"
+						android:hint="@string/hint_image"/>
 
 					<Button
-							android:id="@+id/button_remove_image"
-							android:visibility="gone"
-							android:layout_width="match_parent"
-							android:layout_height="40dp"
-							android:layout_marginTop="10dp"
-							android:text="@string/label_remove" />
+						android:id="@+id/button_remove_image"
+						android:visibility="gone"
+						android:layout_width="match_parent"
+						android:layout_height="40dp"
+						android:layout_marginTop="10dp"
+						android:text="@string/label_remove"/>
 
 				</LinearLayout>
 
 			</LinearLayout>
 
 			<LinearLayout
-					android:id="@+id/notification_video"
-					android:layout_width="match_parent"
-					android:layout_height="wrap_content"
-					android:orientation="vertical"
-					android:layout_marginTop="20dp">
+				android:id="@+id/notification_video"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:orientation="vertical"
+				android:layout_marginTop="20dp">
 
 				<LinearLayout
-						android:layout_width="match_parent"
-						android:layout_height="wrap_content"
-						android:orientation="horizontal">
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:orientation="horizontal">
 
 					<TextView
-							style="?android:textAppearanceMedium"
-							android:layout_width="0dp"
-							android:layout_height="wrap_content"
-							android:layout_weight=".3"
-							android:text="@string/label_select_video" />
+						style="?android:textAppearanceMedium"
+						android:layout_width="0dp"
+						android:layout_height="wrap_content"
+						android:layout_weight=".3"
+						android:text="@string/label_select_video"/>
 
-					<LinearLayout
-							android:layout_width="match_parent"
-							android:layout_height="wrap_content"
-							android:orientation="vertical"
-							android:layout_weight=".7"
-							android:layout_marginLeft="40dp">
+					<LinearLayout android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:orientation="vertical"
+						android:layout_weight=".7"
+						android:layout_marginLeft="40dp">
 
-						<LinearLayout
-								android:layout_width="match_parent"
-								android:layout_height="wrap_content"
-								android:orientation="vertical">
+						<LinearLayout android:layout_width="match_parent"
+							android:layout_height="wrap_content"
+							android:orientation="vertical">
 
 							<ImageView
-									android:id="@+id/video_preview"
-									android:visibility="gone"
-									android:layout_width="match_parent"
-									android:layout_height="100dp"
-									android:layout_weight=".7"
-									android:hint="@string/hint_text" />
+								android:id="@+id/video_preview"
+								android:visibility="gone"
+								android:layout_width="match_parent"
+								android:layout_height="100dp"
+								android:layout_weight=".7"
+								android:hint="@string/hint_text"/>
 
 							<Button
-									android:id="@+id/button_select_video"
-									android:visibility="visible"
-									android:layout_width="80dp"
-									android:layout_height="40dp"
-									android:layout_centerHorizontal="true"
-									android:text="Select" />
+								android:id="@+id/button_select_video"
+								android:visibility="visible"
+								android:layout_width="80dp"
+								android:layout_height="40dp"
+								android:layout_centerHorizontal="true"
+								android:text="Select"/>
 
 							<Button
-									android:id="@+id/button_remove_video"
-									android:visibility="gone"
-									android:layout_width="80dp"
-									android:layout_height="40dp"
-									android:layout_centerHorizontal="true"
-									android:layout_below="@id/video"
-									android:layout_marginTop="10dp"
-									android:text="@string/label_button_remove" />
+								android:id="@+id/button_remove_video"
+								android:visibility="gone"
+								android:layout_width="80dp"
+								android:layout_height="40dp"
+								android:layout_centerHorizontal="true"
+								android:layout_below="@id/video"
+								android:layout_marginTop="10dp"
+								android:text="@string/label_button_remove"/>
 
 						</LinearLayout>
 
@@ -226,140 +211,113 @@
 
 		</LinearLayout>
 
-		<View
-				android:background="@android:color/black"
-				android:layout_width="match_parent"
-				android:layout_height="1dp" />
+		<View android:background="@android:color/black"
+			  android:layout_width = "match_parent"
+			  android:layout_height="1dp"/>
 
-		<im.getsocial.demo.ui.PickActionView
-				android:id="@+id/pick_action_view"
-				android:layout_width="match_parent"
-				android:layout_height="wrap_content" />
+		<im.getsocial.demo.ui.PickActionView android:id="@+id/pick_action_view"
+											 android:layout_width="match_parent"
+											 android:layout_height="wrap_content"/>
 
-		<RelativeLayout
-				android:gravity="center"
-				android:layout_margin="10dp"
-				android:layout_width="match_parent"
-				android:layout_height="wrap_content">
+		<RelativeLayout android:gravity="center"
+						android:layout_margin="10dp"
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content">
 
-			<TextView
-					android:layout_width="wrap_content"
-					android:layout_centerVertical="true"
-					android:layout_height="wrap_content"
-					android:layout_alignParentLeft="true"
-					android:textSize="20dp"
-					android:text="Action Buttons" />
+			<TextView android:layout_width="wrap_content"
+					  android:layout_centerVertical="true"
+					  android:layout_height="wrap_content"
+					  android:layout_alignParentLeft="true"
+					  android:textSize="20dp"
+					  android:text="Action Buttons"/>
 
-			<Button
-					android:id="@+id/button_add_action_button"
+			<Button android:id="@+id/button_add_action_button"
 					android:layout_centerVertical="true"
 					android:layout_alignParentRight="true"
 					android:text="Add"
 					android:layout_width="wrap_content"
-					android:layout_height="wrap_content" />
+					android:layout_height="wrap_content"/>
 
 		</RelativeLayout>
 
-		<LinearLayout
-				android:id="@+id/container_action_buttons"
-				android:layout_width="match_parent"
-				android:layout_height="wrap_content"
-				android:orientation="vertical" />
+		<LinearLayout android:id="@+id/container_action_buttons"
+					  android:layout_width="match_parent"
+					  android:layout_height="wrap_content"
+					  android:orientation="vertical"/>
 
-		<View
-				android:background="@android:color/black"
-				android:layout_width="match_parent"
-				android:layout_height="1dp" />
+		<View android:background="@android:color/black"
+			  android:layout_width = "match_parent"
+			  android:layout_height="1dp"/>
 
-		<TextView
-				android:layout_width="wrap_content"
-				android:layout_height="wrap_content"
-				android:textSize="25dp"
-				android:text="Recipients" />
+		<TextView android:layout_width="wrap_content"
+				  android:layout_height="wrap_content"
+				  android:textSize="25dp"
+				  android:text="Recipients"/>
 
-		<CheckBox
-				android:id="@+id/checkbox_friends"
-				android:text="Friends"
-				android:layout_width="match_parent"
-				android:layout_height="wrap_content" />
+		<CheckBox android:id="@+id/checkbox_friends"
+				  android:text="Friends"
+				  android:layout_width="match_parent"
+				  android:layout_height="wrap_content"/>
 
-		<CheckBox
-				android:id="@+id/checkbox_referred_users"
-				android:text="Invited Users"
-				android:layout_width="match_parent"
-				android:layout_height="wrap_content" />
+		<CheckBox android:id="@+id/checkbox_referred_users"
+				  android:text="Invited Users"
+				  android:layout_width="match_parent"
+				  android:layout_height="wrap_content"/>
 
-		<CheckBox
-				android:id="@+id/checkbox_referrer"
-				android:text="Referrer"
-				android:layout_width="match_parent"
-				android:layout_height="wrap_content" />
+		<CheckBox android:id="@+id/checkbox_referrer"
+				  android:text="Referrer"
+				  android:layout_width="match_parent"
+				  android:layout_height="wrap_content"/>
 
-		<CheckBox
-				android:id="@+id/checkbox_me"
-				android:text="ME"
-				android:layout_width="match_parent"
-				android:layout_height="wrap_content" />
 
-		<RelativeLayout
-				android:gravity="center"
-				android:layout_margin="10dp"
-				android:layout_width="match_parent"
-				android:layout_height="wrap_content">
+		<RelativeLayout android:gravity="center"
+						android:layout_margin="10dp"
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content">
 
-			<TextView
-					android:layout_width="wrap_content"
-					android:layout_centerVertical="true"
-					android:layout_height="wrap_content"
-					android:layout_alignParentLeft="true"
-					android:textSize="20dp"
-					android:text="Custom Users" />
+			<TextView android:layout_width="wrap_content"
+					  android:layout_centerVertical="true"
+					  android:layout_height="wrap_content"
+					  android:layout_alignParentLeft="true"
+					  android:textSize="20dp"
+					  android:text="Custom Users"/>
 
-			<Button
-					android:id="@+id/button_add_user_id"
+			<Button android:id="@+id/button_add_user_id"
 					android:layout_centerVertical="true"
 					android:layout_alignParentRight="true"
 					android:text="Add"
 					android:layout_width="wrap_content"
-					android:layout_height="wrap_content" />
+					android:layout_height="wrap_content"/>
 
 		</RelativeLayout>
 
-		<LinearLayout
-				android:id="@+id/container_user_ids"
-				android:layout_width="match_parent"
-				android:layout_height="wrap_content"
-				android:orientation="vertical" />
+		<LinearLayout android:id="@+id/container_user_ids"
+					  android:layout_width="match_parent"
+					  android:layout_height="wrap_content"
+					  android:orientation="vertical"/>
 
-		<LinearLayout
-				android:layout_width="match_parent"
+		<LinearLayout android:layout_width="match_parent"
 				android:layout_height="wrap_content"
 				android:orientation="horizontal">
-
-			<Spinner
-					android:id="@+id/spinner_select_badge_change"
+			<Spinner android:id="@+id/spinner_select_badge_change"
 					android:layout_margin="5dp"
 					android:layout_width="200dp"
-					android:layout_height="match_parent" />
-
-			<EditText
-					android:id="@+id/badge_change"
+					android:layout_height="match_parent"/>
+			<EditText android:id="@+id/badge_change"
 					android:layout_margin="5dp"
 					android:visibility="gone"
 					android:inputType="numberSigned"
 					android:layout_width="match_parent"
-					android:layout_height="wrap_content" />
+					android:layout_height="wrap_content"/>
 		</LinearLayout>
 
-		<View
-				android:background="@android:color/black"
-				android:layout_width="match_parent"
-				android:layout_height="1dp" />
+		<View android:background="@android:color/black"
+			  android:layout_width = "match_parent"
+			  android:layout_height="1dp"/>
 
-		<Button
-				android:id="@+id/button_send_notification"
+		<Button android:id="@+id/button_send_notification"
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
-				android:text="Send Notification" />
+				android:text="Send Notification"/>
 	</LinearLayout>
 </ScrollView>

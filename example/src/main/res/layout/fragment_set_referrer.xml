@@ -48,28 +48,6 @@
 		</LinearLayout>
 
 		<LinearLayout
-				android:id="@+id/setReferrer_providerId_layout"
-				android:layout_width="match_parent"
-				android:layout_height="wrap_content"
-				android:orientation="horizontal">
-
-			<TextView
-					style="?android:textAppearanceMedium"
-					android:layout_width="0dp"
-					android:layout_height="wrap_content"
-					android:layout_weight=".3"
-					android:text="@string/setReferrer_providerId_label"/>
-
-			<EditText
-					android:id="@+id/setReferrer_providerId"
-					android:layout_width="0dp"
-					android:layout_height="wrap_content"
-					android:layout_weight=".7"
-					android:hint="@string/setReferrer_providerId_hint"/>
-
-		</LinearLayout>
-
-		<LinearLayout
 				android:id="@+id/setReferrer_event_layout"
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"

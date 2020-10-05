@@ -18,16 +18,14 @@ package im.getsocial.demo.plugin;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.net.Uri;
 import android.widget.Toast;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
-import com.facebook.share.model.ShareLinkContent;
-import com.facebook.share.widget.ShareDialog;
+import com.facebook.share.model.AppInviteContent;
+import com.facebook.share.widget.AppInviteDialog;
 import im.getsocial.sdk.GetSocial;
 import im.getsocial.sdk.invites.InviteCallback;
 import im.getsocial.sdk.invites.InviteChannel;
@@ -37,14 +35,18 @@ import im.getsocial.sdk.invites.InvitePackage;
 /**
  * Invite Channel Plugin for GetSocial SDK.
  * Register plugin via {@link GetSocial#registerInviteChannelPlugin(String pluginId, InviteChannelPlugin plugin)}.
+ * @deprecated use {@link im.getsocial.demo.plugin.FacebookSharePlugin} ()} instead.
+ * Facebook is deprecating App Invites from February 5, 2018: https://developers.facebook.com/blog/post/2017/11/07/changes-developer-offerings/
+ * More: https://blog.getsocial.im/facebook-deprecates-app-invites-are-you-ready/
  */
-public class FacebookSharePlugin extends InviteChannelPlugin {
+@Deprecated
+public class FacebookInvitePlugin extends InviteChannelPlugin {
 
 	private final Activity _activity;
 	private final CallbackManager _callbackManager;
 	private final ConnectivityManager _connectivityManager;
 
-	public FacebookSharePlugin(Activity activity, CallbackManager callbackManager) {
+	public FacebookInvitePlugin(Activity activity, CallbackManager callbackManager) {
 		_activity = activity;
 		_callbackManager = callbackManager;
 		_connectivityManager = (ConnectivityManager) activity.getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -52,24 +54,24 @@ public class FacebookSharePlugin extends InviteChannelPlugin {
 
 	@Override
 	public boolean isAvailableForDevice(InviteChannel inviteChannel) {
-		// always available, if Facebook app not installed, it opens webview.
-		return true;
+		return AppInviteDialog.canShow();
 	}
 
 	@Override
 	public void presentChannelInterface(InviteChannel inviteChannel, InvitePackage invitePackage, final InviteCallback callback) {
 		if (isConnected()) {
-			ShareLinkContent.Builder shareLinkBuilder = new ShareLinkContent.Builder();
+			AppInviteContent.Builder contentBuilder = new AppInviteContent.Builder();
 
-			shareLinkBuilder.setContentUrl(Uri.parse(invitePackage.getReferralUrl()));
-			shareLinkBuilder.setQuote(invitePackage.getText());
+			contentBuilder.setApplinkUrl(invitePackage.getReferralUrl());
+			if (invitePackage.getImageUrl() != null && invitePackage.getImage() != null) {
+				contentBuilder.setPreviewImageUrl(invitePackage.getImageUrl());
+			}
+			AppInviteContent sharedContent = contentBuilder.build();
 
-			ShareLinkContent sharedContent = shareLinkBuilder.build();
-
-			ShareDialog shareDialog = new ShareDialog(_activity);
-			shareDialog.registerCallback(_callbackManager, new FacebookCallback<ShareDialog.Result>() {
+			AppInviteDialog appInviteDialog = new AppInviteDialog(_activity);
+			appInviteDialog.registerCallback(_callbackManager, new FacebookCallback<AppInviteDialog.Result>() {
 						@Override
-						public void onSuccess(ShareDialog.Result result) {
+						public void onSuccess(AppInviteDialog.Result result) {
 							callback.onComplete();
 						}
 
@@ -84,27 +86,10 @@ public class FacebookSharePlugin extends InviteChannelPlugin {
 						}
 					}
 			);
-			if (isFacebookAppInstalled()) {
-				shareDialog.show(sharedContent, ShareDialog.Mode.NATIVE);
-			} else {
-				shareDialog.show(sharedContent, ShareDialog.Mode.WEB);
-			}
+			appInviteDialog.show(sharedContent);
 		} else {
 			onError("Can't reach Facebook. No internet connection.", callback);
 		}
-	}
-
-	private boolean isFacebookAppInstalled() {
-		PackageManager pm = _activity.getPackageManager();
-		boolean app_installed = false;
-		try {
-			pm.getPackageInfo("com.facebook.katana", PackageManager.GET_ACTIVITIES);
-			app_installed = true;
-		}
-		catch (PackageManager.NameNotFoundException exception) {
-			app_installed = false;
-		}
-		return app_installed;
 	}
 
 	private boolean isConnected() {

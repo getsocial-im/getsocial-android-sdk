@@ -1,7 +1,6 @@
-<resources xmlns:tools="http://schemas.android.com/tools">
+<resources>
 	<string name="app_name">GetSocial Demo</string>
 	<string name="get_social_app_id">LGa80P9790g4</string>
-	<string name="appcenter_id" tools:ignore="TypographyDashes">-</string>>
 
 	<!-- new sdk -->
 	<string name="facebook_app_id">1283253028421001</string>
@@ -106,8 +105,6 @@
 
 	<string name="setReferrer_referrerId_label">Referrer Id</string>
 	<string name="setReferrer_referrerId_hint">4214234324</string>
-	<string name="setReferrer_providerId_label">Provider Id</string>
-	<string name="setReferrer_providerId_hint">facebook</string>
 	<string name="setReferrer_event_label">Event</string>
 	<string name="setReferrer_event_hint">app_install</string>
 	<string name="setReferrer_button">Set Referrer</string>

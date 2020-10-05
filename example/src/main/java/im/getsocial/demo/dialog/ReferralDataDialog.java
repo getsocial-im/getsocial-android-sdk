@@ -15,9 +15,14 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import im.getsocial.demo.R;
-import im.getsocial.sdk.PromoCodes;
+import im.getsocial.demo.utils.Console;
+import im.getsocial.demo.utils.SimpleLogger;
+import im.getsocial.sdk.Callback;
+import im.getsocial.sdk.GetSocial;
+import im.getsocial.sdk.GetSocialException;
 import im.getsocial.sdk.invites.LinkParams;
 import im.getsocial.sdk.invites.ReferralData;
+import im.getsocial.sdk.promocodes.PromoCode;
 
 public class ReferralDataDialog extends DialogFragment {
 
@@ -34,23 +39,27 @@ public class ReferralDataDialog extends DialogFragment {
 
 	}
 
-	public static void showReferralData(final FragmentManager fm, final ReferralData referralData) {
-		final ReferralDataDialog referralDataDialog = new ReferralDataDialog();
-		final Bundle referralDataBundle = new Bundle();
+	public static void showReferralData(FragmentManager fm, @Nullable ReferralData referralData) {
+		ReferralDataDialog referralDataDialog = new ReferralDataDialog();
+		Bundle referralDataBundle = new Bundle();
 
-		referralDataBundle.putString("REFERRAL_DATA", "Referral data received: [ " + referralData + " ]");
-		referralDataBundle.putString("PROMO_CODE", referralData.getLinkParams().get(LinkParams.KEY_PROMO_CODE));
+		if (referralData == null) {
+			referralDataBundle.putString("REFERRAL_DATA", "No referral data.");
+		} else {
+			referralDataBundle.putString("REFERRAL_DATA", "Referral data received: [ " + referralData + " ]");
+			referralDataBundle.putString("PROMO_CODE", referralData.getReferralLinkParams().get(LinkParams.KEY_PROMO_CODE));
+		}
 
 		referralDataDialog.setArguments(referralDataBundle);
 		referralDataDialog.show(fm, "referral_data_dialog");
 	}
 
 	@Override
-	public View onCreateView(@Nullable final LayoutInflater inflater, final ViewGroup container,
-													 @Nullable final Bundle savedInstanceState) {
+	public View onCreateView(@Nullable LayoutInflater inflater, ViewGroup container,
+							 @Nullable Bundle savedInstanceState) {
 		getDialog().getWindow().requestFeature(Window.FEATURE_NO_TITLE);
 
-		final View view = inflater.inflate(R.layout.dialog_referral_data_info, container);
+		View view = inflater.inflate(R.layout.dialog_referral_data_info, container);
 
 		ButterKnife.bind(this, view);
 
@@ -67,10 +76,16 @@ public class ReferralDataDialog extends DialogFragment {
 
 	@OnClick(R.id.referralDataInfo_actionButton)
 	public void doAction() {
-		PromoCodes.claim(_promoCode, result -> {
-			Toast.makeText(getContext(), "PromoCode claimed: " + result, Toast.LENGTH_SHORT).show();
-		}, error -> {
-			Toast.makeText(getContext(), "Failed to claim PromoCode: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+		GetSocial.claimPromoCode(_promoCode, new Callback<PromoCode>() {
+			@Override
+			public void onSuccess(PromoCode result) {
+				Toast.makeText(getContext(), "PromoCode claimed: " + result, Toast.LENGTH_SHORT).show();
+			}
+
+			@Override
+			public void onFailure(GetSocialException exception) {
+				Toast.makeText(getContext(), "Failed to claim PromoCode: " + exception.getMessage(), Toast.LENGTH_SHORT).show();
+			}
 		});
 	}
 

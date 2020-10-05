@@ -1,8 +1,9 @@
 package im.getsocial.demo.dependencies;
 
+import im.getsocial.demo.dependencies.components.Clipboard;
 import im.getsocial.demo.dependencies.components.NotificationsManager;
+import im.getsocial.demo.utils.NotificationHandler;
 import im.getsocial.sdk.actions.ActionListener;
-import im.getsocial.sdk.notifications.OnNotificationClickedListener;
 
 public interface DependenciesContainer {
 
@@ -10,6 +11,7 @@ public interface DependenciesContainer {
 
 	ActionListener actionListener();
 
-	OnNotificationClickedListener notificationHandler();
+	NotificationHandler notificationHandler();
 
+	Clipboard clipboard();
 }
