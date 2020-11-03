@@ -9,9 +9,10 @@ import androidx.multidex.MultiDex;
 import com.adjust.sdk.Adjust;
 import com.adjust.sdk.AdjustConfig;
 import com.appsflyer.AppsFlyerLib;
-import com.crashlytics.android.Crashlytics;
+import com.microsoft.appcenter.AppCenter;
+import com.microsoft.appcenter.analytics.Analytics;
+import com.microsoft.appcenter.crashes.Crashes;
 import com.vk.sdk.VKSdk;
-import io.fabric.sdk.android.Fabric;
 
 /**
  * Created by orestsavchak on 1/4/18.
@@ -25,7 +26,6 @@ public class DemoApplication extends Application {
 	protected void attachBaseContext(Context base) {
 		super.attachBaseContext(base);
 
-
 		MultiDex.install(this);
 	}
 
@@ -35,15 +35,15 @@ public class DemoApplication extends Application {
 		configureVK();
 		configureAdjust();
 		configureAppsFlyer();
-		initCrashlytics();
+		initAppCenter();
 	}
 
-	protected void initCrashlytics() {
-		final Fabric fabric = new Fabric.Builder(this)
-				.kits(new Crashlytics())
-				.debuggable(true)           // Enables Crashlytics debugger
-				.build();
-		Fabric.with(fabric);
+	protected void initAppCenter() {
+		final String appSecret = getResources().getString(R.string.appcenter_id);
+		if ("-".equals(appSecret)) {
+			return;
+		}
+		AppCenter.start(this, appSecret, Analytics.class, Crashes.class);
 	}
 
 	private void configureAdjust() {
@@ -79,10 +79,12 @@ public class DemoApplication extends Application {
 	private static class AdjustLifecycleCallbacks implements ActivityLifecycleCallbacks {
 
 		@Override
-		public void onActivityCreated(Activity activity, Bundle savedInstanceState) { }
+		public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
+		}
 
 		@Override
-		public void onActivityStarted(Activity activity) { }
+		public void onActivityStarted(Activity activity) {
+		}
 
 		@Override
 		public void onActivityResumed(Activity activity) {
@@ -95,12 +97,15 @@ public class DemoApplication extends Application {
 		}
 
 		@Override
-		public void onActivityStopped(Activity activity) { }
+		public void onActivityStopped(Activity activity) {
+		}
 
 		@Override
-		public void onActivitySaveInstanceState(Activity activity, Bundle outState) { }
+		public void onActivitySaveInstanceState(Activity activity, Bundle outState) {
+		}
 
 		@Override
-		public void onActivityDestroyed(Activity activity) { }
+		public void onActivityDestroyed(Activity activity) {
+		}
 	}
 }

@@ -17,20 +17,20 @@
 package im.getsocial.demo.fragment;
 
 import android.os.Bundle;
-import androidx.annotation.Nullable;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import androidx.annotation.Nullable;
 import butterknife.BindView;
 import butterknife.BindViews;
 import butterknife.ButterKnife;
 import im.getsocial.demo.R;
-import im.getsocial.sdk.CompletionCallback;
-import im.getsocial.sdk.GetSocial;
-import im.getsocial.sdk.GetSocialException;
+import im.getsocial.sdk.Invites;
+import im.getsocial.sdk.communities.UserId;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -45,12 +45,12 @@ public class SetReferrerFragment extends BaseFragment {
 
 
 	@Override
-	public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+	public View onCreateView(final LayoutInflater inflater, @Nullable final ViewGroup container, @Nullable final Bundle savedInstanceState) {
 		return inflater.inflate(R.layout.fragment_set_referrer, container, false);
 	}
 
 	@Override
-	public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+	public void onViewCreated(final View view, @Nullable final Bundle savedInstanceState) {
 		super.onViewCreated(view, savedInstanceState);
 		_viewContainer = new ViewContainer(view);
 	}
@@ -67,29 +67,24 @@ public class SetReferrerFragment extends BaseFragment {
 
 	private void invokeSetReferrer() {
 		final String referrerId = _viewContainer._referrerIdInput.getText().toString();
+		final String providerId = _viewContainer._providerIdInput.getText().toString();
 		final String event = _viewContainer._referrerEventInput.getText().toString();
 
 		// collect custom data
 		final Map<String, String> customData = new HashMap<>();
 		for (int i = 0; i < _viewContainer._customDataKeys.size(); i++) {
-			String key = _viewContainer._customDataKeys.get(i).getText().toString();
-			String value = _viewContainer._customDataValues.get(i).getText().toString();
+			final String key = _viewContainer._customDataKeys.get(i).getText().toString();
+			final String value = _viewContainer._customDataValues.get(i).getText().toString();
 			if (!TextUtils.isEmpty(key) && !TextUtils.isEmpty(value)) {
 				customData.put(key, value);
 			}
 		}
 
 		// invoke set referrer
-		GetSocial.setReferrer(referrerId, event, customData, new CompletionCallback() {
-			@Override
-			public void onSuccess() {
-				showAlert("Set Referrer", "Referrer was set.");
-			}
-
-			@Override
-			public void onFailure(GetSocialException exception) {
-				showAlert("Set Referrer", "Error: " + exception.getMessage());
-			}
+		Invites.setReferrer(UserId.createWithProvider(providerId, referrerId), event, customData, () -> {
+			showAlert("Set Referrer", "Referrer was set.");
+		}, error -> {
+			showAlert("Set Referrer", "Error: " + error.getMessage());
 		});
 	}
 
@@ -97,6 +92,8 @@ public class SetReferrerFragment extends BaseFragment {
 
 		@BindView(R.id.setReferrer_referrerId)
 		EditText _referrerIdInput;
+		@BindView(R.id.setReferrer_providerId)
+		EditText _providerIdInput;
 		@BindView(R.id.setReferrer_event)
 		EditText _referrerEventInput;
 
@@ -108,13 +105,13 @@ public class SetReferrerFragment extends BaseFragment {
 		@BindView(R.id.buttonSetReferrer)
 		Button _buttonSetReferrer;
 
-		ViewContainer(View view) {
+		ViewContainer(final View view) {
 
 			ButterKnife.bind(this, view);
 
 			_buttonSetReferrer.setOnClickListener(new View.OnClickListener() {
 				@Override
-				public void onClick(View view) {
+				public void onClick(final View view) {
 					invokeSetReferrer();
 				}
 			});
