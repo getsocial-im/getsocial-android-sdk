@@ -19,7 +19,7 @@
 
 		<EditText
 				android:id="@+id/group_name"
-				android:hint="Title"
+				android:hint="Name"
 				android:maxLines="1"
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content" />
@@ -30,6 +30,63 @@
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content" />
 
+		<EditText
+			android:id="@+id/group_avatar_url"
+			android:hint="Avatar Url"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content" />
+
+		<LinearLayout
+			android:id="@+id/group_avatar_image_layout"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:orientation="horizontal">
+
+			<TextView
+				style="?android:textAppearanceMedium"
+				android:layout_width="0dp"
+				android:layout_height="wrap_content"
+				android:layout_weight=".3"
+				android:text="@string/label_select_image"/>
+
+			<Button
+				android:id="@+id/button_select_group_avatar_image"
+				android:visibility="visible"
+				android:layout_width="80dp"
+				android:layout_height="40dp"
+				android:layout_marginLeft="10dp"
+				android:text="Choose"/>
+
+		</LinearLayout>
+		<LinearLayout
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:orientation="horizontal">
+
+			<LinearLayout
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:orientation="vertical">
+
+				<ImageView
+					android:id="@+id/group_avatar_image"
+					android:layout_width="match_parent"
+					android:layout_height="100dp"
+					android:layout_weight=".7"
+					android:visibility="gone"
+					android:hint="@string/hint_image"/>
+
+				<Button
+					android:id="@+id/button_remove_group_avatar_image"
+					android:visibility="gone"
+					android:layout_width="match_parent"
+					android:layout_height="40dp"
+					android:layout_marginTop="10dp"
+					android:text="@string/label_remove"/>
+
+			</LinearLayout>
+
+		</LinearLayout>
 		<LinearLayout
 				android:id="@+id/properties"
 				android:orientation="vertical"

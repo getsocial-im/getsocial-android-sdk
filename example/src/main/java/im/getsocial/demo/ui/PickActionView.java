@@ -36,7 +36,7 @@ public class PickActionView extends LinearLayout {
 	private static final Map<String, List<String>> PLACEHOLDERS = new HashMap<String, List<String>>() {
 		{
 			put(ActionTypes.OPEN_PROFILE, Collections.singletonList(ActionDataKeys.OpenProfile.USER_ID));
-			put(ActionTypes.OPEN_ACTIVITY, Arrays.asList(ActionDataKeys.OpenActivity.ACTIVITY_ID, ActionDataKeys.OpenActivity.COMMENT_ID, ActionDataKeys.OpenActivity.TOPIC_ID, ActionDataKeys.OpenActivity.USER_ID));
+			put(ActionTypes.OPEN_ACTIVITY, Arrays.asList(ActionDataKeys.OpenActivity.ACTIVITY_ID, ActionDataKeys.OpenActivity.COMMENT_ID, ActionDataKeys.OpenActivity.TOPIC_ID, ActionDataKeys.OpenActivity.USER_ID, ActionDataKeys.OpenActivity.GROUP_ID));
 			put(ActionTypes.OPEN_INVITES, Collections.emptyList());
 			put(ActionTypes.OPEN_URL, Collections.singletonList(ActionDataKeys.OpenUrl.URL));
 			put(ActionTypes.CLAIM_PROMO_CODE, Collections.singletonList(ActionDataKeys.ClaimPromoCode.PROMO_CODE));

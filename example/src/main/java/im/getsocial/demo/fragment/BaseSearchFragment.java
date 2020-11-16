@@ -82,6 +82,21 @@ public abstract class BaseSearchFragment<Query, Item> extends BaseFragment {
 
 	protected abstract BaseSearchAdapter<? extends ViewHolder> createAdapter();
 
+	public BaseSearchAdapter<? extends ViewHolder> getAdapter() {
+		return _adapter;
+	}
+
+	public void removeItem(Item item) {
+		int position = _adapter._items.indexOf(item);
+		_adapter._items.remove(position);
+		_adapter.notifyItemRemoved(position);
+	}
+	public void updateItem(Item oldItem, Item newItem) {
+		int position = _adapter._items.indexOf(oldItem);
+		_adapter._items.set(position, newItem);
+		_adapter.notifyItemChanged(position);
+	}
+
 	protected void loadItems() {
 		_scrollListener.resetState();
 		_swipeRefreshLayout.setRefreshing(true);
@@ -160,6 +175,10 @@ public abstract class BaseSearchFragment<Query, Item> extends BaseFragment {
 		@Override
 		public int getItemCount() {
 			return _items.size();
+		}
+
+		public int getItemPosition(Item item) {
+			return _items.indexOf(item);
 		}
 	}
 

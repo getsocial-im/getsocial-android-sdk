@@ -198,9 +198,9 @@ public class PostActivityFragment extends BaseFragment implements Callback<GetSo
 		if (_postTopic != null) {
 			return PostActivityTarget.topic(_postTopic);
 		}
-//		if (_postGroup != null) {
-//			return PostActivityTarget.group(_postGroup);
-//		}
+		if (_postGroup != null) {
+			return PostActivityTarget.group(_postGroup);
+		}
 		return PostActivityTarget.timeline();
 	}
 
@@ -208,9 +208,9 @@ public class PostActivityFragment extends BaseFragment implements Callback<GetSo
 		if (_postTopic != null) {
 			return ActivitiesQuery.activitiesInTopic(_postTopic);
 		}
-//		if (_postGroup != null) {
-//			return ActivitiesQuery.activitiesInGroup(_postGroup);
-//		}
+		if (_postGroup != null) {
+			return ActivitiesQuery.activitiesInGroup(_postGroup);
+		}
 		return ActivitiesQuery.feedOf(UserId.currentUser());
 	}
 

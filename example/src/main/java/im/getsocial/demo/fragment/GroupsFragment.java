@@ -10,7 +10,8 @@ public class GroupsFragment extends BaseListFragment {
 	protected List<MenuItem> createListData() {
 		return Arrays.asList(
 						navigationListItem("Create Group", CreateGroupFragment.class),
-						navigationListItem("Find Groups", GroupsSearchFragment.class)
+						navigationListItem("Find Groups", GroupsSearchFragment.class),
+						navigationListItem("My Groups", MyGroupsFragment.class)
 		);
 	}
 

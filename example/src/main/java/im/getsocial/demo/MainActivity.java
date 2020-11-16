@@ -230,6 +230,11 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Acti
 		Notifications.setOnNotificationReceivedListener(this);
 		GetSocial.addOnCurrentUserChangedListener(this);
 		GetSocial.addOnInitializeListener(() -> {
+			Communities.getGroup("Yana1", (group) -> {
+				System.out.println(group.toString());
+			}, error -> {
+				System.out.println("FCK");
+			});
 			System.out.println("### OnInitialized listener is invoked");
 			System.out.println("### Current user: " + GetSocial.getCurrentUser());
 			invalidateUi();

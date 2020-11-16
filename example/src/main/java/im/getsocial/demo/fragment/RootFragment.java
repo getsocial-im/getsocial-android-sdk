@@ -90,7 +90,7 @@ public class RootFragment extends BaseListFragment implements NotificationsManag
 						navigationListItem("Activities", ActivitiesFragment.class),
 						navigationListItem("Topics", TopicsSearchFragment.class),
 						navigationListItem("Tags", TagsListFragment.class),
-//						navigationListItem("Groups", GroupsFragment.class),
+						navigationListItem("Groups", GroupsFragment.class),
 						navigationListItem("Users", UsersSearchFragment.class),
 						navigationListItem("Users by IDs", TestUsersByIdFragment.class),
 						navigationListItem("Notifications", NotificationsFragment.class, builder -> builder.withSubtitle(() -> "You have " + _notificationsManager.getNewNotificationsCount() + " new notifications")),
