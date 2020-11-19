@@ -58,7 +58,7 @@ public class GroupMembersFragment extends BaseSearchFragment<MembersQuery, Group
 		final Bundle bundle = getArguments();
 		_groupId = bundle.getString("groupId");
 		Integer intRole = bundle.getInt("role");
-		_role = Role.from(intRole);
+		_role = Role.findByValue(intRole);
 		return super.onCreateView(inflater, container, savedInstanceState);
 	}
 

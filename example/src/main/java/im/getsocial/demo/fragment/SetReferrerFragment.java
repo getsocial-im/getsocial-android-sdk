@@ -67,7 +67,10 @@ public class SetReferrerFragment extends BaseFragment {
 
 	private void invokeSetReferrer() {
 		final String referrerId = _viewContainer._referrerIdInput.getText().toString();
-		final String providerId = _viewContainer._providerIdInput.getText().toString();
+		String providerId = null;
+		if (!TextUtils.isEmpty(_viewContainer._providerIdInput.getText())) {
+			providerId = _viewContainer._providerIdInput.getText().toString();
+		}
 		final String event = _viewContainer._referrerEventInput.getText().toString();
 
 		// collect custom data
