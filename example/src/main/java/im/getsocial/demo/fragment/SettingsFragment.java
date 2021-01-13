@@ -57,25 +57,25 @@ public class SettingsFragment extends BaseListFragment {
 
 		listData.add(new MenuItem.Builder("Enable Custom Error Message")
 				.withAction(() -> {
-					Utils.setCustomErrorMesageEnabled(getContext(), true);
+					Utils.setCustomErrorMessageEnabled(getContext(), true);
 					invalidateList();
 				})
 				.withEnabledCheck(new EnabledCheck() {
 					@Override
 					public boolean isOptionEnabled() {
-						return !Utils.isCustomErrorMesageEnabled(getContext());
+						return !Utils.isCustomErrorMessageEnabled(getContext());
 					}
 				}).build());
 
 		listData.add(new MenuItem.Builder("Disable Custom Error Message")
 				.withAction(() -> {
-					Utils.setCustomErrorMesageEnabled(getContext(), false);
+					Utils.setCustomErrorMessageEnabled(getContext(), false);
 					invalidateList();
 				})
 				.withEnabledCheck(new EnabledCheck() {
 					@Override
 					public boolean isOptionEnabled() {
-						return Utils.isCustomErrorMesageEnabled(getContext());
+						return Utils.isCustomErrorMessageEnabled(getContext());
 					}
 				}).build());
 

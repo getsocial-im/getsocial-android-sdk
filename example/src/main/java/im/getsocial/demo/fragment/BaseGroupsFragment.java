@@ -223,7 +223,7 @@ public abstract class BaseGroupsFragment extends BaseSearchFragment<GroupsQuery,
 								getUserAndShowActionDialog(mention);
 							})
 							.setTagClickListener(tag -> _log.logInfoAndToast("Tag clicked: " + tag));
-							if (Utils.isCustomErrorMesageEnabled(getContext())) {
+							if (Utils.isCustomErrorMessageEnabled(getContext())) {
 								builder.setCustomErrorMessageProvider(new CustomErrorMessageProvider() {
 									@Override
 									public String onError(int errorCode, String errorMessage) {

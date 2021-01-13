@@ -114,7 +114,7 @@ public class ActivitiesFragment extends BaseListFragment implements ActionListen
 		ActivityFeedViewBuilder builder = ActivityFeedViewBuilder.create(ActivitiesQuery.feedOf(UserId.currentUser()))
 						.setWindowTitle("My Feed")
 						.setActionListener(actionListener());
-		if (Utils.isCustomErrorMesageEnabled(getContext())) {
+		if (Utils.isCustomErrorMessageEnabled(getContext())) {
 			builder.setCustomErrorMessageProvider(new CustomErrorMessageProvider() {
 				@Override
 				public String onError(int errorCode, String errorMessage) {
@@ -166,7 +166,7 @@ public class ActivitiesFragment extends BaseListFragment implements ActionListen
 							.setAvatarClickListener(ActivitiesFragment.this::showUserActionDialog)
 							.setMentionClickListener(mention -> getUserAndShowActionDialog(mention))
 							.setTagClickListener(ActivitiesFragment.this::openGlobalFeedForTag);
-			if (Utils.isCustomErrorMesageEnabled(getContext())) {
+			if (Utils.isCustomErrorMessageEnabled(getContext())) {
 				builder.setCustomErrorMessageProvider(new CustomErrorMessageProvider() {
 					@Override
 					public String onError(int errorCode, String errorMessage) {
@@ -192,8 +192,10 @@ public class ActivitiesFragment extends BaseListFragment implements ActionListen
 		@Override
 		public void execute() {
 			ActivityFeedViewBuilder builder =  ActivityFeedViewBuilder.create(ActivitiesQuery.activitiesInTopic(_feed))
-							.setActionListener(actionListener());
-							if (Utils.isCustomErrorMesageEnabled(getContext())) {
+							.setActionListener(actionListener())
+							.setAvatarClickListener(ActivitiesFragment.this::showUserActionDialog);
+
+							if (Utils.isCustomErrorMessageEnabled(getContext())) {
 								builder.setCustomErrorMessageProvider(new CustomErrorMessageProvider() {
 									@Override
 									public String onError(int errorCode, String errorMessage) {
@@ -222,7 +224,7 @@ public class ActivitiesFragment extends BaseListFragment implements ActionListen
 		public void execute() {
 			ActivityFeedViewBuilder builder = ActivityFeedViewBuilder.create(ActivitiesQuery.timeline())
 							.setActionListener(actionListener());
-			if (Utils.isCustomErrorMesageEnabled(getContext())) {
+			if (Utils.isCustomErrorMessageEnabled(getContext())) {
 				builder.setCustomErrorMessageProvider(new CustomErrorMessageProvider() {
 					@Override
 					public String onError(int errorCode, String errorMessage) {

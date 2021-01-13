@@ -51,7 +51,7 @@ import im.getsocial.demo.dialog.CurrentUserInfoDialog;
 import im.getsocial.demo.dialog.ReferralDataDialog;
 import im.getsocial.demo.dialog.UserInfoDialog;
 import im.getsocial.demo.fragment.BaseFragment;
-import im.getsocial.demo.fragment.ChatFragment;
+import im.getsocial.demo.fragment.ChatMessagesFragment;
 import im.getsocial.demo.fragment.ConsoleFragment;
 import im.getsocial.demo.fragment.FriendsFragment;
 import im.getsocial.demo.fragment.HasFragmentTag;
@@ -88,6 +88,8 @@ import im.getsocial.sdk.notifications.NotificationContext;
 import im.getsocial.sdk.notifications.NotificationStatus;
 import im.getsocial.sdk.notifications.OnNotificationClickedListener;
 import im.getsocial.sdk.notifications.OnNotificationReceivedListener;
+import im.getsocial.sdk.ui.GetSocialUi;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -104,6 +106,7 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Acti
 	protected VKInvitePlugin _vkInvitePlugin;
 	private ViewContainer _viewContainer;
 	private DependenciesContainer _dependenciesContainer;
+	private String _chatId = null;
 
 	@Override
 	protected void onCreate(@Nullable final Bundle savedInstanceState) {
@@ -230,24 +233,14 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Acti
 		Notifications.setOnNotificationReceivedListener(this);
 		GetSocial.addOnCurrentUserChangedListener(this);
 		GetSocial.addOnInitializeListener(() -> {
-			Communities.getGroup("Yana1", (group) -> {
-				System.out.println(group.toString());
-			}, error -> {
-				System.out.println("FCK");
-			});
-			System.out.println("### OnInitialized listener is invoked");
-			System.out.println("### Current user: " + GetSocial.getCurrentUser());
 			invalidateUi();
 			final RootFragment rootFragment = findRootFragment();
 			if (rootFragment != null) {
 				rootFragment.invalidateList();
 			}
-			final JSONObject object = new JSONObject();
-			try {
-				object.put("query", Getson.toJson(UsersQuery.find("John")));
-				object.put("limit", 42);
-			} catch (final JSONException e) {
-				e.printStackTrace();
+			if (this._chatId != null) {
+				openChat(this._chatId);
+				this._chatId = null;
 			}
 		});
 		Invites.setReferralDataListener(referralData -> ReferralDataDialog.showReferralData(getSupportFragmentManager(), referralData));
@@ -264,6 +257,16 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Acti
 				showAddFriendDialog(notification);
 				return;
 			}
+			if (ActionTypes.OPEN_CHAT.equals(notification.getAction().getType())) {
+				GetSocialUi.closeView();
+				String chatId = notification.getAction().getData().get(ActionDataKeys.OpenChat.CHAT_ID);
+				if (GetSocial.isInitialized()) {
+					openChat(chatId);
+				} else {
+					this._chatId = chatId;
+				}
+				return;
+			}
 
 			handleAction(notification.getAction());
 		} else {
@@ -275,9 +278,22 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Acti
 	public void onNotificationReceived(final Notification notification) {
 		if (ActionTypes.ADD_FRIEND.equals(notification.getAction().getType())) {
 			showAddFriendDialog(notification);
-			return;
+		}
+		if (ActionTypes.OPEN_CHAT.equals(notification.getAction().getType())) {
+			GetSocialUi.closeView();
+			String chatId = notification.getAction().getData().get(ActionDataKeys.OpenChat.CHAT_ID);
+			if (GetSocial.isInitialized()) {
+				openChat(chatId);
+			} else {
+				this._chatId = chatId;
+			}
 		}
 		Toast.makeText(MainActivity.this, notification.getText(), Toast.LENGTH_SHORT).show();
+	}
+
+	private void openChat(final String chatId) {
+		ChatMessagesFragment fragment = ChatMessagesFragment.openChat(chatId);
+		addContentFragment(fragment);
 	}
 
 	private void showAddFriendDialog(final Notification notification) {
@@ -437,30 +453,12 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Acti
 				final String userId = action.getData().get(ActionDataKeys.OpenProfile.USER_ID);
 				showUserInfoDialog(userId);
 				return;
-			case ChatFragment.NOTIFICATION_ACTION_OPEN_MESSAGE:
-
-				final Fragment fragment = findFragment(ChatFragment.TAG);
-				if (fragment == null) {
-					if (GetSocial.isInitialized()) {
-						showChatFragment();
-					} else {
-						GetSocial.addOnInitializeListener(this::showChatFragment);
-					}
-				}
-
-				break;
 			case "custom":
 				_log.logInfo("Received custom action:" + action.getData());
 				return;
 		}
 		GetSocial.handle(action);
 	}
-
-	private void showChatFragment() {
-		final ChatFragment chatFragment = new ChatFragment();
-		addContentFragment(chatFragment);
-	}
-
 	//endregion
 
 	class ViewContainer {

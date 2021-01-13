@@ -54,6 +54,7 @@ import im.getsocial.sdk.communities.User;
 import im.getsocial.sdk.communities.UserId;
 import im.getsocial.sdk.communities.UserIdList;
 import im.getsocial.sdk.communities.UserUpdate;
+import im.getsocial.sdk.ui.GetSocialUi;
 import im.getsocial.sdk.ui.MentionClickListener;
 import im.getsocial.sdk.ui.UiAction;
 import im.getsocial.sdk.ui.communities.ActivityFeedViewBuilder;
@@ -409,6 +410,15 @@ public abstract class BaseFragment extends Fragment implements HasTitle, HasFrag
 				sync[0] = true;
 			}
 		};
+		actionDialog.addAction(new ActionDialog.Action("Open Chat") {
+			@Override
+			public void execute() {
+				GetSocialUi.closeView();
+				ChatMessagesFragment fragment = ChatMessagesFragment.chatWith(user.getId());
+				addContentFragment(fragment);
+			}
+		});
+
 		Communities.isFollowing(UserId.currentUser(), FollowQuery.users(UserIdList.create(user.getId())), followingMap -> {
 			final boolean isFollowing = Boolean.TRUE.equals(followingMap.get(user.getId()));
 			actionDialog.addAction(new ActionDialog.Action(isFollowing ? "Unfollow" : "Follow") {

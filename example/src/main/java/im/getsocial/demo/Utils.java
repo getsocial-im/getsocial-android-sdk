@@ -122,11 +122,11 @@ public final class Utils {
 		return preferences(context).getBoolean(KEY_OPEN_UI, false);
 	}
 
-	public static boolean isCustomErrorMesageEnabled(Context context) {
+	public static boolean isCustomErrorMessageEnabled(Context context) {
 		return preferences(context).getBoolean(KEY_CUSTOM_ERROR_MESSAGE, false);
 	}
 
-	public static void setCustomErrorMesageEnabled(Context context, boolean newValue) {
+	public static void setCustomErrorMessageEnabled(Context context, boolean newValue) {
 		preferences(context).edit().putBoolean(KEY_CUSTOM_ERROR_MESSAGE, newValue).commit();
 	}
 

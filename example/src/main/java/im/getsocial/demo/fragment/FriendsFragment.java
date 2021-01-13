@@ -260,17 +260,17 @@ public class FriendsFragment extends BaseUsersListFragment<FriendsQuery> {
 				FriendsFragment.this.removeFriend(_user);
 			}
 
-			@OnClick(R.id.message_friend_btn)
-			void openChatDialog() {
-				final Bundle bundle = new Bundle();
-				bundle.putString(ChatFragment.KEY_RECIPIENT_ID, _user.getId());
-				bundle.putString(ChatFragment.KEY_RECIPIENT_NAME, _userName.getText().toString());
-
-				final ChatFragment chatFragment = new ChatFragment();
-				chatFragment.setArguments(bundle);
-
-				addContentFragment(chatFragment);
-			}
+//			@OnClick(R.id.message_friend_btn)
+//			void openChatDialog() {
+//				final Bundle bundle = new Bundle();
+//				bundle.putString(ChatMessagesFragment.KEY_RECIPIENT_ID, _user.getId());
+//				bundle.putString(ChatMessagesFragment.KEY_RECIPIENT_NAME, _userName.getText().toString());
+//
+//				final ChatMessagesFragment chatFragment = new ChatMessagesFragment();
+//				chatFragment.setArguments(bundle);
+//
+//				addContentFragment(chatFragment);
+//			}
 		}
 
 	}
