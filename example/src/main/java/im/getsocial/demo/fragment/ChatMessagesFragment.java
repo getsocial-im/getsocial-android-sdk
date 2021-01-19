@@ -25,6 +25,7 @@ import java.io.InputStreamReader;
 import java.util.List;
 
 import im.getsocial.demo.R;
+import im.getsocial.demo.adapter.MessageClickListener;
 import im.getsocial.demo.adapter.MessageListAdapter;
 import im.getsocial.demo.utils.EndlessRecyclerViewScrollListener;
 import im.getsocial.sdk.communities.Chat;
@@ -212,6 +213,7 @@ public class ChatMessagesFragment extends BaseFragment {
 		_list.setHasFixedSize(true);
 		_list.setLayoutManager(new LinearLayoutManager(getActivity()));
 		_adapter = new MessageListAdapter(messages);
+		_adapter.clickListener = message -> showAlert("Details", message.toString());
 		_list.setAdapter(_adapter);
 		_list.scrollToPosition(messages.size() - 1);
 	}

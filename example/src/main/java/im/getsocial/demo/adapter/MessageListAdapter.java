@@ -4,6 +4,7 @@ import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
@@ -19,6 +20,8 @@ import im.getsocial.sdk.media.MediaAttachment;
 
 public class MessageListAdapter extends RecyclerView.Adapter<MessageListAdapter.MessageViewHolder> {
 	private final List<ChatMessage> _items;
+
+	public MessageClickListener clickListener;
 
 	public MessageListAdapter(final List<ChatMessage> items) {
 		_items = items;
@@ -73,6 +76,15 @@ public class MessageListAdapter extends RecyclerView.Adapter<MessageListAdapter.
 		viewHolder._messageImageUrl.setText(imageText);
 		viewHolder._messageVideoUrl.setText(videoText);
 
+		viewHolder._showDetailsButton.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View view) {
+				if (clickListener != null) {
+					clickListener.onShowMessageDetails(message);
+				}
+			}
+		});
+
 	}
 
 	@Override
@@ -86,6 +98,7 @@ public class MessageListAdapter extends RecyclerView.Adapter<MessageListAdapter.
 		TextView _messageDate;
 		TextView _messageImageUrl;
 		TextView _messageVideoUrl;
+		Button _showDetailsButton;
 
 		MessageViewHolder(final View view) {
 			super(view);
@@ -94,6 +107,7 @@ public class MessageListAdapter extends RecyclerView.Adapter<MessageListAdapter.
 			_messageDate = view.findViewById(R.id.message_date);
 			_messageImageUrl = view.findViewById(R.id.message_image);
 			_messageVideoUrl = view.findViewById(R.id.message_video);
+			_showDetailsButton = view.findViewById(R.id.showDetails);
 		}
 
 	}
