@@ -8,7 +8,7 @@ buildscript {
 	dependencies {
 		classpath "com.android.tools.build:gradle:3.4.1"
 		classpath 'com.google.gms:google-services:4.2.0'
-		classpath "im.getsocial:plugin-v7:1.0.0"
+		classpath "im.getsocial:plugin-v7:1.0.5"
 	}
 }
 
@@ -30,6 +30,7 @@ dependencies {
 	implementation 'com.kakao.sdk:kakaotalk:1.14.0'
 	implementation 'com.kakao.sdk:kakaostory:1.14.0'
 	implementation 'com.facebook.android:facebook-android-sdk:5.0.0'
+	implementation "androidx.multidex:multidex:2.0.1"
 
 	implementation('com.vk:androidsdk:1.6.9') {
 		transitive = false
