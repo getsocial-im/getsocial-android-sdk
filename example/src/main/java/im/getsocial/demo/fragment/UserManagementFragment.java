@@ -20,6 +20,7 @@ import android.app.AlertDialog;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.text.InputType;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.Toast;
@@ -85,6 +86,8 @@ public class UserManagementFragment extends BaseListFragment {
 		);
 		listData.add(new MenuItem.Builder("Add property").withAction(this::setPublicProperty).build());
 		listData.add(new MenuItem.Builder("Get property").withAction(this::getPublicProperty).build());
+		listData.add(new MenuItem.Builder("Increment property").withAction(this::incrementPublicProperty).build());
+		listData.add(new MenuItem.Builder("Decrement property").withAction(this::decrementPublicProperty).build());
 		listData.add(new MenuItem.Builder("Log out").withAction(this::logOut).build());
 		listData.add(MenuItem.builder("Reset without init").withAction(() -> GetSocial.reset(() -> {
 			_log.logInfoAndToast("User reset");
@@ -186,6 +189,80 @@ public class UserManagementFragment extends BaseListFragment {
 															"Error changing public property: \n" + error.getMessage(),
 															Toast.LENGTH_SHORT).show();
 										})).setNegativeButton("Cancel", (dialogInterface, which) -> dialogInterface.cancel()).create().show();
+	}
+
+	private void incrementPublicProperty() {
+		final EditTextWOCopyPaste keyInput = new EditTextWOCopyPaste(getContext());
+		keyInput.setLongClickable(false);
+		final EditTextWOCopyPaste valInput = new EditTextWOCopyPaste(getContext());
+		valInput.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
+		valInput.setLongClickable(false);
+
+		keyInput.setHint("Key");
+		keyInput.setContentDescription("public_property_key");
+		valInput.setHint("Value");
+		valInput.setContentDescription("increment");
+
+		final int _8dp = PixelUtils.dp2px(getContext(), 8);
+		final LinearLayout frameLayout = new LinearLayout(getContext());
+		frameLayout.setOrientation(LinearLayout.VERTICAL);
+		frameLayout.setPadding(_8dp, _8dp, _8dp, _8dp);
+
+		frameLayout.addView(keyInput);
+		frameLayout.addView(valInput);
+
+		new AlertDialog.Builder(getContext()).setView(frameLayout).setTitle("User Property")
+				.setPositiveButton("OK", (dialogInterface, which) -> GetSocial.getCurrentUser().updateDetails(new UserUpdate().incrementPublicProperty(keyInput.getText().toString(), Double.parseDouble(valInput.getText().toString())),
+						new SafeCompletionCallback() {
+							@Override
+							public void onSafeSuccess() {
+								dialogInterface.dismiss();
+								_activityListener.invalidateUi();
+								Toast.makeText(getContext(), "Public property has been changed successfully!",
+										Toast.LENGTH_SHORT).show();
+							}
+						}, error -> {
+							Toast.makeText(getContext(),
+									"Error changing public property: \n" + error.getMessage(),
+									Toast.LENGTH_SHORT).show();
+						})).setNegativeButton("Cancel", (dialogInterface, which) -> dialogInterface.cancel()).create().show();
+	}
+
+	private void decrementPublicProperty() {
+		final EditTextWOCopyPaste keyInput = new EditTextWOCopyPaste(getContext());
+		keyInput.setLongClickable(false);
+		final EditTextWOCopyPaste valInput = new EditTextWOCopyPaste(getContext());
+		valInput.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
+		valInput.setLongClickable(false);
+
+		keyInput.setHint("Key");
+		keyInput.setContentDescription("public_property_key");
+		valInput.setHint("Value");
+		valInput.setContentDescription("decrement");
+
+		final int _8dp = PixelUtils.dp2px(getContext(), 8);
+		final LinearLayout frameLayout = new LinearLayout(getContext());
+		frameLayout.setOrientation(LinearLayout.VERTICAL);
+		frameLayout.setPadding(_8dp, _8dp, _8dp, _8dp);
+
+		frameLayout.addView(keyInput);
+		frameLayout.addView(valInput);
+
+		new AlertDialog.Builder(getContext()).setView(frameLayout).setTitle("User Property")
+				.setPositiveButton("OK", (dialogInterface, which) -> GetSocial.getCurrentUser().updateDetails(new UserUpdate().decrementPublicProperty(keyInput.getText().toString(), Double.parseDouble(valInput.getText().toString())),
+						new SafeCompletionCallback() {
+							@Override
+							public void onSafeSuccess() {
+								dialogInterface.dismiss();
+								_activityListener.invalidateUi();
+								Toast.makeText(getContext(), "Public property has been changed successfully!",
+										Toast.LENGTH_SHORT).show();
+							}
+						}, error -> {
+							Toast.makeText(getContext(),
+									"Error changing public property: \n" + error.getMessage(),
+									Toast.LENGTH_SHORT).show();
+						})).setNegativeButton("Cancel", (dialogInterface, which) -> dialogInterface.cancel()).create().show();
 	}
 
 // region Presenter
