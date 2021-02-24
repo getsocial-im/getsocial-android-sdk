@@ -88,6 +88,7 @@ public class UserManagementFragment extends BaseListFragment {
 		listData.add(new MenuItem.Builder("Get property").withAction(this::getPublicProperty).build());
 		listData.add(new MenuItem.Builder("Increment property").withAction(this::incrementPublicProperty).build());
 		listData.add(new MenuItem.Builder("Decrement property").withAction(this::decrementPublicProperty).build());
+		listData.add(new MenuItem.Builder("Refresh").withAction(this::refreshUser).build());
 		listData.add(new MenuItem.Builder("Log out").withAction(this::logOut).build());
 		listData.add(MenuItem.builder("Reset without init").withAction(() -> GetSocial.reset(() -> {
 			_log.logInfoAndToast("User reset");
@@ -263,6 +264,17 @@ public class UserManagementFragment extends BaseListFragment {
 									"Error changing public property: \n" + error.getMessage(),
 									Toast.LENGTH_SHORT).show();
 						})).setNegativeButton("Cancel", (dialogInterface, which) -> dialogInterface.cancel()).create().show();
+	}
+
+	private void refreshUser() {
+		GetSocial.getCurrentUser().refresh(() -> {
+			Toast.makeText(getContext(), "Current User has been refreshed successfully!",
+					Toast.LENGTH_SHORT).show();
+		}, (error) -> {
+			Toast.makeText(getContext(),
+					"Error refreshing current user: \n" + error.getMessage(),
+					Toast.LENGTH_SHORT).show();
+		});
 	}
 
 // region Presenter
