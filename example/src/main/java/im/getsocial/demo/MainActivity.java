@@ -93,6 +93,8 @@ import im.getsocial.sdk.ui.GetSocialUi;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -276,19 +278,23 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Acti
 
 	@Override
 	public void onNotificationReceived(final Notification notification) {
-		if (ActionTypes.ADD_FRIEND.equals(notification.getAction().getType())) {
-			showAddFriendDialog(notification);
-		}
-		if (ActionTypes.OPEN_CHAT.equals(notification.getAction().getType())) {
-			GetSocialUi.closeView();
-			String chatId = notification.getAction().getData().get(ActionDataKeys.OpenChat.CHAT_ID);
-			if (GetSocial.isInitialized()) {
-				openChat(chatId);
-			} else {
-				this._chatId = chatId;
+		Notifications.setStatus(NotificationStatus.READ, Collections.singletonList(notification.getId()), () -> {
+			if (ActionTypes.ADD_FRIEND.equals(notification.getAction().getType())) {
+				showAddFriendDialog(notification);
 			}
-		}
-		Toast.makeText(MainActivity.this, notification.getText(), Toast.LENGTH_SHORT).show();
+			if (ActionTypes.OPEN_CHAT.equals(notification.getAction().getType())) {
+				GetSocialUi.closeView();
+				String chatId = notification.getAction().getData().get(ActionDataKeys.OpenChat.CHAT_ID);
+				if (GetSocial.isInitialized()) {
+					openChat(chatId);
+				} else {
+					this._chatId = chatId;
+				}
+			}
+			Toast.makeText(MainActivity.this, notification.getText(), Toast.LENGTH_SHORT).show();
+		}, (error) -> {
+			Toast.makeText(MainActivity.this, "Failed to set notification status", Toast.LENGTH_SHORT).show();
+		});
 	}
 
 	private void openChat(final String chatId) {

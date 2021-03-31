@@ -49,24 +49,12 @@ public class NotificationsFragment extends BaseListFragment {
 		NotificationCenterViewBuilder.create(NotificationsQuery.withStatuses(NotificationStatus.READ, NotificationStatus.
 						UNREAD))
 						.setNotificationClickListener((notification, context) -> {
-							_activityListener.dependencies().actionListener().handleAction(notification.getAction());
-							Notifications.setStatus(NotificationStatus.READ, Collections.singletonList(notification.getId()), () -> {}, (error) -> {});
-							if (context.getActionButtonId() == null) {
-								if (notification.getAction().getType().equalsIgnoreCase(ActionTypes.OPEN_CHAT)) {
-									GetSocialUi.closeView();
-									String chatId = notification.getAction().getData().get(ActionDataKeys.OpenChat.CHAT_ID);
-									ChatMessagesFragment fragment = ChatMessagesFragment.openChat(chatId);
-									addContentFragment(fragment);
-								} else {
-									_log.logInfoAndToast(String.format("Notification [%s] clicked", notification.getId()));
-									GetSocial.handle(notification.getAction());
-								}
-							} else {
-								_log.logInfoAndToast(String.format("Action button [%s] for notification [%s] clicked", context.getActionButtonId(), notification.getId()));
-								if (!NotificationButton.IGNORE_ACTION.equals(context.getActionButtonId())) {
-									GetSocial.handle(notification.getAction());
-								}
-							}
+							Notifications.setStatus(NotificationStatus.READ, Collections.singletonList(notification.getId()), () -> {
+								_log.logInfoAndToast(String.format("Notification [%s] clicked", notification.getId()));
+							}, (error) -> {
+								_log.logErrorAndToast(String.format("Failed to set notification status, error: %s", error));
+
+							});
 						})
 						.show();
 	}
