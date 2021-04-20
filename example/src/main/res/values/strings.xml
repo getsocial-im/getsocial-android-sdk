@@ -74,6 +74,7 @@
 	<string name="hint_serialized_data_to_save">Serialized data to save</string>
 	<string name="title_custom_user_identity">Custom User Identity</string>
 	<string name="hint_user_id">User ID</string>
+	<string name="hint_reaction">like</string>
 	<string name="hint_token">Token</string>
 	<string name="change_configuration">Change configuration</string>
 	<string name="label_no_users">No users to display</string>

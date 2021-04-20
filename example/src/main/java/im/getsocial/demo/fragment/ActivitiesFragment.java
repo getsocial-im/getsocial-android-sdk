@@ -89,7 +89,8 @@ public class ActivitiesFragment extends BaseListFragment implements ActionListen
 											}
 										})
 										.build(),
-						navigationListItem("Post to timeline", PostActivityFragment.class)
+						navigationListItem("Post to timeline", PostActivityFragment.class),
+						navigationListItem("Reactions", FeedFragment.class)
 		);
 	}
 
