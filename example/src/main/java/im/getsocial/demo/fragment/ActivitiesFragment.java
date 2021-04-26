@@ -71,7 +71,7 @@ public class ActivitiesFragment extends BaseListFragment implements ActionListen
 						MenuItem.builder("Update Last Activity")
 										.withAction(new UpdateActivityAction())
 										.build(),
-						MenuItem.builder("All my posts")
+						MenuItem.builder("All my posts everywhere")
 										.withAction(new MenuItem.Action() {
 											@Override
 											public void execute() {
@@ -80,6 +80,24 @@ public class ActivitiesFragment extends BaseListFragment implements ActionListen
 											}
 										})
 										.build(),
+						MenuItem.builder("All my posts in all topics")
+								.withAction(new MenuItem.Action() {
+									@Override
+									public void execute() {
+										ActivityFeedViewBuilder.create(ActivitiesQuery.inAllTopics().byUser(UserId.currentUser()))
+												.show();
+									}
+								})
+								.build(),
+						MenuItem.builder("All my posts in all groups")
+								.withAction(new MenuItem.Action() {
+									@Override
+									public void execute() {
+										ActivityFeedViewBuilder.create(ActivitiesQuery.inAllGroups().byUser(UserId.currentUser()))
+												.show();
+									}
+								})
+								.build(),
 						MenuItem.builder("My Feed")
 										.withAction(new MenuItem.Action() {
 											@Override

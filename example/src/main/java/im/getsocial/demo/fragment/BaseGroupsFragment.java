@@ -40,6 +40,7 @@ import im.getsocial.sdk.communities.MemberStatus;
 import im.getsocial.sdk.communities.RemoveGroupMembersQuery;
 import im.getsocial.sdk.communities.RemoveGroupsQuery;
 import im.getsocial.sdk.communities.Role;
+import im.getsocial.sdk.communities.UserId;
 import im.getsocial.sdk.communities.UserIdList;
 import im.getsocial.sdk.ui.CustomErrorMessageProvider;
 import im.getsocial.sdk.ui.UiAction;
@@ -114,7 +115,13 @@ public abstract class BaseGroupsFragment extends BaseSearchFragment<GroupsQuery,
 				dialog.addAction(new ActionDialog.Action("Show Feed") {
 					@Override
 					public void execute() {
-						openFeed();
+						openFeed(false);
+					}
+				});
+				dialog.addAction(new ActionDialog.Action("Activities created by Me") {
+					@Override
+					public void execute() {
+						openFeed(true);
 					}
 				});
 			}
@@ -188,8 +195,12 @@ public abstract class BaseGroupsFragment extends BaseSearchFragment<GroupsQuery,
 			}, error -> Toast.makeText(getContext(), error.toString(), Toast.LENGTH_SHORT).show());
 		}
 
-		void openFeed() {
-			ActivityFeedViewBuilder builder = ActivityFeedViewBuilder.create(ActivitiesQuery.activitiesInGroup(_item.getId()))
+		void openFeed(boolean currentUser) {
+			ActivitiesQuery query = ActivitiesQuery.activitiesInGroup(_item.getId());
+			if (currentUser) {
+				query = query.byUser(UserId.currentUser());
+			}
+			ActivityFeedViewBuilder builder = ActivityFeedViewBuilder.create(query)
 							.setActionListener(_activityListener.dependencies().actionListener())
 							.setViewStateListener(new ViewStateListener() {
 								@Override

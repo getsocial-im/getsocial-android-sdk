@@ -188,7 +188,13 @@ public class TopicsSearchFragment extends BaseSearchFragment<TopicsQuery, Topic>
 			dialog.addAction(new ActionDialog.Action("Feed") {
 				@Override
 				public void execute() {
-					openFeed();
+					openFeed(false);
+				}
+			});
+			dialog.addAction(new ActionDialog.Action("Activities created by Me") {
+				@Override
+				public void execute() {
+					openFeed(true);
 				}
 			});
 			dialog.addAction(new ActionDialog.Action(_isFollowing ? "Unfollow" : "Follow") {
@@ -257,8 +263,12 @@ public class TopicsSearchFragment extends BaseSearchFragment<TopicsQuery, Topic>
 			});
 		}
 
-		void openFeed() {
-			ActivityFeedViewBuilder builder = ActivityFeedViewBuilder.create(ActivitiesQuery.activitiesInTopic(_item.getId()))
+		void openFeed(boolean currentUser) {
+			ActivitiesQuery query = ActivitiesQuery.activitiesInTopic(_item.getId());
+			if (currentUser) {
+				query = query.byUser(UserId.currentUser());
+			}
+			ActivityFeedViewBuilder builder = ActivityFeedViewBuilder.create(query)
 							.setActionListener(_activityListener.dependencies().actionListener())
 							.setViewStateListener(new ViewStateListener() {
 								@Override
