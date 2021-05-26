@@ -108,7 +108,26 @@ public class ActivitiesFragment extends BaseListFragment implements ActionListen
 										})
 										.build(),
 						navigationListItem("Post to timeline", PostActivityFragment.class),
-						navigationListItem("Reactions", FeedFragment.class)
+						navigationListItem("Reactions", FeedFragment.class),
+						MenuItem.builder("Topic Activity Details (569141942483009835)")
+							.withAction(new MenuItem.Action() {
+								@Override
+								public void execute() {
+									ActivityDetailsViewBuilder.create("569141942483009835")
+										.show();
+							}
+						})
+						.build(),
+						MenuItem.builder("Group Activity Details (504205474833540031)")
+								.withAction(new MenuItem.Action() {
+								@Override
+								public void execute() {
+									ActivityDetailsViewBuilder.create("504205474833540031")
+											.show();
+								}
+						})
+						.build()
+
 		);
 	}
 
