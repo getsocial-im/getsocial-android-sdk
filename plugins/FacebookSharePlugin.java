@@ -18,6 +18,7 @@ package im.getsocial.demo.plugin;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -98,8 +99,8 @@ public class FacebookSharePlugin extends InviteChannelPlugin {
 		final PackageManager pm = _activity.getPackageManager();
 		boolean app_installed = false;
 		try {
-			pm.getPackageInfo("com.facebook.katana", PackageManager.GET_ACTIVITIES);
-			app_installed = true;
+			PackageInfo info = pm.getPackageInfo("com.facebook.katana", PackageManager.GET_ACTIVITIES);
+			app_installed = info.applicationInfo.enabled;
 		} catch (final PackageManager.NameNotFoundException exception) {
 			app_installed = false;
 		}
