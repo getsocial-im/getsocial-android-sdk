@@ -31,6 +31,7 @@ import im.getsocial.sdk.communities.ActivitiesQuery;
 import im.getsocial.sdk.communities.CommunitiesAction;
 import im.getsocial.sdk.communities.FollowQuery;
 import im.getsocial.sdk.communities.GetSocialActivity;
+import im.getsocial.sdk.communities.PostActivityTarget;
 import im.getsocial.sdk.communities.Topic;
 import im.getsocial.sdk.communities.TopicsQuery;
 import im.getsocial.sdk.communities.UserId;
@@ -197,6 +198,18 @@ public class TopicsSearchFragment extends BaseSearchFragment<TopicsQuery, Topic>
 					openFeed(true);
 				}
 			});
+			dialog.addAction(new ActionDialog.Action("Activities with Polls") {
+				@Override
+				public void execute() {
+					openPolls();
+				}
+			});
+			dialog.addAction(new ActionDialog.Action("Announcements with Polls") {
+				@Override
+				public void execute() {
+					openAnnouncementPolls();
+				}
+			});
 			dialog.addAction(new ActionDialog.Action(_isFollowing ? "Unfollow" : "Follow") {
 				@Override
 				public void execute() {
@@ -208,6 +221,12 @@ public class TopicsSearchFragment extends BaseSearchFragment<TopicsQuery, Topic>
 					@Override
 					public void execute() {
 						postToTopic();
+					}
+				});
+				dialog.addAction(new ActionDialog.Action("Create poll") {
+					@Override
+					public void execute() {
+						createPoll();
 					}
 				});
 			}
@@ -316,8 +335,20 @@ public class TopicsSearchFragment extends BaseSearchFragment<TopicsQuery, Topic>
 							builder.show();
 		}
 
+		void openPolls() {
+			addContentFragment(PollsListFragment.inTopic(_item.getId()));
+		}
+
+		void openAnnouncementPolls() {
+			addContentFragment(PollsListFragment.inTopicAnnouncements(_item.getId()));
+		}
+
 		void postToTopic() {
 			addContentFragment(PostActivityFragment.postToTopic(_item.getId()));
+		}
+
+		void createPoll() {
+			addContentFragment(CreatePollFragment.postToTopic(_item.getId()));
 		}
 
 		void followTopic() {

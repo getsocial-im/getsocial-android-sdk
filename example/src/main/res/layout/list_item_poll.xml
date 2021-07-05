@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+		android:orientation="vertical"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content">
+
+	<TextView
+		android:layout_marginTop="8dp"
+		android:layout_marginLeft="8dp"
+		android:layout_marginRight="8dp"
+		android:id="@+id/poll_text"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:maxLines="3"/>
+
+	<TextView
+		android:layout_marginTop="8dp"
+		android:layout_marginLeft="8dp"
+		android:layout_marginRight="8dp"
+		android:id="@+id/poll_total_votes"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:maxLines="3"/>
+
+	<LinearLayout
+			android:layout_marginTop="8dp"
+			android:layout_marginLeft="8dp"
+			android:layout_marginRight="8dp"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content">
+
+		<Button
+				android:id="@+id/actions"
+				style="@style/Widget.AppCompat.Button.Borderless"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:text="Actions" />
+
+	</LinearLayout>
+</LinearLayout>

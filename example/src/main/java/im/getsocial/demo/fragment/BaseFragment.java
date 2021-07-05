@@ -60,6 +60,10 @@ import im.getsocial.sdk.ui.UiAction;
 import im.getsocial.sdk.ui.communities.ActivityFeedViewBuilder;
 
 import javax.annotation.Nullable;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
 
@@ -480,6 +484,14 @@ public abstract class BaseFragment extends Fragment implements HasTitle, HasFrag
 		);
 	}
 
+	protected byte[] getBytesFromInputStream(InputStream is) throws IOException {
+		ByteArrayOutputStream os = new ByteArrayOutputStream();
+		byte[] buffer = new byte[0xFFFF];
+		for (int len = is.read(buffer); len != -1; len = is.read(buffer)) {
+			os.write(buffer, 0, len);
+		}
+		return os.toByteArray();
+	}
 
 	protected void disconnectFromFacebook() {
 

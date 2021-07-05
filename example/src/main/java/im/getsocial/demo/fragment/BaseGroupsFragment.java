@@ -124,6 +124,18 @@ public abstract class BaseGroupsFragment extends BaseSearchFragment<GroupsQuery,
 						openFeed(true);
 					}
 				});
+				dialog.addAction(new ActionDialog.Action("Activities with Polls") {
+					@Override
+					public void execute() {
+						openPolls();
+					}
+				});
+				dialog.addAction(new ActionDialog.Action("Announcements with Polls") {
+					@Override
+					public void execute() {
+						openAnnouncementsPolls();
+					}
+				});
 			}
 			if (status == MemberStatus.MEMBER) {
 				dialog.addAction(new ActionDialog.Action("Show Members") {
@@ -137,6 +149,12 @@ public abstract class BaseGroupsFragment extends BaseSearchFragment<GroupsQuery,
 						@Override
 						public void execute() {
 							postToFeed();
+						}
+					});
+					dialog.addAction(new ActionDialog.Action("Create poll") {
+						@Override
+						public void execute() {
+							createPoll();
 						}
 					});
 				}
@@ -195,6 +213,14 @@ public abstract class BaseGroupsFragment extends BaseSearchFragment<GroupsQuery,
 			}, error -> Toast.makeText(getContext(), error.toString(), Toast.LENGTH_SHORT).show());
 		}
 
+		void openPolls() {
+			addContentFragment(PollsListFragment.inGroup(_item.getId()));
+		}
+
+		void openAnnouncementsPolls() {
+			addContentFragment(PollsListFragment.inGroupAnnouncements(_item.getId()));
+		}
+
 		void openFeed(boolean currentUser) {
 			ActivitiesQuery query = ActivitiesQuery.activitiesInGroup(_item.getId());
 			if (currentUser) {
@@ -250,6 +276,10 @@ public abstract class BaseGroupsFragment extends BaseSearchFragment<GroupsQuery,
 
 		void postToFeed() {
 			addContentFragment(PostActivityFragment.postToGroup(_item.getId()));
+		}
+
+		void createPoll() {
+			addContentFragment(CreatePollFragment.postToGroup(_item.getId()));
 		}
 
 		void showGroupMembers() {

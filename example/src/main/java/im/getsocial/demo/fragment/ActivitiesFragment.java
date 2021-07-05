@@ -30,6 +30,7 @@ import im.getsocial.sdk.actions.ActionListener;
 import im.getsocial.sdk.common.PagingQuery;
 import im.getsocial.sdk.communities.ActivitiesQuery;
 import im.getsocial.sdk.communities.GetSocialActivity;
+import im.getsocial.sdk.communities.PollStatus;
 import im.getsocial.sdk.communities.UserId;
 import im.getsocial.sdk.media.MediaAttachment;
 import im.getsocial.sdk.ui.CustomErrorMessageProvider;
@@ -127,7 +128,6 @@ public class ActivitiesFragment extends BaseListFragment implements ActionListen
 								}
 						})
 						.build()
-
 		);
 	}
 
@@ -342,7 +342,7 @@ public class ActivitiesFragment extends BaseListFragment implements ActionListen
 
 		@Override
 		public void execute() {
-			Communities.getActivities(new PagingQuery<>(ActivitiesQuery.everywhere().byUser(UserId.currentUser())).withLimit(5), result -> {
+			Communities.getActivities(new PagingQuery<>(ActivitiesQuery.everywhere().byUser(UserId.currentUser()).withPollStatus(PollStatus.WITHOUT_POLL)).withLimit(5), result -> {
 				final List<GetSocialActivity> getSocialActivities = result.getEntries();
 				if (getSocialActivities.isEmpty()) {
 					Toast.makeText(getContext(), "You haven't recently posted anywhere.", Toast.LENGTH_SHORT).show();
