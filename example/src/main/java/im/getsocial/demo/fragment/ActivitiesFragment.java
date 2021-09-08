@@ -290,7 +290,7 @@ public class ActivitiesFragment extends BaseListFragment implements ActionListen
 			Communities.getActivities(new PagingQuery<>(ActivitiesQuery.timeline()).withLimit(5), result -> {
 				final List<GetSocialActivity> getSocialActivities = result.getEntries();
 				if (getSocialActivities.isEmpty()) {
-					Toast.makeText(getContext(), "No activities in global feed", Toast.LENGTH_SHORT).show();
+					Toast.makeText(getContext(), "No activities in timeline", Toast.LENGTH_SHORT).show();
 					return;
 				}
 				final String[] activityContents = new String[getSocialActivities.size()];

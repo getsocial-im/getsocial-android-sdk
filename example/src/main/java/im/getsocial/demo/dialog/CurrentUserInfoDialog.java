@@ -82,6 +82,13 @@ public class CurrentUserInfoDialog extends DialogFragment {
 		sb.append("PRIVATE PROPERTIES:").endLine()
 						.append(GetSocial.getCurrentUser().getPrivateProperties());
 
+		sb.append("BAN INFO").endLine();
+		sb.append("Is banned: ").append(GetSocial.getCurrentUser().isBanned()).endLine();
+		if (GetSocial.getCurrentUser().isBanned()) {
+			sb.append("Expiry: ").append("" + GetSocial.getCurrentUser().getBanInfo().getExpiry()).endLine();
+			sb.append("Reason: ").append(GetSocial.getCurrentUser().getBanInfo().getReason()).endLine();
+		}
+
 		sb.append("JSON:").endLine()
 						.append(toJson(userDetails));
 

@@ -35,6 +35,8 @@ import com.facebook.GraphResponse;
 import com.facebook.HttpMethod;
 import com.facebook.Profile;
 import com.facebook.login.LoginManager;
+
+import im.getsocial.demo.MainActivity;
 import im.getsocial.demo.R;
 import im.getsocial.demo.dependencies.DependenciesContainer;
 import im.getsocial.demo.dialog.action_dialog.ActionDialog;
@@ -394,7 +396,9 @@ public abstract class BaseFragment extends Fragment implements HasTitle, HasFrag
 												.show();
 							}
 						});
-		if (isCurrentUser(user)) {
+		if (user.isApp()) {
+			Toast.makeText(getContext(), "App user avatar clicked", Toast.LENGTH_SHORT).show();
+		} else if (isCurrentUser(user)) {
 			actionDialog.show();
 		} else {
 			checkIfFriendsAndShowDialog(user, actionDialog.setTitle("User " + user.getDisplayName()));
