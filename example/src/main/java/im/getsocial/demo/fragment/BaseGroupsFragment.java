@@ -81,6 +81,9 @@ public abstract class BaseGroupsFragment extends BaseSearchFragment<GroupsQuery,
 		@BindView(R.id.group_avatar)
 		ImageView _avatar;
 
+		@BindView(R.id.group_score)
+		TextView _score;
+
 		@BindView(R.id.group_member_role)
 		TextView _member_role;
 
@@ -112,10 +115,16 @@ public abstract class BaseGroupsFragment extends BaseSearchFragment<GroupsQuery,
 				}
 			});
 			if (!_item.getSettings().isPrivate() || status == MemberStatus.MEMBER) {
-				dialog.addAction(new ActionDialog.Action("Show Feed") {
+				dialog.addAction(new ActionDialog.Action("Feed UI") {
 					@Override
 					public void execute() {
 						openFeed(false);
+					}
+				});
+				dialog.addAction(new ActionDialog.Action("Activities") {
+					@Override
+					public void execute() {
+						openActivities();
 					}
 				});
 				dialog.addAction(new ActionDialog.Action("Activities created by Me") {
@@ -217,6 +226,10 @@ public abstract class BaseGroupsFragment extends BaseSearchFragment<GroupsQuery,
 			addContentFragment(PollsListFragment.inGroup(_item.getId()));
 		}
 
+		void openActivities() {
+			addContentFragment(ActivitiesListFragment.inGroup(_item.getId()));
+		}
+
 		void openAnnouncementsPolls() {
 			addContentFragment(PollsListFragment.inGroupAnnouncements(_item.getId()));
 		}
@@ -237,6 +250,7 @@ public abstract class BaseGroupsFragment extends BaseSearchFragment<GroupsQuery,
 								@Override
 								public void onClose() {
 									_log.logInfoAndToast("Feed closed for " + _item.getId());
+									loadItems();
 								}
 							})
 							.setUiActionListener((action, pendingAction) -> {
@@ -347,6 +361,7 @@ public abstract class BaseGroupsFragment extends BaseSearchFragment<GroupsQuery,
 					memberStatus = "APPROVED";
 				}
 			}
+			_score.setText("Popularity: " + _item.getPopularity());
 			_member_role.setText("Member role: " + memberRole);
 			_member_status.setText("Member status: " + memberStatus);
 		}

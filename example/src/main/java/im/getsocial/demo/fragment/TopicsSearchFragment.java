@@ -2,6 +2,7 @@ package im.getsocial.demo.fragment;
 
 import android.app.AlertDialog;
 import android.os.Bundle;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -19,6 +20,8 @@ import butterknife.OnClick;
 import com.squareup.picasso.Picasso;
 import im.getsocial.demo.R;
 import im.getsocial.demo.Utils;
+import im.getsocial.demo.dialog.SortOrderDelegate;
+import im.getsocial.demo.dialog.SortOrderDialog;
 import im.getsocial.demo.dialog.action_dialog.ActionDialog;
 import im.getsocial.sdk.Callback;
 import im.getsocial.sdk.Communities;
@@ -31,7 +34,6 @@ import im.getsocial.sdk.communities.ActivitiesQuery;
 import im.getsocial.sdk.communities.CommunitiesAction;
 import im.getsocial.sdk.communities.FollowQuery;
 import im.getsocial.sdk.communities.GetSocialActivity;
-import im.getsocial.sdk.communities.PostActivityTarget;
 import im.getsocial.sdk.communities.Topic;
 import im.getsocial.sdk.communities.TopicsQuery;
 import im.getsocial.sdk.communities.UserId;
@@ -42,6 +44,7 @@ import im.getsocial.sdk.ui.ViewStateListener;
 import im.getsocial.sdk.ui.communities.ActivityFeedViewBuilder;
 
 import java.text.DateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Iterator;
@@ -54,6 +57,9 @@ public class TopicsSearchFragment extends BaseSearchFragment<TopicsQuery, Topic>
 	private boolean _myTopicsOnly;
 	private String _userId;
 	private String _userName;
+	private boolean _isTrending = false;
+	private String _sortKey;
+	private String _sortDirection;
 
 	static Fragment followedBy(final String userId, final String userName) {
 		final TopicsSearchFragment fragment = new TopicsSearchFragment();
@@ -77,6 +83,10 @@ public class TopicsSearchFragment extends BaseSearchFragment<TopicsQuery, Topic>
 		if (_userId == null) {
 			menu.add(Menu.NONE, 0x42, Menu.NONE, _myTopicsOnly ? "Show all" : "Followed by me");
 		}
+		menu.add(Menu.NONE, 0x43, Menu.NONE, _isTrending ? "All" : "Trending");
+//		if (!_isTrending) {
+//			menu.add(Menu.NONE, 0x44, Menu.NONE, "Sort");
+//		}
 		super.onCreateOptionsMenu(menu, inflater);
 	}
 
@@ -86,7 +96,40 @@ public class TopicsSearchFragment extends BaseSearchFragment<TopicsQuery, Topic>
 			filter();
 			return true;
 		}
+		if (item.getItemId() == 0x43) {
+			_isTrending = !_isTrending;
+			_sortDirection = null;
+			_sortKey = null;
+			loadItems();
+			getActivity().invalidateOptionsMenu();
+			return true;
+		}
+		if (item.getItemId() == 0x44) {
+			showSortDialog();
+			getActivity().invalidateOptionsMenu();
+			return true;
+		}
+
 		return super.onOptionsItemSelected(item);
+	}
+
+	private void showSortDialog() {
+		List<Pair<String, String>> sortOptions = new ArrayList<>();
+		if (this._isTrending) {
+		} else {
+			sortOptions.add(new Pair<>("id",""));
+			sortOptions.add(new Pair<>("id","-"));
+			sortOptions.add(new Pair<>("createdAt",""));
+			sortOptions.add(new Pair<>("createdAt","-"));
+		}
+		SortOrderDialog.show(getFragmentManager(), sortOptions, new SortOrderDelegate() {
+			@Override
+			public void onSortKeySelected(Pair<String, String> pair) {
+				_sortKey = pair.first;
+				_sortDirection = pair.second;
+				loadItems();
+			}
+		});
 	}
 
 	@Override
@@ -120,14 +163,17 @@ public class TopicsSearchFragment extends BaseSearchFragment<TopicsQuery, Topic>
 	}
 
 	@Override
-	protected TopicsQuery createQuery(final String query) {
+	protected TopicsQuery createQuery(final String searchTerm) {
+		TopicsQuery query = null;
 		if (_userId != null) {
-			return TopicsQuery.followedByUser(UserId.create(_userId));
+			query = TopicsQuery.followedByUser(UserId.create(_userId));
+		} else if (_myTopicsOnly) {
+			query = TopicsQuery.followedByUser(UserId.currentUser());
+		} else {
+			query = TopicsQuery.find(searchTerm);
 		}
-		if (_myTopicsOnly) {
-			return TopicsQuery.followedByUser(UserId.currentUser());
-		}
-		return TopicsQuery.find(query);
+		query = query.onlyTrending(_isTrending);
+		return query;
 	}
 
 	@Override
@@ -166,6 +212,9 @@ public class TopicsSearchFragment extends BaseSearchFragment<TopicsQuery, Topic>
 		@BindView(R.id.topic_avatar)
 		ImageView _avatar;
 
+		@BindView(R.id.topic_score)
+		TextView _score;
+
 		boolean _isFollowing;
 
 		TopicViewHolder(final View view) {
@@ -186,10 +235,16 @@ public class TopicsSearchFragment extends BaseSearchFragment<TopicsQuery, Topic>
 					openFollowers();
 				}
 			});
-			dialog.addAction(new ActionDialog.Action("Feed") {
+			dialog.addAction(new ActionDialog.Action("Feed UI") {
 				@Override
 				public void execute() {
 					openFeed(false);
+				}
+			});
+			dialog.addAction(new ActionDialog.Action("Activities") {
+				@Override
+				public void execute() {
+					openActivities();
 				}
 			});
 			dialog.addAction(new ActionDialog.Action("Activities created by Me") {
@@ -298,6 +353,7 @@ public class TopicsSearchFragment extends BaseSearchFragment<TopicsQuery, Topic>
 								@Override
 								public void onClose() {
 									_log.logInfoAndToast("Feed closed for " + _item.getTitle());
+									loadItems();
 								}
 							})
 							.setUiActionListener((action, pendingAction) -> {
@@ -337,6 +393,10 @@ public class TopicsSearchFragment extends BaseSearchFragment<TopicsQuery, Topic>
 
 		void openPolls() {
 			addContentFragment(PollsListFragment.inTopic(_item.getId()));
+		}
+
+		void openActivities() {
+			addContentFragment(ActivitiesListFragment.inTopic(_item.getId()));
 		}
 
 		void openAnnouncementPolls() {
@@ -390,6 +450,7 @@ public class TopicsSearchFragment extends BaseSearchFragment<TopicsQuery, Topic>
 				date += " (" + DateFormat.getDateTimeInstance().format(new Date(_item.getUpdatedAt() * 1000)) + ")";
 			}
 			_dates.setText(date);
+			_score.setText("Popularity: " + _item.getPopularity());
 		}
 	}
 }

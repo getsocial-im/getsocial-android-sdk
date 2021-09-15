@@ -1,7 +1,10 @@
 package im.getsocial.demo.fragment;
 
 import android.os.Bundle;
+import android.util.Pair;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
@@ -19,6 +22,8 @@ import butterknife.OnClick;
 import butterknife.OnTextChanged;
 import im.getsocial.demo.R;
 import im.getsocial.demo.dialog.DialogWithScrollableText;
+import im.getsocial.demo.dialog.SortOrderDelegate;
+import im.getsocial.demo.dialog.SortOrderDialog;
 import im.getsocial.sdk.Communities;
 import im.getsocial.sdk.GetSocialError;
 import im.getsocial.sdk.communities.ActivitiesQuery;
@@ -49,6 +54,10 @@ public class TagsListFragment extends BaseFragment {
 
 	private StringAdapter _adapter;
 
+	private boolean _isTrending = false;
+	private String _sortKey;
+	private String _sortDirection;
+
 	@Override
 
 	public View onCreateView(final LayoutInflater inflater, @Nullable final ViewGroup container, @Nullable final Bundle savedInstanceState) {
@@ -71,9 +80,54 @@ public class TagsListFragment extends BaseFragment {
 		loadItems();
 	}
 
+	@Override
+	public void onCreateOptionsMenu(final Menu menu, final MenuInflater inflater) {
+		menu.add(Menu.NONE, 0x43, Menu.NONE, _isTrending ? "All" : "Trending");
+		super.onCreateOptionsMenu(menu, inflater);
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(final android.view.MenuItem item) {
+		if (item.getItemId() == 0x43) {
+			_isTrending = !_isTrending;
+			_sortDirection = null;
+			_sortKey = null;
+			loadItems();
+			getActivity().invalidateOptionsMenu();
+			return true;
+		}
+		if (item.getItemId() == 0x44) {
+			showSortDialog();
+			getActivity().invalidateOptionsMenu();
+			return true;
+		}
+
+		return super.onOptionsItemSelected(item);
+	}
+
+	private void showSortDialog() {
+		List<Pair<String, String>> sortOptions = new ArrayList<>();
+		if (this._isTrending) {
+		} else {
+			sortOptions.add(new Pair<>("name",""));
+			sortOptions.add(new Pair<>("name","-"));
+		}
+		SortOrderDialog.show(getFragmentManager(), sortOptions, new SortOrderDelegate() {
+			@Override
+			public void onSortKeySelected(Pair<String, String> pair) {
+				_sortKey = pair.first;
+				_sortDirection = pair.second;
+				loadItems();
+			}
+		});
+	}
+
 	protected void loadItems() {
 		_swipeRefreshLayout.setRefreshing(true);
-		Communities.getTags(TagsQuery.find(query()), this::saveResult, this::onError);
+		TagsQuery query = TagsQuery.find(query());
+		query = query.onlyTrending(_isTrending);
+
+		Communities.getTags(query, this::saveResult, this::onError);
 	}
 
 	protected void onError(final GetSocialError error) {

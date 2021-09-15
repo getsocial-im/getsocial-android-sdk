@@ -49,6 +49,16 @@
 			android:maxLines="3"
 			android:text="This is a topic about something important. I will tell you later exactly about what." />
 
+	<TextView
+		android:layout_marginTop="8dp"
+		android:layout_marginLeft="8dp"
+		android:layout_marginRight="8dp"
+		android:id="@+id/topic_score"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:maxLines="3"
+		android:text="This is a topic about something important. I will tell you later exactly about what." />
+
 	<LinearLayout
 			android:layout_marginTop="8dp"
 			android:layout_marginLeft="8dp"
