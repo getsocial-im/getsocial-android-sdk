@@ -25,6 +25,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -192,13 +193,16 @@ public abstract class BaseFragment extends Fragment implements HasTitle, HasFrag
 						.setNegativeButton("Cancel", (dialog, which) ->
 										_log.logInfoAndToast("Can not " + actionDescription + " without authorization.")
 						)
-						.setItems(new CharSequence[] {"Facebook", "Custom"}, (dialog, which) -> {
+						.setItems(new CharSequence[] {"Facebook", "Custom", "Trusted"}, (dialog, which) -> {
 							switch (which) {
 								case 0:
 									addFacebookUserIdentity(pendingAction::proceed);
 									break;
 								case 1:
 									addCustomUserIdentity(pendingAction::proceed);
+									break;
+								case 2:
+									addTrustedUserIdentity(pendingAction::proceed);
 									break;
 								default:
 									break;
@@ -293,8 +297,8 @@ public abstract class BaseFragment extends Fragment implements HasTitle, HasFrag
 		final LayoutInflater layoutInflater = LayoutInflater.from(getContext());
 		final View view = layoutInflater.inflate(R.layout.dialog_custom_identity, null, false);
 
-		final EditTextWOCopyPaste userIdEditText = view.findViewById(R.id.user_id);
-		final EditTextWOCopyPaste tokenEditText = view.findViewById(R.id.user_token);
+		final EditText userIdEditText = view.findViewById(R.id.user_id);
+		final EditText tokenEditText = view.findViewById(R.id.user_token);
 
 		final UserManagementFragment.AddUserIdentityOutcomeCallback addUserIdentityOutcomeCallback = new UserManagementFragment.AddUserIdentityOutcomeCallback() {
 			@Override
@@ -330,6 +334,49 @@ public abstract class BaseFragment extends Fragment implements HasTitle, HasFrag
 						)
 						.setNegativeButton("Cancel", (dialog, which) -> {
 						});
+		builder.show();
+	}
+	protected void addTrustedUserIdentity(final CompletionCallback completionCallback) {
+		final LayoutInflater layoutInflater = LayoutInflater.from(getContext());
+		final View view = layoutInflater.inflate(R.layout.dialog_trusted_identity, null, false);
+
+		final EditText providerIdEditText = view.findViewById(R.id.provider_id);
+		final EditText tokenEditText = view.findViewById(R.id.user_token);
+
+		final UserManagementFragment.AddUserIdentityOutcomeCallback addUserIdentityOutcomeCallback = new UserManagementFragment.AddUserIdentityOutcomeCallback() {
+			@Override
+			public void onSuccess() {
+				_log.logInfoAndToast("Added trusted user identity successfully");
+				completionCallback.onSuccess();
+			}
+
+			@Override
+			public void onFailure(final GetSocialError exception) {
+				_log.logInfoAndToast("Adding trusted user identity failed : " + exception);
+			}
+
+			@Override
+			public void onConflictResolvedWithCurrent() {
+				_log.logInfoAndToast("Conflict adding trusted user identity resolved with current");
+			}
+
+			@Override
+			public void onConflictResolvedWithRemote() {
+				_log.logInfoAndToast("Conflict adding trusted user identity resolved with remote");
+				completionCallback.onSuccess();
+			}
+		};
+
+		final AlertDialog.Builder builder = new AlertDialog.Builder(getContext())
+				.setView(view)
+				.setPositiveButton("Add", (dialog, which) -> {
+							String providerId = providerIdEditText.getText().toString().trim();
+							String token = tokenEditText.getText().toString().trim();
+							addIdentity(Identity.trusted(providerId, token), addUserIdentityOutcomeCallback);
+						}
+				)
+				.setNegativeButton("Cancel", (dialog, which) -> {
+				});
 		builder.show();
 	}
 

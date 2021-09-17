@@ -22,6 +22,8 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.EditText;
+
 import androidx.annotation.Nullable;
 import com.facebook.AccessToken;
 import com.facebook.AccessTokenTracker;
@@ -32,7 +34,6 @@ import im.getsocial.demo.dependencies.DependenciesContainer;
 import im.getsocial.demo.dependencies.components.NotificationsManager;
 import im.getsocial.demo.dialog.action_dialog.ActionDialog;
 import im.getsocial.demo.utils.Console;
-import im.getsocial.demo.utils.EditTextWOCopyPaste;
 import im.getsocial.sdk.Communities;
 import im.getsocial.sdk.CompletionCallback;
 import im.getsocial.sdk.ErrorCode;
@@ -149,17 +150,26 @@ public class RootFragment extends BaseListFragment implements NotificationsManag
 			_log.logErrorAndToast(exception);
 			invalidateUi();
 		};
-		new ActionDialog(getContext()).addAction(new ActionDialog.Action("Facebook") {
-			@Override
-			public void execute() {
-				loginWithFacebook(callback, failureCallback);
-			}
-		}).addAction(new ActionDialog.Action("Custom Identity") {
-			@Override
-			public void execute() {
-				loginWithCustom(callback, failureCallback);
-			}
-		}).setTitle("Login with...").show();
+		new ActionDialog(getContext())
+				.addAction(new ActionDialog.Action("Facebook") {
+					@Override
+					public void execute() {
+						loginWithFacebook(callback, failureCallback);
+					}
+				})
+				.addAction(new ActionDialog.Action("Custom Identity") {
+					@Override
+					public void execute() {
+						loginWithCustom(callback, failureCallback);
+					}
+				})
+				.addAction(new ActionDialog.Action("Trusted Identity") {
+					@Override
+					public void execute() {
+						loginWithTrusted(callback, failureCallback);
+					}
+				})
+				.setTitle("Login with...").show();
 	}
 
 	private void invalidateUi() {
@@ -198,8 +208,8 @@ public class RootFragment extends BaseListFragment implements NotificationsManag
 		final LayoutInflater layoutInflater = LayoutInflater.from(getContext());
 		final View view = layoutInflater.inflate(R.layout.dialog_custom_identity, null, false);
 
-		final EditTextWOCopyPaste userIdEditText = (EditTextWOCopyPaste) view.findViewById(R.id.user_id);
-		final EditTextWOCopyPaste tokenEditText = (EditTextWOCopyPaste) view.findViewById(R.id.user_token);
+		final EditText userIdEditText = view.findViewById(R.id.user_id);
+		final EditText tokenEditText = view.findViewById(R.id.user_token);
 
 		final AlertDialog.Builder builder = new AlertDialog.Builder(getContext())
 						.setView(view)
@@ -222,5 +232,32 @@ public class RootFragment extends BaseListFragment implements NotificationsManag
 		builder.show();
 	}
 
+	protected void loginWithTrusted(final CompletionCallback callback, final FailureCallback failureCallback) {
+		final LayoutInflater layoutInflater = LayoutInflater.from(getContext());
+		final View view = layoutInflater.inflate(R.layout.dialog_custom_identity, null, false);
+
+		final EditText providerIdEditText = view.findViewById(R.id.user_id);
+		final EditText tokenEditText = view.findViewById(R.id.user_token);
+
+		final AlertDialog.Builder builder = new AlertDialog.Builder(getContext())
+				.setView(view)
+				.setPositiveButton("Add", new DialogInterface.OnClickListener() {
+							@Override
+							public void onClick(final DialogInterface dialog, final int which) {
+								final String providerId = providerIdEditText.getText().toString().trim();
+								final String token = tokenEditText.getText().toString().trim();
+								GetSocial.init(Identity.custom(providerId, null, token), callback, failureCallback);
+							}
+						}
+				)
+				.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+							@Override
+							public void onClick(final DialogInterface dialog, final int which) {
+
+							}
+						}
+				);
+		builder.show();
+	}
 	//endregion
 }

@@ -21,6 +21,9 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.text.InputType;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.Toast;
@@ -28,11 +31,16 @@ import androidx.annotation.NonNull;
 import com.squareup.picasso.MemoryPolicy;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
+
+import im.getsocial.demo.R;
 import im.getsocial.demo.adapter.MenuItem;
 import im.getsocial.demo.utils.EditTextWOCopyPaste;
 import im.getsocial.demo.utils.PixelUtils;
 import im.getsocial.demo.utils.UserIdentityUtils;
+import im.getsocial.sdk.CompletionCallback;
 import im.getsocial.sdk.GetSocial;
+import im.getsocial.sdk.GetSocialError;
+import im.getsocial.sdk.communities.Identity;
 import im.getsocial.sdk.communities.IdentityProviderIds;
 import im.getsocial.sdk.communities.UserUpdate;
 
@@ -73,6 +81,11 @@ public class UserManagementFragment extends BaseListFragment {
 						.build()
 		);
 
+		listData.add(new MenuItem.Builder("Add Trusted user identity")
+				.withAction(() -> addTrustedUserIdentity(this::invalidateUi))
+				.build()
+		);
+
 		listData.add(new MenuItem.Builder("Remove Facebook user identity").withSubtitle("Log out from Facebook")
 						.withAction(this::removeFacebookUserIdentity)
 						.withEnabledCheck(() -> GetSocial.getCurrentUser().getIdentities().containsKey(IdentityProviderIds.FACEBOOK))
@@ -83,6 +96,11 @@ public class UserManagementFragment extends BaseListFragment {
 						.withAction(this::removeCustomUserIdentity)
 						.withEnabledCheck(() -> GetSocial.getCurrentUser().getIdentities().containsKey(CUSTOM_PROVIDER))
 						.build()
+		);
+		listData.add(new MenuItem.Builder("Remove Trusted user identity")
+				.withAction(this::removeTrustedUserIdentity)
+				.withEnabledCheck(() -> !GetSocial.getCurrentUser().isAnonymous())
+				.build()
 		);
 		listData.add(new MenuItem.Builder("Add property").withAction(this::setPublicProperty).build());
 		listData.add(new MenuItem.Builder("Get property").withAction(this::getPublicProperty).build());
@@ -359,6 +377,24 @@ public class UserManagementFragment extends BaseListFragment {
 			_log.logErrorAndToast(String.format("Failed to remove user identity '%s', error: %s", providerId,
 							error.getMessage()));
 		});
+	}
+
+	protected void removeTrustedUserIdentity() {
+		final LayoutInflater layoutInflater = LayoutInflater.from(getContext());
+		final View view = layoutInflater.inflate(R.layout.dialog_remove_trusted_identity, null, false);
+
+		final EditText providerIdEditText = view.findViewById(R.id.provider_id);
+
+		final AlertDialog.Builder builder = new AlertDialog.Builder(getContext())
+				.setView(view)
+				.setPositiveButton("Remove", (dialog, which) -> {
+							String providerId = providerIdEditText.getText().toString().trim();
+							removeUserIdentity(providerId);
+						}
+				)
+				.setNegativeButton("Cancel", (dialog, which) -> {
+				});
+		builder.show();
 	}
 
 	@Override

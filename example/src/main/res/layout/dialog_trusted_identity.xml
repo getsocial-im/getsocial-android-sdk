@@ -8,17 +8,17 @@
 	<TextView
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			android:text="@string/title_custom_user_identity"
+			android:text="@string/title_trusted_user_identity"
 			android:textSize="@dimen/text_title"
 			android:textStyle="bold"/>
 
 	<EditText
-			android:id="@+id/user_id"
-			android:contentDescription="user_id"
+			android:id="@+id/provider_id"
+			android:contentDescription="provider_id"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
 			android:layout_marginTop="@dimen/margin_normal"
-			android:hint="@string/hint_user_id"/>
+			android:hint="@string/hint_provider_id"/>
 
 	<EditText
 			android:id="@+id/user_token"

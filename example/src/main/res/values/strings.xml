@@ -73,6 +73,9 @@
 	<string name="title_enter_save_data">Enter data to save</string>
 	<string name="hint_serialized_data_to_save">Serialized data to save</string>
 	<string name="title_custom_user_identity">Custom User Identity</string>
+	<string name="title_trusted_user_identity">Trusted User Identity</string>
+	<string name="title_remove_trusted_user_identity">Remove Trusted User Identity</string>
+	<string name="hint_provider_id">Provider ID</string>
 	<string name="hint_user_id">User ID</string>
 	<string name="hint_reaction">like</string>
 	<string name="hint_token">Token</string>
