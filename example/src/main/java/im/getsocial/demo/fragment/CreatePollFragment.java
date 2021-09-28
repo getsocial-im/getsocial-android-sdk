@@ -51,6 +51,8 @@ public class CreatePollFragment extends BaseFragment {
     @Nullable
     private String _postGroup;
 
+    private boolean _timeline = false;
+
     @Nullable
     @Override
     public View onCreateView(@NonNull final LayoutInflater inflater, @Nullable final ViewGroup container, @Nullable final Bundle savedInstanceState) {
@@ -73,6 +75,15 @@ public class CreatePollFragment extends BaseFragment {
         return fragment;
     }
 
+    public static Fragment postToTimeline() {
+        final CreatePollFragment fragment = new CreatePollFragment();
+        final Bundle args = new Bundle();
+        args.putBoolean("timeline", true);
+        fragment.setArguments(args);
+        return fragment;
+    }
+
+
     @Override
     public void onViewCreated(final View view, @Nullable final Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -81,6 +92,7 @@ public class CreatePollFragment extends BaseFragment {
         if (bundle != null) {
             _postTopic = bundle.getString("topic");
             _postGroup = bundle.getString("group");
+            _timeline = bundle.getBoolean("timeline", false);
         }
     }
 

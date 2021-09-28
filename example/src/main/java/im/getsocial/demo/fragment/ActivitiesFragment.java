@@ -24,7 +24,6 @@ import im.getsocial.demo.adapter.MenuItem;
 import im.getsocial.sdk.Communities;
 import im.getsocial.sdk.ErrorCode;
 import im.getsocial.sdk.GetSocial;
-import im.getsocial.sdk.GetSocialError;
 import im.getsocial.sdk.actions.Action;
 import im.getsocial.sdk.actions.ActionListener;
 import im.getsocial.sdk.common.PagingQuery;
@@ -109,6 +108,14 @@ public class ActivitiesFragment extends BaseListFragment implements ActionListen
 										})
 										.build(),
 						navigationListItem("Post to timeline", PostActivityFragment.class),
+						MenuItem.builder("Create Poll in User's feed")
+								.withAction(new MenuItem.Action() {
+									@Override
+									public void execute() {
+										addContentFragment(CreatePollFragment.postToTimeline());
+									}
+								})
+								.build(),
 						navigationListItem("Reactions", FeedFragment.class),
 						MenuItem.builder("Topic Activity Details (569141942483009835)")
 							.withAction(new MenuItem.Action() {
