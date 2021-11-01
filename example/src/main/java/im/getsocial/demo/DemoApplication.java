@@ -5,7 +5,6 @@ import android.app.Application;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import androidx.multidex.MultiDex;
 import com.adjust.sdk.Adjust;
 import com.adjust.sdk.AdjustConfig;
 import com.appsflyer.AppsFlyerLib;
@@ -26,7 +25,7 @@ public class DemoApplication extends Application {
 	protected void attachBaseContext(Context base) {
 		super.attachBaseContext(base);
 
-		MultiDex.install(this);
+		//MultiDex.install(this);
 	}
 
 	@Override
