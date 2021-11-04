@@ -85,7 +85,7 @@ public class GroupMembersFragment extends BaseSearchFragment<MembersQuery, Group
 	}
 
 	@Override
-	protected MembersQuery createQuery(String groupId) {
+	protected MembersQuery createQuery(final SearchObject searchObject) {
 		return MembersQuery.ofGroup(_groupId);
 	}
 

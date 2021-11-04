@@ -16,8 +16,8 @@ public class UsersSearchFragment extends BaseUsersListFragment<UsersQuery> {
 	}
 
 	@Override
-	protected UsersQuery createQuery(final String query) {
-		return UsersQuery.find(query);
+	protected UsersQuery createQuery(final SearchObject searchObject) {
+		return UsersQuery.find(searchObject.searchTerm);
 	}
 
 	@Override

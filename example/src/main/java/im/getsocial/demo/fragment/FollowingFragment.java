@@ -50,7 +50,7 @@ public class FollowingFragment extends BaseUsersListFragment<UsersQuery> {
 	}
 
 	@Override
-	protected UsersQuery createQuery(final String query) {
+	protected UsersQuery createQuery(final SearchObject searchObject) {
 		return UsersQuery.followedByUser(UserId.create(_userId));
 	}
 

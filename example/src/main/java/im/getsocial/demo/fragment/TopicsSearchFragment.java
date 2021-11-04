@@ -135,6 +135,7 @@ public class TopicsSearchFragment extends BaseSearchFragment<TopicsQuery, Topic>
 	@Override
 	public void onViewCreated(final View view, @Nullable final Bundle savedInstanceState) {
 		super.onViewCreated(view, savedInstanceState);
+		super.showAdvancedSearch();
 		_query.setVisibility(_userId == null ? View.VISIBLE : View.GONE);
 	}
 
@@ -163,14 +164,20 @@ public class TopicsSearchFragment extends BaseSearchFragment<TopicsQuery, Topic>
 	}
 
 	@Override
-	protected TopicsQuery createQuery(final String searchTerm) {
+	protected TopicsQuery createQuery(final SearchObject searchObject) {
 		TopicsQuery query = null;
 		if (_userId != null) {
 			query = TopicsQuery.followedByUser(UserId.create(_userId));
 		} else if (_myTopicsOnly) {
 			query = TopicsQuery.followedByUser(UserId.currentUser());
 		} else {
-			query = TopicsQuery.find(searchTerm);
+			query = TopicsQuery.find(searchObject.searchTerm);
+		}
+		if (searchObject.labels != null) {
+			query = query.withLabels(searchObject.labels);
+		}
+		if (searchObject.properties != null) {
+			query = query.withProperties(searchObject.properties);
 		}
 		query = query.onlyTrending(_isTrending);
 		return query;
@@ -214,6 +221,12 @@ public class TopicsSearchFragment extends BaseSearchFragment<TopicsQuery, Topic>
 
 		@BindView(R.id.topic_score)
 		TextView _score;
+
+		@BindView(R.id.topic_labels)
+		TextView _labels;
+
+		@BindView(R.id.topic_properties)
+		TextView _properties;
 
 		boolean _isFollowing;
 
@@ -451,6 +464,8 @@ public class TopicsSearchFragment extends BaseSearchFragment<TopicsQuery, Topic>
 			}
 			_dates.setText(date);
 			_score.setText("Popularity: " + _item.getPopularity());
+			_labels.setText("Labels: " + joinElements(_item.getSettings().getLabels()));
+			_properties.setText("Properties: " + joinElements(_item.getSettings().getProperties()));
 		}
 	}
 }

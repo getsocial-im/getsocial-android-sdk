@@ -32,7 +32,7 @@ public class GenericFriendsFragment extends BaseUsersListFragment<FriendsQuery> 
 	public void onViewCreated(final View view, @Nullable final Bundle savedInstanceState) {
 		super.onViewCreated(view, savedInstanceState);
 		_query.setVisibility(View.GONE);
-		Communities.getFriendsCount(createQuery(""), result -> {
+		Communities.getFriendsCount(createQuery(SearchObject.empty()), result -> {
 			_count = result;
 			_activityListener.invalidateUi();
 		}, this::onError);
@@ -55,7 +55,7 @@ public class GenericFriendsFragment extends BaseUsersListFragment<FriendsQuery> 
 	}
 
 	@Override
-	protected FriendsQuery createQuery(final String query) {
+	protected FriendsQuery createQuery(final SearchObject searchObject) {
 		return FriendsQuery.ofUser(UserId.create(_userId));
 	}
 

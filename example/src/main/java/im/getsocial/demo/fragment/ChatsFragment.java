@@ -52,7 +52,7 @@ public class ChatsFragment extends BaseSearchFragment<SimplePagingQuery, Chat> {
     }
 
     @Override
-    protected SimplePagingQuery createQuery(String query) {
+    protected SimplePagingQuery createQuery(final SearchObject searchObject) {
         return SimplePagingQuery.simple(50);
     }
 

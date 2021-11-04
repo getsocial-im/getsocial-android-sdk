@@ -38,6 +38,7 @@ import im.getsocial.sdk.communities.Role;
 import im.getsocial.sdk.media.MediaAttachment;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -110,10 +111,9 @@ public class CreateGroupFragment extends BaseFragment {
 		final String imageUrl = _viewContainer._groupAvatarUrl.getText().toString();
 		if (bitmap != null) {
 			return MediaAttachment.image(bitmap);
-		} else if (imageUrl.trim().length() > 0) {
+		} else {
 			return MediaAttachment.imageUrl(imageUrl);
 		}
-		return null;
 	}
 
 	private void createGroup() {
@@ -170,6 +170,11 @@ public class CreateGroupFragment extends BaseFragment {
 				break;
 			}
 		}
+		String searchText = _viewContainer._labels.getText().toString();
+		if (!searchText.isEmpty()) {
+			content = content.withLabels(Arrays.asList(searchText.split(",")));
+		}
+
 		if (_groupId == null) {
 			Communities.createGroup(content, group -> {
 				_log.logInfoAndToast("Created group:" + group);
@@ -232,6 +237,9 @@ public class CreateGroupFragment extends BaseFragment {
 		@BindView(R.id.create_group)
 		Button _createButton;
 
+		@BindView(R.id.group_labels)
+		EditText _labels;
+
 		@OnClick(R.id.add_property)
 		void addProperty() {
 			createRow("", "");
@@ -276,6 +284,7 @@ public class CreateGroupFragment extends BaseFragment {
 			if (group.getSettings().getPermissions().get(CommunitiesAction.REACT) != null) {
 				_interact.setSelection(group.getSettings().getPermissions().get(CommunitiesAction.REACT).ordinal());
 			}
+			_labels.setText(TextUtils.join(",", group.getSettings().getLabels()));
 			_createButton.setText(_groupId == null ? "Create" : "Update");
 		}
 	}

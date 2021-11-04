@@ -132,7 +132,7 @@ public class ActivitiesListFragment extends BaseSearchFragment<ActivitiesQuery, 
     }
 
     @Override
-    protected ActivitiesQuery createQuery(final String searchTerm) {
+    protected ActivitiesQuery createQuery(final SearchObject searchObject) {
         ActivitiesQuery query = _topicId == null ? ActivitiesQuery.activitiesInGroup(_groupId) : ActivitiesQuery.activitiesInTopic(_topicId);
         query = query.onlyTrending(_isTrending);
         return query;

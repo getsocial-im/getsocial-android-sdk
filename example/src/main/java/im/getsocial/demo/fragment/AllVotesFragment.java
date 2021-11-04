@@ -65,7 +65,7 @@ public class AllVotesFragment extends BaseSearchFragment<VotesQuery, UserVotes> 
     }
 
     @Override
-    protected VotesQuery createQuery(final String query) {
+    protected VotesQuery createQuery(final SearchObject searchObject) {
         return VotesQuery.forActivity(_activityId);
     }
 

@@ -19,7 +19,7 @@ public abstract class FollowersFragment extends BaseUsersListFragment<FollowersQ
 	public void onViewCreated(final View view, @Nullable final Bundle savedInstanceState) {
 		super.onViewCreated(view, savedInstanceState);
 		_query.setVisibility(View.GONE);
-		loadCount(createQuery(""), result -> {
+		loadCount(createQuery(SearchObject.empty()), result -> {
 			_count = result;
 			_activityListener.invalidateUi();
 		}, this::onError);

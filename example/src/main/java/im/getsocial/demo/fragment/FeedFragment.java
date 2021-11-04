@@ -52,7 +52,7 @@ public class FeedFragment extends BaseSearchFragment<ActivitiesQuery, GetSocialA
     }
 
     @Override
-    protected ActivitiesQuery createQuery(final String query) {
+    protected ActivitiesQuery createQuery(final SearchObject searchObject) {
         return ActivitiesQuery.activitiesInTopic("DemoFeed");
     }
 

@@ -32,7 +32,7 @@ public class TopicFollowersFragment extends FollowersFragment {
 	}
 
 	@Override
-	protected FollowersQuery createQuery(final String query) {
+	protected FollowersQuery createQuery(final SearchObject searchObject) {
 		return FollowersQuery.ofTopic(_topicId);
 	}
 

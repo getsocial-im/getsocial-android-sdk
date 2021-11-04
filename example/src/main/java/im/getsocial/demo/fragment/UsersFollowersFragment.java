@@ -31,7 +31,7 @@ public class UsersFollowersFragment extends FollowersFragment {
 	}
 
 	@Override
-	protected FollowersQuery createQuery(final String query) {
+	protected FollowersQuery createQuery(final SearchObject searchObject) {
 		return FollowersQuery.ofUser(UserId.create(_userId));
 	}
 

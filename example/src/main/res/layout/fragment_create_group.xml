@@ -155,6 +155,13 @@
 
 		</LinearLayout>
 
+		<EditText
+			android:id="@+id/group_labels"
+			android:hint="Labels: label1,label2"
+			android:maxLines="1"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content" />
+
 		<Button
 				android:id="@+id/create_group"
 				android:text="Create Group"

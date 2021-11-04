@@ -82,7 +82,7 @@ public class NotificationsSearchFragment extends BaseSearchFragment<Notification
 		super.onViewCreated(view, savedInstanceState);
 		_notificationsManager.addListener(this::loadItems);
 		_query.setVisibility(View.GONE);
-		loadCount(createQuery(""), result -> {
+		loadCount(createQuery(SearchObject.empty()), result -> {
 			_count = result;
 			_activityListener.invalidateUi();
 		}, this::onError);
@@ -110,7 +110,7 @@ public class NotificationsSearchFragment extends BaseSearchFragment<Notification
 	}
 
 	@Override
-	protected NotificationsQuery createQuery(final String query) {
+	protected NotificationsQuery createQuery(final SearchObject searchObject) {
 		return _notificationsManager.createNotificationsQuery();
 	}
 

@@ -104,7 +104,7 @@ public class FriendsFragment extends BaseUsersListFragment<FriendsQuery> {
 	}
 
 	@Override
-	protected FriendsQuery createQuery(final String query) {
+	protected FriendsQuery createQuery(final SearchObject searchObject) {
 		return FriendsQuery.ofUser(UserId.currentUser());
 	}
 

@@ -6,8 +6,8 @@ import im.getsocial.sdk.communities.UserId;
 public class MyGroupsFragment extends BaseGroupsFragment {
 
 	@Override
-	protected GroupsQuery createQuery(final String query) {
-		return GroupsQuery.find(query).withMember(UserId.currentUser());
+	protected GroupsQuery createQuery(final SearchObject searchObject) {
+		return GroupsQuery.find(searchObject.searchTerm).withMember(UserId.currentUser());
 	}
 
 	@Override

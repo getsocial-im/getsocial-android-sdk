@@ -1,8 +1,12 @@
 package im.getsocial.demo.fragment;
 
+import android.os.Bundle;
 import android.util.Pair;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.View;
+
+import androidx.annotation.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,8 +22,14 @@ public class GroupsSearchFragment extends BaseGroupsFragment {
 	private String _sortDirection;
 
 	@Override
-	protected GroupsQuery createQuery(final String searchText) {
-		GroupsQuery query = GroupsQuery.find(searchText);
+	protected GroupsQuery createQuery(final SearchObject searchObject) {
+		GroupsQuery query = GroupsQuery.find(searchObject.searchTerm);
+		if (searchObject.labels != null) {
+			query = query.withLabels(searchObject.labels);
+		}
+		if (searchObject.properties != null) {
+			query = query.withProperties(searchObject.properties);
+		}
 		query = query.onlyTrending(_isTrending);
 		return query;
 	}
@@ -32,6 +42,12 @@ public class GroupsSearchFragment extends BaseGroupsFragment {
 	@Override
 	public String getTitle() {
 		return "Groups";
+	}
+
+	@Override
+	public void onViewCreated(final View view, @Nullable final Bundle savedInstanceState) {
+		super.onViewCreated(view, savedInstanceState);
+		super.showAdvancedSearch();
 	}
 
 	@Override

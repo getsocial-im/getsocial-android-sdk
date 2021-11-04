@@ -1,5 +1,6 @@
 package im.getsocial.demo.fragment;
 
+import android.os.Build;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -8,7 +9,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.fragment.app.Fragment;
 
 import com.squareup.picasso.Picasso;
 
@@ -83,6 +83,12 @@ public abstract class BaseGroupsFragment extends BaseSearchFragment<GroupsQuery,
 
 		@BindView(R.id.group_score)
 		TextView _score;
+
+		@BindView(R.id.group_labels)
+		TextView _labels;
+
+		@BindView(R.id.group_properties)
+		TextView _properties;
 
 		@BindView(R.id.group_member_role)
 		TextView _member_role;
@@ -362,6 +368,8 @@ public abstract class BaseGroupsFragment extends BaseSearchFragment<GroupsQuery,
 				}
 			}
 			_score.setText("Popularity: " + _item.getPopularity());
+			_labels.setText("Labels: " + joinElements(_item.getSettings().getLabels()));
+			_properties.setText("Properties: " + joinElements(_item.getSettings().getProperties()));
 			_member_role.setText("Member role: " + memberRole);
 			_member_status.setText("Member status: " + memberStatus);
 		}

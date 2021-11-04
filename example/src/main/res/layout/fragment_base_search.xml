@@ -12,6 +12,32 @@
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content" />
 
+	<EditText
+		android:padding="5dp"
+		android:hint="label1,label2"
+		android:background="#aaaaaaaa"
+		android:id="@+id/search_labels"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:visibility="gone"/>
+
+	<EditText
+		android:padding="5dp"
+		android:hint="key:value,key1:value1"
+		android:background="#aaaaaaaa"
+		android:id="@+id/search_properties"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:visibility="gone" />
+
+	<Button
+		android:padding="5dp"
+		android:text="Search"
+		android:id="@+id/execute_search"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:visibility="gone" />
+
 	<TextView
 			android:id="@+id/error"
 			android:layout_width="match_parent"

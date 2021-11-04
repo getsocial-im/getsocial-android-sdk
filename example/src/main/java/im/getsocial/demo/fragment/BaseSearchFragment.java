@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -15,6 +16,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 import butterknife.OnTextChanged;
 import im.getsocial.demo.R;
 import im.getsocial.demo.dialog.DialogWithScrollableText;
@@ -26,7 +28,11 @@ import im.getsocial.sdk.common.PagingQuery;
 import im.getsocial.sdk.common.PagingResult;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -41,6 +47,15 @@ public abstract class BaseSearchFragment<Query, Item> extends BaseFragment {
 	@BindView(R.id.search_text)
 	public EditText _query;
 
+	@BindView(R.id.search_labels)
+	public EditText _labelsSearch;
+
+	@BindView(R.id.search_properties)
+	public EditText _propertiesSearch;
+
+	@BindView(R.id.execute_search)
+	public Button _searchButton;
+
 	@BindView(R.id.list)
 	public RecyclerView _listView;
 
@@ -51,6 +66,8 @@ public abstract class BaseSearchFragment<Query, Item> extends BaseFragment {
 	private boolean _isLastPage;
 	private BaseSearchAdapter<? extends ViewHolder> _adapter;
 	private EndlessRecyclerViewScrollListener _scrollListener;
+
+	protected boolean _startSearchOnButtonClick = false;
 
 	@Override
 	public View onCreateView(final LayoutInflater inflater, @Nullable final ViewGroup container, @Nullable final Bundle savedInstanceState) {
@@ -100,13 +117,20 @@ public abstract class BaseSearchFragment<Query, Item> extends BaseFragment {
 	protected void loadItems() {
 		_scrollListener.resetState();
 		_swipeRefreshLayout.setRefreshing(true);
-		load(new PagingQuery<>(createQuery(query())), result -> saveResult(result, true), this::onError);
+		load(new PagingQuery<>(createQuery(createSearchObject())), result -> saveResult(result, true), this::onError);
+	}
+
+	protected void showAdvancedSearch() {
+		_labelsSearch.setVisibility(View.VISIBLE);
+		_propertiesSearch.setVisibility(View.VISIBLE);
+		_searchButton.setVisibility(View.VISIBLE);
+		_startSearchOnButtonClick = true;
 	}
 
 	private void loadNext() {
 		if (!_isLastPage) {
 			_swipeRefreshLayout.setRefreshing(true);
-			load(new PagingQuery<>(createQuery(query())).next(_nextCursor), result -> saveResult(result, false), this::onError);
+			load(new PagingQuery<>(createQuery(createSearchObject())).next(_nextCursor), result -> saveResult(result, false), this::onError);
 		}
 	}
 
@@ -130,12 +154,66 @@ public abstract class BaseSearchFragment<Query, Item> extends BaseFragment {
 		// override in children
 	}
 
-	private String query() {
+	private String getSearchText() {
 		return _query.getText().toString();
+	}
+
+	@Nullable
+	private List<String> getSearchLabels() {
+		String searchText = _labelsSearch.getText().toString();
+		if (searchText.isEmpty()) {
+			return null;
+		}
+		return Arrays.asList(searchText.split(","));
+	}
+
+	@Nullable
+	private Map<String, String> getSearchProperties() {
+		String searchText = _propertiesSearch.getText().toString();
+		if (searchText.isEmpty()) {
+			return null;
+		}
+		String[] entries = searchText.split(",");
+		Map<String, String> result = new HashMap<>();
+		for(String entry: entries) {
+			String[] elements = entry.split(":");
+			if (elements.length == 2) {
+				String key = elements[0];
+				String value = elements[1];
+				result.put(key, value);
+			}
+		}
+		return result;
+	}
+
+	private SearchObject createSearchObject() {
+		SearchObject object = new SearchObject();
+		object.searchTerm = getSearchText();
+		object.labels = getSearchLabels();
+		object.properties = getSearchProperties();
+		return object;
+	}
+
+	@OnClick(R.id.execute_search)
+	public void onSearchButtonClick() {
+		if (_pendingTask != null) {
+			_pendingTask.cancel();
+		}
+		_error.setVisibility(View.GONE);
+		_pendingTask = new TimerTask() {
+			@Override
+			public void run() {
+				getActivity().runOnUiThread(BaseSearchFragment.this::loadItems);
+			}
+		};
+		_timer.schedule(_pendingTask, 300);
 	}
 
 	@OnTextChanged(R.id.search_text)
 	public void onSearchTextChange(final CharSequence newText) {
+		if (_startSearchOnButtonClick) {
+			return;
+		}
 		if (_pendingTask != null) {
 			_pendingTask.cancel();
 		}
@@ -161,7 +239,7 @@ public abstract class BaseSearchFragment<Query, Item> extends BaseFragment {
 
 	protected abstract void load(PagingQuery<Query> query, Callback<PagingResult<Item>> success, FailureCallback failure);
 
-	protected abstract Query createQuery(String query);
+	protected abstract Query createQuery(SearchObject searchObject);
 
 	protected abstract class BaseSearchAdapter<VH extends ViewHolder> extends RecyclerView.Adapter<VH> {
 
@@ -210,5 +288,32 @@ public abstract class BaseSearchFragment<Query, Item> extends BaseFragment {
 		}
 
 		protected abstract void invalidate();
+	}
+
+
+	protected String joinElements(List<String> elements) {
+		StringBuilder elementsBuilder = new StringBuilder();
+		for(String str: elements) {
+			elementsBuilder.append(str);
+			elementsBuilder.append(",");
+		}
+		if (elementsBuilder.length() > 0) {
+			elementsBuilder.deleteCharAt(elementsBuilder.length() - 1);
+		}
+		return elementsBuilder.toString();
+	}
+
+	protected String joinElements(Map<String, String> elements) {
+		StringBuilder elementsBuilder = new StringBuilder();
+		for(Map.Entry<String, String> element: elements.entrySet()) {
+			elementsBuilder.append(element.getKey());
+			elementsBuilder.append("=");
+			elementsBuilder.append(element.getValue());
+			elementsBuilder.append(",");
+		}
+		if (elementsBuilder.length() > 0) {
+			elementsBuilder.deleteCharAt(elementsBuilder.length() - 1);
+		}
+		return elementsBuilder.toString();
 	}
 }
