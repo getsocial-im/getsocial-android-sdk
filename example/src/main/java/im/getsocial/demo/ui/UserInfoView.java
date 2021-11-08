@@ -30,9 +30,7 @@ import com.squareup.picasso.Picasso;
 import im.getsocial.demo.R;
 import im.getsocial.demo.utils.CircleTransform;
 import im.getsocial.sdk.GetSocial;
-import im.getsocial.sdk.communities.CurrentUser;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Set;
 
@@ -44,86 +42,94 @@ public class UserInfoView extends RelativeLayout {
 	TextView _extraInfoTextView;
 	@BindView(R.id.userInfo_avatar)
 	ImageView _avatarImageView;
+	@BindView(R.id.userInfo_testDevice)
+	ImageView _testDevice;
 
-	public UserInfoView(final Context context) {
+	public UserInfoView(Context context) {
 		super(context);
 		init(null, 0);
 	}
 
-	public UserInfoView(final Context context, final AttributeSet attrs) {
+	public UserInfoView(Context context, AttributeSet attrs) {
 		super(context, attrs);
 		init(attrs, 0);
 	}
 
-	public UserInfoView(final Context context, final AttributeSet attrs, final int defStyle) {
+	public UserInfoView(Context context, AttributeSet attrs, int defStyle) {
 		super(context, attrs, defStyle);
 		init(attrs, defStyle);
 	}
 
-	public void updateView(@Nullable final CurrentUser user) {
-		final Handler handler = getHandler();
+	public void updateView() {
+		Handler handler = getHandler();
 		if (handler != null) {
-			getHandler().post(() -> updateContent(user));
+			getHandler().post(new Runnable() {
+				@Override
+				public void run() {
+					updateContent();
+				}
+			});
 		}
 	}
 
 	@Override
 	protected void onAttachedToWindow() {
 		super.onAttachedToWindow();
-		updateView(GetSocial.getCurrentUser());
+		updateView();
 	}
 
-	private void init(final AttributeSet attrs, final int defStyle) {
-		final LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+	private void init(AttributeSet attrs, int defStyle) {
+		LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
 		inflater.inflate(R.layout.view_user_info, this, true);
 
 		ButterKnife.bind(this);
 
-		updateContent(GetSocial.getCurrentUser());
+		updateContent();
 	}
 
-	private void updateContent(@Nullable final CurrentUser user) {
-		if (user != null) {
-			if (user.isAnonymous()) {
+	private void updateContent() {
+		if (GetSocial.isInitialized()) {
+			_testDevice.setVisibility(GetSocial.Device.isTestDevice() ? VISIBLE : INVISIBLE);
+			if (GetSocial.User.isAnonymous()) {
 				_extraInfoTextView.setText("Anonymous");
 			} else {
 				_extraInfoTextView.setText(printProviders());
 			}
 
-			String displayName = user.getDisplayName();
+			String displayName = GetSocial.User.getDisplayName();
 			if (TextUtils.isEmpty(displayName)) {
-				displayName = "id: " + GetSocial.getCurrentUser().getId();
+				displayName = "id: " + GetSocial.User.getId();
 			}
 			_displayNameTextView.setText(displayName);
-			final String avatarUrl = user.getAvatarUrl();
+			String avatarUrl = GetSocial.User.getAvatarUrl();
 			if (TextUtils.isEmpty(avatarUrl)) {
 				Picasso.with(getContext())
-								.load(R.drawable.avatar_default)
-								.transform(new CircleTransform())
-								.into(_avatarImageView);
+						.load(R.drawable.avatar_default)
+						.transform(new CircleTransform())
+						.into(_avatarImageView);
 			} else {
 				Picasso.with(getContext())
-								.load(avatarUrl)
-								.transform(new CircleTransform())
-								.placeholder(R.drawable.avatar_default)
-								.into(_avatarImageView);
+						.load(avatarUrl)
+						.transform(new CircleTransform())
+						.placeholder(R.drawable.avatar_default)
+						.into(_avatarImageView);
 			}
 		} else {
 			_displayNameTextView.setText(R.string.no_user);
 			_extraInfoTextView.setText(R.string.probably_you_are_offline);
 
 			Picasso.with(getContext())
-							.load(R.drawable.avatar_default)
-							.transform(new CircleTransform())
-							.into(_avatarImageView);
+					.load(R.drawable.avatar_default)
+					.transform(new CircleTransform())
+					.into(_avatarImageView);
 		}
 	}
 
 	private String printProviders() {
-		final StringBuilder sb = new StringBuilder();
-		final Set<String> keySet = GetSocial.getCurrentUser().getIdentities().keySet();
-		final ArrayList<String> providers = new ArrayList<>(keySet);
+		StringBuilder sb = new StringBuilder();
+		Set<String> keySet = GetSocial.User.getAuthIdentities().keySet();
+		ArrayList<String> providers = new ArrayList<>(keySet);
 		for (int i = 0; i < keySet.size() && i < 3; i++) {
 			sb.append(providers.get(i));
 			if (i < providers.size() - 1) {

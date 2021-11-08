@@ -3,14 +3,16 @@ package im.getsocial.demo.ui;
 import android.annotation.TargetApi;
 import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.os.Build;
+import androidx.annotation.Nullable;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
-import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -36,50 +38,50 @@ public class PickActionView extends LinearLayout {
 	private static final Map<String, List<String>> PLACEHOLDERS = new HashMap<String, List<String>>() {
 		{
 			put(ActionTypes.OPEN_PROFILE, Collections.singletonList(ActionDataKeys.OpenProfile.USER_ID));
-			put(ActionTypes.OPEN_ACTIVITY, Arrays.asList(ActionDataKeys.OpenActivity.ACTIVITY_ID, ActionDataKeys.OpenActivity.COMMENT_ID, ActionDataKeys.OpenActivity.TOPIC_ID, ActionDataKeys.OpenActivity.USER_ID, ActionDataKeys.OpenActivity.GROUP_ID));
-			put(ActionTypes.OPEN_INVITES, Collections.emptyList());
+			put(ActionTypes.OPEN_ACTIVITY, Arrays.asList(ActionDataKeys.OpenActivity.ACTIVITY_ID, ActionDataKeys.OpenActivity.COMMENT_ID, ActionDataKeys.OpenActivity.FEED_NAME));
+			put(ActionTypes.OPEN_INVITES, Collections.<String>emptyList());
 			put(ActionTypes.OPEN_URL, Collections.singletonList(ActionDataKeys.OpenUrl.URL));
 			put(ActionTypes.CLAIM_PROMO_CODE, Collections.singletonList(ActionDataKeys.ClaimPromoCode.PROMO_CODE));
-			put(ActionTypes.ADD_FRIEND, Collections.singletonList(ActionDataKeys.AddFriend.USER_ID));
 		}
 	};
-	private static final String DEFAULT_ACTION = "$$DEFAULT";
-	private static final String CUSTOM_ACTION = "custom";
+	private static final String DEFAULT_ACTION = "DEFAULT";
 
-	final List<DynamicUi.DynamicInputHolder> _notificationData = new ArrayList<>();
 	@BindView(R.id.spinner_select_notification_type)
 	Spinner _selectNotificationType;
+
 	@BindView(R.id.container_notification_data)
 	LinearLayout _notificationDataContainer;
 
-	public PickActionView(final Context context) {
+	final List<DynamicUi.DynamicInputHolder> _notificationData = new ArrayList<>();
+
+	public PickActionView(Context context) {
 		super(context);
 		init(context);
 	}
 
-	public PickActionView(final Context context, @Nullable final AttributeSet attrs) {
+	public PickActionView(Context context, @Nullable AttributeSet attrs) {
 		super(context, attrs);
 		init(context);
 	}
 
-	public PickActionView(final Context context, @Nullable final AttributeSet attrs, final int defStyleAttr) {
+	public PickActionView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
 		super(context, attrs, defStyleAttr);
 		init(context);
 	}
 
 	@TargetApi(Build.VERSION_CODES.LOLLIPOP)
 	@RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-	public PickActionView(final Context context, @Nullable final AttributeSet attrs, final int defStyleAttr, final int defStyleRes) {
+	public PickActionView(Context context, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
 		super(context, attrs, defStyleAttr, defStyleRes);
 		init(context);
 	}
 
-	private void init(final Context context) {
+	private void init(Context context) {
 		LayoutInflater.from(context).inflate(R.layout.view_pick_action, this, true);
 		setOrientation(VERTICAL);
 
 		ButterKnife.bind(this);
-		_selectNotificationType.setAdapter(new ArrayAdapter<>(getContext(), android.R.layout.simple_list_item_1, NotificationAction.names()));
+		_selectNotificationType.setAdapter(new ArrayAdapter<String>(getContext(), android.R.layout.simple_list_item_1, NotificationAction.names()));
 	}
 
 	private String notificationAction() {
@@ -88,20 +90,20 @@ public class PickActionView extends LinearLayout {
 
 	@Nullable
 	public Action getAction() {
-		if (notificationAction().equals(DEFAULT_ACTION)) {
+		if (DEFAULT_ACTION.equals(notificationAction())) {
 			return null;
 		}
-		return Action.create(notificationAction(), actionData());
+		return Action.builder(notificationAction()).addActionData(actionData()).build();
 	}
 
 	private Map<String, String> actionData() {
 		final Map<String, String> actionData = new HashMap<>();
-		for (final DynamicUi.DynamicInputHolder inputHolder : _notificationData) {
+		for (DynamicUi.DynamicInputHolder inputHolder : _notificationData) {
 			actionData.put(inputHolder.getText(0), inputHolder.getText(1));
 		}
 		if (isAddFriendRequest()) {
-			actionData.put(ActionDataKeys.AddFriend.USER_ID, GetSocial.getCurrentUser().getId());
-			actionData.put(KEY_USER_NAME, GetSocial.getCurrentUser().getDisplayName());
+			actionData.put(ActionDataKeys.AddFriend.USER_ID, GetSocial.User.getId());
+			actionData.put(KEY_USER_NAME, GetSocial.User.getDisplayName());
 		}
 		return actionData;
 	}
@@ -115,16 +117,12 @@ public class PickActionView extends LinearLayout {
 		final DynamicUi.DynamicInputHolder inputHolder = DynamicUi.createDynamicTextRow(getContext(), _notificationDataContainer, _notificationData, "Key", "Value");
 		final EditText key = inputHolder.getView(0);
 		final EditText val = inputHolder.getView(1);
-		key.setOnLongClickListener(view -> showPlaceholders(key, val));
-	}
-
-	private void createRow(final String k, final String v) {
-		final DynamicUi.DynamicInputHolder inputHolder = DynamicUi.createDynamicTextRow(getContext(), _notificationDataContainer, _notificationData, "Key", "Value");
-		final EditText key = inputHolder.getView(0);
-		final EditText val = inputHolder.getView(1);
-		key.setOnLongClickListener(view -> showPlaceholders(key, val));
-		key.setText(k);
-		val.setText(v);
+		key.setOnLongClickListener(new OnLongClickListener() {
+			@Override
+			public boolean onLongClick(View view) {
+				return showPlaceholders(key, val);
+			}
+		});
 	}
 
 	private boolean showPlaceholders(final EditText key, final EditText val) {
@@ -133,60 +131,44 @@ public class PickActionView extends LinearLayout {
 			return false;
 		}
 		final AlertDialog dialog = new AlertDialog.Builder(getContext())
-						.setCancelable(true)
-						.setTitle("Select Placeholder")
-						.setItems(placeholders.toArray(new String[placeholders.size()]), (dialog1, which) -> {
-							key.setText(placeholders.get(which));
-							val.requestFocus();
-						})
-						.create();
+				.setCancelable(true)
+				.setTitle("Select Placeholder")
+				.setItems(placeholders.toArray(new String[placeholders.size()]), new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int which) {
+						key.setText(placeholders.get(which));
+						val.requestFocus();
+					}
+				})
+				.create();
 
 		dialog.setCanceledOnTouchOutside(true);
 		dialog.show();
 		return true;
 	}
 
-	public void setAction(final Action action) {
-		_selectNotificationType.setSelection(position(action.getType()));
-		for (final Map.Entry<String, String> property : action.getData().entrySet()) {
-			createRow(property.getKey(), property.getValue());
-		}
-	}
-
-	private static int position(final String type) {
-		for (int i = 0; i < NotificationAction.ALL.length; i++) {
-			final NotificationAction notificationAction = NotificationAction.ALL[i];
-			if (notificationAction._action.equals(type)) {
-				return i;
-			}
-		}
-
-		// hardcode - custom
-		return 1;
-	}
-
 	private static class NotificationAction {
-		static final NotificationAction[] ALL = new NotificationAction[] {
-						new NotificationAction("Default", DEFAULT_ACTION),
-						new NotificationAction("Custom", CUSTOM_ACTION),
-						new NotificationAction("Open Activity", ActionTypes.OPEN_ACTIVITY),
-						new NotificationAction("Open Invites", ActionTypes.OPEN_INVITES),
-						new NotificationAction("Open Profile", ActionTypes.OPEN_PROFILE),
-						new NotificationAction("Open URL", ActionTypes.OPEN_URL),
-						new NotificationAction("Add Friend", ActionTypes.ADD_FRIEND),
-						new NotificationAction("Claim Promo Code", ActionTypes.CLAIM_PROMO_CODE),
-		};
 		final String _name;
 		final String _action;
 
-		private NotificationAction(final String name, final String action) {
+		static final NotificationAction[] ALL = new NotificationAction[] {
+				new NotificationAction("No Action", DEFAULT_ACTION),
+				new NotificationAction("Default", ActionTypes.CUSTOM),
+				new NotificationAction("Open Activity", ActionTypes.OPEN_ACTIVITY),
+				new NotificationAction("Open Invites", ActionTypes.OPEN_INVITES),
+				new NotificationAction("Open Profile", ActionTypes.OPEN_PROFILE),
+				new NotificationAction("Open URL", ActionTypes.OPEN_URL),
+				new NotificationAction("Add Friend", ActionTypes.ADD_FRIEND),
+				new NotificationAction("Claim Promo Code", ActionTypes.CLAIM_PROMO_CODE),
+		};
+
+		private NotificationAction(String name, String action) {
 			_name = name;
 			_action = action;
 		}
 
 		static List<String> names() {
 			final List<String> names = new ArrayList<>();
-			for (final NotificationAction action : ALL) {
+			for (NotificationAction action : ALL) {
 				names.add(action._name);
 			}
 			return names;

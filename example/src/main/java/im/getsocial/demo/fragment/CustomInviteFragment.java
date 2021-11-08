@@ -1,27 +1,30 @@
 /*
- *    	Copyright 2015-2017 GetSocial B.V.
- *
- *	Licensed under the Apache License, Version 2.0 (the "License");
- *	you may not use this file except in compliance with the License.
- *	You may obtain a copy of the License at
- *
- *    	http://www.apache.org/licenses/LICENSE-2.0
- *
- *	Unless required by applicable law or agreed to in writing, software
- *	distributed under the License is distributed on an "AS IS" BASIS,
- *	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *	See the License for the specific language governing permissions and
- *	limitations under the License.
- */
+*    	Copyright 2015-2017 GetSocial B.V.
+*
+*	Licensed under the Apache License, Version 2.0 (the "License");
+*	you may not use this file except in compliance with the License.
+*	You may obtain a copy of the License at
+*
+*    	http://www.apache.org/licenses/LICENSE-2.0
+*
+*	Unless required by applicable law or agreed to in writing, software
+*	distributed under the License is distributed on an "AS IS" BASIS,
+*	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+*	See the License for the specific language governing permissions and
+*	limitations under the License.
+*/
 
 package im.getsocial.demo.fragment;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
+import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.os.Bundle;
+import androidx.annotation.Nullable;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -29,33 +32,32 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
-import androidx.annotation.Nullable;
 import butterknife.BindView;
 import butterknife.BindViews;
 import butterknife.ButterKnife;
 import com.squareup.picasso.MemoryPolicy;
 import im.getsocial.demo.R;
 import im.getsocial.demo.utils.VideoUtils;
-import im.getsocial.sdk.GetSocialError;
 import im.getsocial.sdk.invites.InviteContent;
 import im.getsocial.sdk.invites.InviteTextPlaceholders;
 import im.getsocial.sdk.invites.LinkParams;
 import im.getsocial.sdk.media.MediaAttachment;
+import im.getsocial.sdk.ui.GetSocialUi;
 import im.getsocial.sdk.ui.invites.InviteUiCallback;
-import im.getsocial.sdk.ui.invites.InvitesViewBuilder;
 
-import java.util.HashMap;
+import java.io.File;
+import java.io.FileInputStream;
 import java.util.List;
-import java.util.Map;
 
+import static android.provider.MediaStore.Video.Thumbnails.MINI_KIND;
 import static com.squareup.picasso.Picasso.with;
 
 public class CustomInviteFragment extends BaseFragment {
 
 	private static final String[] INSERT_OPTIONS = {
-					InviteTextPlaceholders.PLACEHOLDER_APP_INVITE_URL,
-					InviteTextPlaceholders.PLACEHOLDER_PROMO_CODE,
-					InviteTextPlaceholders.PLACEHOLDER_USER_NAME
+			InviteTextPlaceholders.PLACEHOLDER_APP_INVITE_URL,
+			InviteTextPlaceholders.PLACEHOLDER_PROMO_CODE,
+			InviteTextPlaceholders.PLACEHOLDER_USER_NAME
 	};
 
 	private static final int REQUEST_PICK_CUSTOM_INVITE_IMAGE = 0x1;
@@ -70,55 +72,57 @@ public class CustomInviteFragment extends BaseFragment {
 	}
 
 	private void validateInput() {
-		final String text = _viewContainer._inviteTextInput.getText().toString();
+		String text = _viewContainer._inviteTextInput.getText().toString();
 
 		if (text.isEmpty() || text.contains(InviteTextPlaceholders.PLACEHOLDER_APP_INVITE_URL)) {
 			openInviteProviderList();
 		} else {
 			new AlertDialog.Builder(getContext())
-							.setTitle(android.R.string.dialog_alert_title)
-							.setMessage("No placeholder for URL found in text, would you like to continue anyway?\nWithout placeholder the invite URL will not be visible.")
-							.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-								@Override
-								public void onClick(final DialogInterface dialogInterface, final int which) {
-									openInviteProviderList();
-								}
-							})
-							.setNegativeButton(android.R.string.no, null)
-							.show();
+					.setTitle(android.R.string.dialog_alert_title)
+					.setMessage("No placeholder for URL found in text, would you like to continue anyway?\nWithout placeholder the invite URL will not be visible.")
+					.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+						@Override
+						public void onClick(DialogInterface dialogInterface, int which) {
+							openInviteProviderList();
+						}
+					})
+					.setNegativeButton(android.R.string.no, null)
+					.show();
 		}
 	}
 
 	private void openInviteProviderList() {
-		final InviteContent inviteContent = new InviteContent();
-		inviteContent.setLinkParams(createLinkParams());
-		inviteContent.setSubject(_viewContainer._inviteSubjectInput.getText().toString());
-		inviteContent.setText(_viewContainer._inviteTextInput.getText().toString());
-		inviteContent.setMediaAttachment(createMediaAttachment());
+		final InviteContent inviteContent = InviteContent.createBuilder()
+				.withSubject(_viewContainer._inviteSubjectInput.getText().toString())
+				.withText(_viewContainer._inviteTextInput.getText().toString())
+				.withMediaAttachment(createMediaAttachment())
+				.build();
 
-		InvitesViewBuilder.create()
-						.setCustomInviteContent(inviteContent)
-						.setInviteCallback(new InviteUiCallback() {
-							@Override
-							public void onComplete(final String channelId) {
-								// Do nothing
-							}
+		final LinkParams params = createLinkParams();
+		GetSocialUi.createInvitesView()
+				.setCustomInviteContent(inviteContent)
+				.setLinkParams(params)
+				.setInviteCallback(new InviteUiCallback() {
+					@Override
+					public void onComplete(final String channelId) {
+						// Do nothing
+					}
 
-							@Override
-							public void onCancel(final String channelId) {
-								// Do nothing
-							}
+					@Override
+					public void onCancel(final String channelId) {
+						// Do nothing
+					}
 
-							@Override
-							public void onError(final String channelId, final GetSocialError throwable) {
-								// Do nothing
-							}
-						})
-						.show();
+					@Override
+					public void onError(final String channelId, Throwable throwable) {
+						// Do nothing
+					}
+				})
+				.show();
 	}
 
 	private MediaAttachment createMediaAttachment() {
-		final Bitmap bitmap = _viewContainer._inviteImageView.getDrawable() == null ? null : ((BitmapDrawable) _viewContainer._inviteImageView.getDrawable()).getBitmap();
+		final Bitmap bitmap = _viewContainer._inviteImageView.getDrawable() == null ? null : ((BitmapDrawable)_viewContainer._inviteImageView.getDrawable()).getBitmap();
 		final String imageUrl = _viewContainer._inviteImageUrlInput.getText().toString();
 		if (bitmap != null) {
 			return MediaAttachment.image(bitmap);
@@ -130,8 +134,8 @@ public class CustomInviteFragment extends BaseFragment {
 		return null;
 	}
 
-	private Map<String, Object> createLinkParams() {
-		final Map<String, Object> linkParams = new HashMap<>();
+	private LinkParams createLinkParams() {
+		LinkParams linkParams = new LinkParams();
 		if (_viewContainer._landingPageTitle.getText().toString().length() > 0) {
 			linkParams.put(LinkParams.KEY_CUSTOM_TITLE, _viewContainer._landingPageTitle.getText().toString());
 		}
@@ -148,14 +152,14 @@ public class CustomInviteFragment extends BaseFragment {
 			linkParams.put(LinkParams.KEY_CUSTOM_YOUTUBE_VIDEO, _viewContainer._landingPageVideoURL.getText().toString());
 		}
 
-		final Bitmap bitmap = _viewContainer._landingPageImageView.getDrawable() == null ? null : ((BitmapDrawable) _viewContainer._landingPageImageView.getDrawable()).getBitmap();
+		final Bitmap bitmap = _viewContainer._landingPageImageView.getDrawable() == null ? null : ((BitmapDrawable)_viewContainer._landingPageImageView.getDrawable()).getBitmap();
 		if (bitmap != null) {
 			linkParams.put(LinkParams.KEY_CUSTOM_IMAGE, bitmap);
 		}
 
 		for (int i = 0; i < _viewContainer._linkParamsKeys.size(); i++) {
-			final String key = _viewContainer._linkParamsKeys.get(i).getText().toString();
-			final String value = _viewContainer._linkParamsValues.get(i).getText().toString();
+			String key = _viewContainer._linkParamsKeys.get(i).getText().toString();
+			String value = _viewContainer._linkParamsValues.get(i).getText().toString();
 			if (!TextUtils.isEmpty(key) && !TextUtils.isEmpty(value)) {
 				linkParams.put(key, value);
 			}
@@ -164,12 +168,12 @@ public class CustomInviteFragment extends BaseFragment {
 	}
 
 	@Override
-	public View onCreateView(final LayoutInflater inflater, @Nullable final ViewGroup container, @Nullable final Bundle savedInstanceState) {
+	public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 		return inflater.inflate(R.layout.fragment_custom_invite, container, false);
 	}
 
 	@Override
-	public void onViewCreated(final View view, @Nullable final Bundle savedInstanceState) {
+	public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
 		super.onViewCreated(view, savedInstanceState);
 		_viewContainer = new ViewContainer(view);
 	}
@@ -185,26 +189,26 @@ public class CustomInviteFragment extends BaseFragment {
 	}
 
 	@Override
-	protected void onImagePickedFromDevice(final Uri imageUri, final int requestCode) {
-		final ImageView imageView;
+	protected void onImagePickedFromDevice(Uri imageUri, int requestCode) {
+		ImageView imageView;
 		if (requestCode == REQUEST_PICK_CUSTOM_INVITE_IMAGE) {
-			imageView = _viewContainer._inviteImageView;
-			_viewContainer._inviteImageView.setVisibility(View.VISIBLE);
-			_viewContainer._buttonRemoveInviteImage.setVisibility(View.VISIBLE);
+				imageView = _viewContainer._inviteImageView;
+				_viewContainer._inviteImageView.setVisibility(View.VISIBLE);
+				_viewContainer._buttonRemoveInviteImage.setVisibility(View.VISIBLE);
 		} else {
 			imageView = _viewContainer._landingPageImageView;
 			_viewContainer._landingPageImageView.setVisibility(View.VISIBLE);
 			_viewContainer._buttonRemoveImage.setVisibility(View.VISIBLE);
 		}
 		with(getContext())
-						.load(imageUri)
-						.resize(MAX_WIDTH, 0)
-						.memoryPolicy(MemoryPolicy.NO_CACHE)
-						.into(imageView);
+				.load(imageUri)
+				.resize(MAX_WIDTH, 0)
+				.memoryPolicy(MemoryPolicy.NO_CACHE)
+				.into(imageView);
 	}
 
 	@Override
-	protected void onVideoPickedFromDevice(final Uri videoUri, final int requestCode) {
+	protected void onVideoPickedFromDevice(Uri videoUri, int requestCode) {
 		if (requestCode == REQUEST_PICK_CUSTOM_VIDEO) {
 			_video = VideoUtils.open(getContext(), videoUri);
 			if (_video == null) {
@@ -269,31 +273,31 @@ public class CustomInviteFragment extends BaseFragment {
 		@BindView(R.id.button_remove_invite_image)
 		Button _buttonRemoveInviteImage;
 
-		ViewContainer(final View view) {
+		ViewContainer(View view) {
 
 			ButterKnife.bind(this, view);
 
 			_buttonOpenInviteView.setOnClickListener(new View.OnClickListener() {
 				@Override
-				public void onClick(final View view) {
+				public void onClick(View view) {
 					validateInput();
 				}
 			});
 
-			final View.OnLongClickListener onInsertTextLongClickListener = new View.OnLongClickListener() {
+			View.OnLongClickListener onInsertTextLongClickListener = new View.OnLongClickListener() {
 				@Override
 				public boolean onLongClick(final View view) {
-					final AlertDialog.Builder builder = new AlertDialog.Builder(getContext())
-									.setCancelable(true)
-									.setTitle(R.string.invite_text_placeholders)
-									.setItems(INSERT_OPTIONS, new DialogInterface.OnClickListener() {
-										public void onClick(final DialogInterface dialog, final int which) {
-											final EditText editText = (EditText) view;
-											editText.getText().insert(editText.getSelectionStart(), INSERT_OPTIONS[which]);
-										}
-									});
+					AlertDialog.Builder builder = new AlertDialog.Builder(getContext())
+							.setCancelable(true)
+							.setTitle(R.string.invite_text_placeholders)
+							.setItems(INSERT_OPTIONS, new DialogInterface.OnClickListener() {
+								public void onClick(DialogInterface dialog, int which) {
+									EditText editText = (EditText) view;
+									editText.getText().insert(editText.getSelectionStart(), INSERT_OPTIONS[which]);
+								}
+							});
 
-					final AlertDialog dialog = builder.create();
+					AlertDialog dialog = builder.create();
 					dialog.setCanceledOnTouchOutside(true);
 					dialog.show();
 
@@ -305,13 +309,13 @@ public class CustomInviteFragment extends BaseFragment {
 			_inviteTextInput.setOnLongClickListener(onInsertTextLongClickListener);
 			_buttonSelectInviteImage.setOnClickListener(new View.OnClickListener() {
 				@Override
-				public void onClick(final View view) {
+				public void onClick(View view) {
 					pickImageFromDevice(REQUEST_PICK_CUSTOM_INVITE_IMAGE);
 				}
 			});
 			_buttonRemoveInviteImage.setOnClickListener(new View.OnClickListener() {
 				@Override
-				public void onClick(final View v) {
+				public void onClick(View v) {
 					_inviteImageView.setImageDrawable(null);
 					_inviteImageView.setVisibility(View.GONE);
 					_buttonRemoveInviteImage.setVisibility(View.GONE);
@@ -319,13 +323,13 @@ public class CustomInviteFragment extends BaseFragment {
 			});
 			_selectVideoButton.setOnClickListener(new View.OnClickListener() {
 				@Override
-				public void onClick(final View v) {
+				public void onClick(View v) {
 					pickVideoFromDevice(REQUEST_PICK_CUSTOM_VIDEO);
 				}
 			});
 			_removeVideoButton.setOnClickListener(new View.OnClickListener() {
 				@Override
-				public void onClick(final View v) {
+				public void onClick(View v) {
 					_video = null;
 					_inviteVideoView.setImageDrawable(null);
 					_inviteVideoView.setVisibility(View.GONE);
@@ -337,13 +341,13 @@ public class CustomInviteFragment extends BaseFragment {
 
 			_buttonSelectLandingPageImage.setOnClickListener(new View.OnClickListener() {
 				@Override
-				public void onClick(final View v) {
+				public void onClick(View v) {
 					pickImageFromDevice(REQUEST_PICK_CUSTOM_LP_IMAGE);
 				}
 			});
 			_buttonUseSameImage.setOnClickListener(new View.OnClickListener() {
 				@Override
-				public void onClick(final View v) {
+				public void onClick(View v) {
 					if (_inviteImageView.getDrawable() != null) {
 						_landingPageImageView.setImageDrawable(_inviteImageView.getDrawable());
 						_landingPageImageView.setVisibility(View.VISIBLE);
@@ -353,7 +357,7 @@ public class CustomInviteFragment extends BaseFragment {
 			});
 			_buttonRemoveImage.setOnClickListener(new View.OnClickListener() {
 				@Override
-				public void onClick(final View v) {
+				public void onClick(View v) {
 					_landingPageImageView.setImageDrawable(null);
 					_landingPageImageView.setVisibility(View.GONE);
 					_buttonRemoveImage.setVisibility(View.GONE);

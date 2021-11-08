@@ -26,10 +26,10 @@ import com.kakao.message.template.FeedTemplate;
 import com.kakao.message.template.LinkObject;
 import com.kakao.network.ErrorResult;
 import com.kakao.network.callback.ResponseCallback;
-import im.getsocial.sdk.invites.Invite;
 import im.getsocial.sdk.invites.InviteCallback;
 import im.getsocial.sdk.invites.InviteChannel;
 import im.getsocial.sdk.invites.InviteChannelPlugin;
+import im.getsocial.sdk.invites.InvitePackage;
 
 public class KakaoInvitePlugin extends InviteChannelPlugin {
 
@@ -37,42 +37,43 @@ public class KakaoInvitePlugin extends InviteChannelPlugin {
 
 	private static final String PACKAGE_NAME = "com.kakao.talk";
 
-	private static boolean hasKakaoInstalled(final Context context) {
+	private static boolean hasKakaoInstalled(Context context) {
 		try {
 			context.getPackageManager().getPackageInfo(PACKAGE_NAME, 0);
 			return true;
-		} catch (final PackageManager.NameNotFoundException e) {
+		} catch (PackageManager.NameNotFoundException e) {
 			return false;
 		}
 	}
 
 	@Override
-	public boolean isAvailableForDevice(final InviteChannel inviteChannel) {
+	public boolean isAvailableForDevice(InviteChannel inviteChannel) {
 		return hasKakaoInstalled(getContext());
 	}
 
 	@Override
-	public void presentChannelInterface(final InviteChannel inviteChannel, final Invite invite, final InviteCallback callback) {
-		final LinkObject linkObject = LinkObject.newBuilder().setMobileWebUrl(invite.getReferralUrl()).build();
-		final ContentObject.Builder contentObject = ContentObject.newBuilder(invite.getText(), invite.getImageUrl(), linkObject);
+	public void presentChannelInterface(InviteChannel inviteChannel, InvitePackage invitePackage, final InviteCallback callback) {
+		LinkObject linkObject = LinkObject.newBuilder().setMobileWebUrl(invitePackage.getReferralUrl()).build();
+		ContentObject.Builder contentObject = ContentObject.newBuilder(invitePackage.getText(), invitePackage.getImageUrl(), linkObject);
 
-		if (invite.getImageUrl() != null && invite.getImage() != null) {
-			final Bitmap image = invite.getImage();
-			final double ratio = (double) image.getHeight() / (double) image.getWidth();
-			final int height = (int) (ratio * SHARED_IMAGE_WIDTH);
+		if (invitePackage.getImageUrl() != null && invitePackage.getImage() != null) {
+			Bitmap image = invitePackage.getImage();
+			double ratio = (double)image.getHeight() / (double)image.getWidth();
+			int height = (int)(ratio * SHARED_IMAGE_WIDTH);
 			contentObject.setImageHeight(height);
 			contentObject.setImageWidth(SHARED_IMAGE_WIDTH);
 		}
 
-		final FeedTemplate.Builder templateBuilder = FeedTemplate.newBuilder(contentObject.build());
+		FeedTemplate.Builder templateBuilder = FeedTemplate.newBuilder(contentObject.build());
 		KakaoLinkService.getInstance().sendDefault(getContext(), templateBuilder.build(), new ResponseCallback<KakaoLinkResponse>() {
 			@Override
-			public void onFailure(final ErrorResult errorResult) {
-				callback.onError(new Exception(errorResult.getErrorMessage()));
+			public void onFailure(ErrorResult errorResult) {
+
+				callback.onError(new Throwable(errorResult.getErrorMessage()));
 			}
 
 			@Override
-			public void onSuccess(final KakaoLinkResponse kakaoLinkResponse) {
+			public void onSuccess(KakaoLinkResponse kakaoLinkResponse) {
 				callback.onComplete();
 			}
 		});

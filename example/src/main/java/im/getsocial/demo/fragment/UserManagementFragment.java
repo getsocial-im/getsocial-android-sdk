@@ -17,32 +17,27 @@
 package im.getsocial.demo.fragment;
 
 import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
-import android.text.InputType;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.widget.EditText;
+import androidx.annotation.NonNull;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.Toast;
-import androidx.annotation.NonNull;
 import com.squareup.picasso.MemoryPolicy;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
-
-import im.getsocial.demo.R;
+import im.getsocial.demo.adapter.EnabledCheck;
 import im.getsocial.demo.adapter.MenuItem;
+import im.getsocial.demo.dialog.action_dialog.ActionDialog;
 import im.getsocial.demo.utils.EditTextWOCopyPaste;
 import im.getsocial.demo.utils.PixelUtils;
 import im.getsocial.demo.utils.UserIdentityUtils;
 import im.getsocial.sdk.CompletionCallback;
 import im.getsocial.sdk.GetSocial;
-import im.getsocial.sdk.GetSocialError;
-import im.getsocial.sdk.communities.Identity;
-import im.getsocial.sdk.communities.IdentityProviderIds;
-import im.getsocial.sdk.communities.UserUpdate;
+import im.getsocial.sdk.GetSocialException;
+import im.getsocial.sdk.usermanagement.AuthIdentityProviderIds;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -64,77 +59,223 @@ public class UserManagementFragment extends BaseListFragment {
 
 	@NonNull
 	protected List<MenuItem> createListData() {
-		final List<MenuItem> listData = new ArrayList<>();
-		listData.add(new MenuItem.Builder("Change Display Name").withAction(this::changeDisplayName).build());
-		listData.add(new MenuItem.Builder("Change User Avatar").withAction(this::changeUserAvatar).build());
-		listData.add(new MenuItem.Builder("Choose Avatar").withAction(() -> pickImageFromDevice(REQUEST_PICK_AVATAR)).build());
-		listData.add(new MenuItem.Builder("Add Facebook user identity").withAction(
-						() -> addFacebookUserIdentity(this::invalidateUi)
-						).withEnabledCheck(
-						() -> !GetSocial.getCurrentUser().getIdentities().containsKey(IdentityProviderIds.FACEBOOK)
-						).build()
-		);
+		List<MenuItem> listData = new ArrayList<>();
 
-		listData.add(new MenuItem.Builder("Add Custom user identity")
-						.withAction(() -> addCustomUserIdentity(this::invalidateUi))
-						.withEnabledCheck(() -> !GetSocial.getCurrentUser().getIdentities().containsKey(CUSTOM_PROVIDER))
-						.build()
-		);
+		listData.add(new MenuItem.Builder("Change Display Name").withAction(new MenuItem.Action() {
+			@Override
+			public void execute() {
+				changeDisplayName();
+			}
+		}).build());
 
-		listData.add(new MenuItem.Builder("Add Trusted user identity")
-				.withAction(() -> addTrustedUserIdentity(this::invalidateUi))
-				.build()
-		);
+		listData.add(new MenuItem.Builder("Change User Avatar").withAction(new MenuItem.Action() {
+			@Override
+			public void execute() {
+				changeUserAvatar();
+			}
+		}).build());
+
+		listData.add(new MenuItem.Builder("Choose Avatar").withAction(new MenuItem.Action() {
+			@Override
+			public void execute() {
+				pickImageFromDevice(REQUEST_PICK_AVATAR);
+			}
+		}).build());
+
+		listData.add(new MenuItem.Builder("Add Facebook user identity").withAction(new MenuItem.Action() {
+			@Override
+			public void execute() {
+				addFacebookUserIdentity(new CompletionCallback() {
+
+					@Override
+					public void onSuccess() {
+						invalidateUi();
+					}
+
+					@Override
+					public void onFailure(GetSocialException exception) {
+						_log.logErrorAndToast("Authorization failed with exception: " + exception.getMessage());
+					}
+				});
+			}
+		}).withEnabledCheck(new EnabledCheck() {
+			@Override
+			public boolean isOptionEnabled() {
+				return !GetSocial.User.getAuthIdentities().containsKey(AuthIdentityProviderIds.FACEBOOK);
+			}
+		}).build());
+
+		listData.add(new MenuItem.Builder("Add Custom user identity").withAction(new MenuItem.Action() {
+			@Override
+			public void execute() {
+				addCustomUserIdentity(new CompletionCallback() {
+					@Override
+					public void onSuccess() {
+						invalidateUi();
+					}
+
+					@Override
+					public void onFailure(GetSocialException exception) {
+						_log.logErrorAndToast("Authorization failed with exception: " + exception.getMessage());
+					}
+				});
+			}
+		}).withEnabledCheck(new EnabledCheck() {
+			@Override
+			public boolean isOptionEnabled() {
+				return !GetSocial.User.getAuthIdentities().containsKey(CUSTOM_PROVIDER);
+			}
+		}).build());
 
 		listData.add(new MenuItem.Builder("Remove Facebook user identity").withSubtitle("Log out from Facebook")
-						.withAction(this::removeFacebookUserIdentity)
-						.withEnabledCheck(() -> GetSocial.getCurrentUser().getIdentities().containsKey(IdentityProviderIds.FACEBOOK))
-						.build()
-		);
+						.withAction(new MenuItem.Action() {
+							@Override
+							public void execute() {
+								removeFacebookUserIdentity();
+							}
+						}).withEnabledCheck(new EnabledCheck() {
+							@Override
+							public boolean isOptionEnabled() {
+								return GetSocial.User.getAuthIdentities().containsKey(AuthIdentityProviderIds.FACEBOOK);
+							}
+						}).build());
 
-		listData.add(new MenuItem.Builder("Remove Custom user identity")
-						.withAction(this::removeCustomUserIdentity)
-						.withEnabledCheck(() -> GetSocial.getCurrentUser().getIdentities().containsKey(CUSTOM_PROVIDER))
-						.build()
-		);
-		listData.add(new MenuItem.Builder("Remove Trusted user identity")
-				.withAction(this::removeTrustedUserIdentity)
-				.withEnabledCheck(() -> !GetSocial.getCurrentUser().isAnonymous())
-				.build()
-		);
-		listData.add(new MenuItem.Builder("Add property").withAction(this::setPublicProperty).build());
-		listData.add(new MenuItem.Builder("Get property").withAction(this::getPublicProperty).build());
-		listData.add(new MenuItem.Builder("Increment property").withAction(this::incrementPublicProperty).build());
-		listData.add(new MenuItem.Builder("Decrement property").withAction(this::decrementPublicProperty).build());
-		listData.add(new MenuItem.Builder("Refresh").withAction(this::refreshUser).build());
-		listData.add(new MenuItem.Builder("Log out").withAction(this::logOut).build());
-		listData.add(MenuItem.builder("Reset without init").withAction(() -> GetSocial.reset(() -> {
-			_log.logInfoAndToast("User reset");
-			_activityListener.onBackPressed();
-		}, error -> {
-			_log.logErrorAndToast(error);
-			invalidateUi();
-		})).withEnabledCheck(GetSocial::isInitialized).build());
+		listData.add(new MenuItem.Builder("Remove Custom user identity").withAction(new MenuItem.Action() {
+			@Override
+			public void execute() {
+				removeCustomUserIdentity();
+			}
+		}).withEnabledCheck(new EnabledCheck() {
+			@Override
+			public boolean isOptionEnabled() {
+				return GetSocial.User.getAuthIdentities().containsKey(CUSTOM_PROVIDER);
+			}
+		}).build());
+
+		listData.add(new MenuItem.Builder("Add property").withAction(new MenuItem.Action() {
+			@Override
+			public void execute() {
+				setPublicProperty();
+			}
+		}).build());
+
+		listData.add(new MenuItem.Builder("Get property").withAction(new MenuItem.Action() {
+			@Override
+			public void execute() {
+				getPublicProperty();
+			}
+		}).build());
+
+		listData.add(new MenuItem.Builder("Log out").withAction(new MenuItem.Action() {
+			@Override
+			public void execute() {
+				logOut();
+			}
+		}).withEnabledCheck(new EnabledCheck() {
+			@Override
+			public boolean isOptionEnabled() {
+				return GetSocial.isInitialized();
+			}
+		}).build());
+		listData.add(MenuItem.builder("Reset without init").withAction(new MenuItem.Action() {
+			@Override
+			public void execute() {
+				GetSocial.reset(new CompletionCallback() {
+					@Override
+					public void onSuccess() {
+						_log.logInfoAndToast("User reset");
+						invalidateUi();
+					}
+
+					@Override
+					public void onFailure(GetSocialException exception) {
+						_log.logErrorAndToast(exception);
+						invalidateUi();
+					}
+				});
+			}
+		}).withEnabledCheck(new EnabledCheck() {
+			@Override
+			public boolean isOptionEnabled() {
+				return GetSocial.isInitialized();
+			}
+		}).build());
+		listData.add(MenuItem.builder("Init with new anonymous user").withAction(new MenuItem.Action() {
+			@Override
+			public void execute() {
+				GetSocial.init();
+				GetSocial.whenInitialized(new Runnable() {
+					@Override
+					public void run() {
+						invalidateUi();
+					}
+				});
+			}
+		}).withEnabledCheck(new EnabledCheck() {
+			@Override
+			public boolean isOptionEnabled() {
+				return !GetSocial.isInitialized();
+			}
+		}).build());
+		listData.add(MenuItem.builder("Init with...").withAction(new MenuItem.Action() {
+			@Override
+			public void execute() {
+				loginWith();
+			}
+		}).withEnabledCheck(new EnabledCheck() {
+			@Override
+			public boolean isOptionEnabled() {
+				return !GetSocial.isInitialized();
+			}
+		}).build());
 		return listData;
+
+	}
+
+	private void loginWith() {
+		CompletionCallback callback = new CompletionCallback() {
+			@Override
+			public void onSuccess() {
+				_log.logInfoAndToast("Successfully logged in");
+				invalidateUi();
+			}
+
+			@Override
+			public void onFailure(GetSocialException exception) {
+				_log.logErrorAndToast(exception);
+				invalidateUi();
+			}
+		};
+		new ActionDialog(getContext()).addAction(new ActionDialog.Action("Facebook") {
+			@Override
+			public void execute() {
+				loginWithFacebook(callback);
+			}
+		}).addAction(new ActionDialog.Action("Custom Identity") {
+			@Override
+			public void execute() {
+				loginWithCustom(callback);
+			}
+		}).setTitle("Login with...").show();
 	}
 
 	@Override
-	protected void onImagePickedFromDevice(final Uri imageUri, final int requestCode) {
+	protected void onImagePickedFromDevice(Uri imageUri, int requestCode) {
 		if (requestCode == REQUEST_PICK_AVATAR) {
 			with(getContext()).load(imageUri).resize(MAX_WIDTH, 0).memoryPolicy(MemoryPolicy.NO_CACHE)
 							.into(new Target() {
 								@Override
-								public void onBitmapLoaded(final Bitmap bitmap, final Picasso.LoadedFrom from) {
+								public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
 									setAvatarBitmap(bitmap);
 								}
 
 								@Override
-								public void onBitmapFailed(final Drawable errorDrawable) {
+								public void onBitmapFailed(Drawable errorDrawable) {
 									showAlert("Error", "Failed to load image");
 								}
 
 								@Override
-								public void onPrepareLoad(final Drawable placeHolderDrawable) {
+								public void onPrepareLoad(Drawable placeHolderDrawable) {
 
 								}
 							});
@@ -142,16 +283,19 @@ public class UserManagementFragment extends BaseListFragment {
 	}
 
 	private void setAvatarBitmap(final Bitmap bitmap) {
-		GetSocial.getCurrentUser().updateDetails(new UserUpdate().updateAvatar(bitmap), new SafeCompletionCallback() {
+		GetSocial.User.setAvatar(bitmap, new SafeCompletionCallback() {
 			@Override
 			public void onSafeSuccess() {
 				bitmap.recycle();
 				_activityListener.invalidateUi();
 				Toast.makeText(getContext(), "Avatar has been changed successfully!", Toast.LENGTH_SHORT).show();
 			}
-		}, error -> {
-			Toast.makeText(getContext(), "Error changing avatar: \n" + error.getMessage(),
-							Toast.LENGTH_SHORT).show();
+
+			@Override
+			public void onSafeFailure(GetSocialException exception) {
+				Toast.makeText(getContext(), "Error changing avatar: \n" + exception.getLocalizedMessage(),
+								Toast.LENGTH_SHORT).show();
+			}
 		});
 	}
 
@@ -160,18 +304,25 @@ public class UserManagementFragment extends BaseListFragment {
 		keyInput.setContentDescription("public_property_key");
 		keyInput.setLongClickable(false);
 		final int _8dp = PixelUtils.dp2px(getContext(), 8);
-		final FrameLayout frameLayout = new FrameLayout(getContext());
+		FrameLayout frameLayout = new FrameLayout(getContext());
 		frameLayout.setPadding(_8dp, _8dp, _8dp, _8dp);
 		frameLayout.addView(keyInput);
 
 		new AlertDialog.Builder(getContext()).setView(frameLayout).setTitle("User Property")
-						.setPositiveButton("OK", (dialogInterface, which) ->
-										Toast.makeText(
-														getContext(),
-														keyInput.getText().toString() + " = " + GetSocial.getCurrentUser().getPublicProperties().get(keyInput.getText().toString()),
-														Toast.LENGTH_SHORT
-										).show())
-						.setNegativeButton("Cancel", (dialogInterface, which) -> dialogInterface.cancel()).create().show();
+						.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+							@Override
+							public void onClick(final DialogInterface dialogInterface, int which) {
+								Toast.makeText(getContext(),
+												keyInput.getText().toString() + " = "
+																+ GetSocial.User.getPublicProperty(keyInput.getText().toString()),
+												Toast.LENGTH_SHORT).show();
+							}
+						}).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialogInterface, int which) {
+				dialogInterface.cancel();
+			}
+		}).create().show();
 	}
 
 	private void setPublicProperty() {
@@ -186,7 +337,7 @@ public class UserManagementFragment extends BaseListFragment {
 		valInput.setContentDescription("public_property_value");
 
 		final int _8dp = PixelUtils.dp2px(getContext(), 8);
-		final LinearLayout frameLayout = new LinearLayout(getContext());
+		LinearLayout frameLayout = new LinearLayout(getContext());
 		frameLayout.setOrientation(LinearLayout.VERTICAL);
 		frameLayout.setPadding(_8dp, _8dp, _8dp, _8dp);
 
@@ -194,119 +345,50 @@ public class UserManagementFragment extends BaseListFragment {
 		frameLayout.addView(valInput);
 
 		new AlertDialog.Builder(getContext()).setView(frameLayout).setTitle("User Property")
-						.setPositiveButton("OK", (dialogInterface, which) -> GetSocial.getCurrentUser().updateDetails(new UserUpdate().setPublicProperty(keyInput.getText().toString(), valInput.getText().toString()),
-										new SafeCompletionCallback() {
-											@Override
-											public void onSafeSuccess() {
-												dialogInterface.dismiss();
-												_activityListener.invalidateUi();
-												Toast.makeText(getContext(), "Public property has been changed successfully!",
-																Toast.LENGTH_SHORT).show();
-											}
-										}, error -> {
-											Toast.makeText(getContext(),
-															"Error changing public property: \n" + error.getMessage(),
-															Toast.LENGTH_SHORT).show();
-										})).setNegativeButton("Cancel", (dialogInterface, which) -> dialogInterface.cancel()).create().show();
-	}
-
-	private void incrementPublicProperty() {
-		final EditTextWOCopyPaste keyInput = new EditTextWOCopyPaste(getContext());
-		keyInput.setLongClickable(false);
-		final EditTextWOCopyPaste valInput = new EditTextWOCopyPaste(getContext());
-		valInput.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
-		valInput.setLongClickable(false);
-
-		keyInput.setHint("Key");
-		keyInput.setContentDescription("public_property_key");
-		valInput.setHint("Value");
-		valInput.setContentDescription("increment");
-
-		final int _8dp = PixelUtils.dp2px(getContext(), 8);
-		final LinearLayout frameLayout = new LinearLayout(getContext());
-		frameLayout.setOrientation(LinearLayout.VERTICAL);
-		frameLayout.setPadding(_8dp, _8dp, _8dp, _8dp);
-
-		frameLayout.addView(keyInput);
-		frameLayout.addView(valInput);
-
-		new AlertDialog.Builder(getContext()).setView(frameLayout).setTitle("User Property")
-				.setPositiveButton("OK", (dialogInterface, which) -> GetSocial.getCurrentUser().updateDetails(new UserUpdate().incrementPublicProperty(keyInput.getText().toString(), Double.parseDouble(valInput.getText().toString())),
-						new SafeCompletionCallback() {
+						.setPositiveButton("OK", new DialogInterface.OnClickListener() {
 							@Override
-							public void onSafeSuccess() {
-								dialogInterface.dismiss();
-								_activityListener.invalidateUi();
-								Toast.makeText(getContext(), "Public property has been changed successfully!",
-										Toast.LENGTH_SHORT).show();
+							public void onClick(final DialogInterface dialogInterface, int which) {
+								GetSocial.User.setPublicProperty(keyInput.getText().toString(), valInput.getText().toString(),
+												new SafeCompletionCallback() {
+													@Override
+													public void onSafeSuccess() {
+														dialogInterface.dismiss();
+														_activityListener.invalidateUi();
+														Toast.makeText(getContext(), "Public property has been changed successfully!",
+																		Toast.LENGTH_SHORT).show();
+													}
+
+													@Override
+													public void onSafeFailure(GetSocialException exception) {
+														Toast.makeText(getContext(),
+																		"Error changing public property: \n" + exception.getLocalizedMessage(),
+																		Toast.LENGTH_SHORT).show();
+													}
+												});
 							}
-						}, error -> {
-							Toast.makeText(getContext(),
-									"Error changing public property: \n" + error.getMessage(),
-									Toast.LENGTH_SHORT).show();
-						})).setNegativeButton("Cancel", (dialogInterface, which) -> dialogInterface.cancel()).create().show();
+						}).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialogInterface, int which) {
+				dialogInterface.cancel();
+			}
+		}).create().show();
 	}
 
-	private void decrementPublicProperty() {
-		final EditTextWOCopyPaste keyInput = new EditTextWOCopyPaste(getContext());
-		keyInput.setLongClickable(false);
-		final EditTextWOCopyPaste valInput = new EditTextWOCopyPaste(getContext());
-		valInput.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
-		valInput.setLongClickable(false);
-
-		keyInput.setHint("Key");
-		keyInput.setContentDescription("public_property_key");
-		valInput.setHint("Value");
-		valInput.setContentDescription("decrement");
-
-		final int _8dp = PixelUtils.dp2px(getContext(), 8);
-		final LinearLayout frameLayout = new LinearLayout(getContext());
-		frameLayout.setOrientation(LinearLayout.VERTICAL);
-		frameLayout.setPadding(_8dp, _8dp, _8dp, _8dp);
-
-		frameLayout.addView(keyInput);
-		frameLayout.addView(valInput);
-
-		new AlertDialog.Builder(getContext()).setView(frameLayout).setTitle("User Property")
-				.setPositiveButton("OK", (dialogInterface, which) -> GetSocial.getCurrentUser().updateDetails(new UserUpdate().decrementPublicProperty(keyInput.getText().toString(), Double.parseDouble(valInput.getText().toString())),
-						new SafeCompletionCallback() {
-							@Override
-							public void onSafeSuccess() {
-								dialogInterface.dismiss();
-								_activityListener.invalidateUi();
-								Toast.makeText(getContext(), "Public property has been changed successfully!",
-										Toast.LENGTH_SHORT).show();
-							}
-						}, error -> {
-							Toast.makeText(getContext(),
-									"Error changing public property: \n" + error.getMessage(),
-									Toast.LENGTH_SHORT).show();
-						})).setNegativeButton("Cancel", (dialogInterface, which) -> dialogInterface.cancel()).create().show();
-	}
-
-	private void refreshUser() {
-		GetSocial.getCurrentUser().refresh(() -> {
-			Toast.makeText(getContext(), "Current User has been refreshed successfully!",
-					Toast.LENGTH_SHORT).show();
-		}, (error) -> {
-			Toast.makeText(getContext(),
-					"Error refreshing current user: \n" + error.getMessage(),
-					Toast.LENGTH_SHORT).show();
-		});
-	}
-
-// region Presenter
+	// region Presenter
 
 	private void changeUserAvatar() {
-		GetSocial.getCurrentUser().updateDetails(new UserUpdate().updateAvatarUrl(UserIdentityUtils.getRandomAvatar()), new SafeCompletionCallback() {
+		GetSocial.User.setAvatarUrl(UserIdentityUtils.getRandomAvatar(), new SafeCompletionCallback() {
 			@Override
 			public void onSafeSuccess() {
 				_activityListener.invalidateUi();
 				Toast.makeText(getContext(), "Avatar has been changed successfully!", Toast.LENGTH_SHORT).show();
 			}
-		}, error -> {
-			Toast.makeText(getContext(), "Error changing avatar: \n" + error.getMessage(),
-							Toast.LENGTH_SHORT).show();
+
+			@Override
+			public void onSafeFailure(GetSocialException exception) {
+				Toast.makeText(getContext(), "Error changing avatar: \n" + exception.getLocalizedMessage(),
+								Toast.LENGTH_SHORT).show();
+			}
 		});
 	}
 
@@ -315,7 +397,7 @@ public class UserManagementFragment extends BaseListFragment {
 		displayNameInput.setLongClickable(false);
 
 		final int _8dp = PixelUtils.dp2px(getContext(), 8);
-		final FrameLayout frameLayout = new FrameLayout(getContext());
+		FrameLayout frameLayout = new FrameLayout(getContext());
 		frameLayout.setPadding(_8dp, _8dp, _8dp, _8dp);
 		frameLayout.addView(displayNameInput);
 
@@ -324,25 +406,37 @@ public class UserManagementFragment extends BaseListFragment {
 		displayNameInput.setContentDescription("display_name_input");
 
 		new AlertDialog.Builder(getContext()).setView(frameLayout).setTitle("User Display Name")
-						.setPositiveButton("OK", (dialogInterface, which) -> GetSocial.getCurrentUser().updateDetails(new UserUpdate().updateDisplayName(displayNameInput.getText().toString()),
-										new SafeCompletionCallback() {
-											@Override
-											public void onSafeSuccess() {
-												dialogInterface.dismiss();
-												_activityListener.invalidateUi();
-												Toast.makeText(getContext(), "Display name has been changed successfully!",
-																Toast.LENGTH_SHORT).show();
-											}
-										}, error -> {
-											Toast.makeText(getContext(),
-															"Error changing display name: \n" + error.getMessage(),
-															Toast.LENGTH_SHORT).show();
-										})).setNegativeButton("Cancel", (dialogInterface, which) -> dialogInterface.cancel())
-						.create().show();
+						.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+							@Override
+							public void onClick(final DialogInterface dialogInterface, int which) {
+								GetSocial.User.setDisplayName(displayNameInput.getText().toString(),
+												new SafeCompletionCallback() {
+													@Override
+													public void onSafeSuccess() {
+														dialogInterface.dismiss();
+														_activityListener.invalidateUi();
+														Toast.makeText(getContext(), "Display name has been changed successfully!",
+																		Toast.LENGTH_SHORT).show();
+													}
+
+													@Override
+													public void onSafeFailure(GetSocialException exception) {
+														Toast.makeText(getContext(),
+																		"Error changing display name: \n" + exception.getLocalizedMessage(),
+																		Toast.LENGTH_SHORT).show();
+													}
+												});
+							}
+						}).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialogInterface, int which) {
+				dialogInterface.cancel();
+			}
+		}).create().show();
 	}
 
 	private void removeFacebookUserIdentity() {
-		removeUserIdentity(IdentityProviderIds.FACEBOOK);
+		removeUserIdentity(AuthIdentityProviderIds.FACEBOOK);
 
 		disconnectFromFacebook();
 	}
@@ -353,48 +447,40 @@ public class UserManagementFragment extends BaseListFragment {
 
 	private void logOut() {
 		showLoading("Log Out", "Wait...");
-		GetSocial.resetUser(() -> {
-			invalidateUi();
-			hideLoading();
-			Toast.makeText(getContext(), "User has been successfully logged out!", Toast.LENGTH_SHORT).show();
-		}, error -> {
-			hideLoading();
-			Toast.makeText(getContext(), "Failed to log out user, error: " + error.getMessage(),
-							Toast.LENGTH_SHORT).show();
+		GetSocial.User.reset(new CompletionCallback() {
+			@Override
+			public void onSuccess() {
+				invalidateUi();
+				hideLoading();
+				Toast.makeText(getContext(), "User has been successfully logged out!", Toast.LENGTH_SHORT).show();
+			}
+
+			@Override
+			public void onFailure(GetSocialException exception) {
+				hideLoading();
+				Toast.makeText(getContext(), "Failed to log out user, error: " + exception.getMessage(),
+								Toast.LENGTH_SHORT).show();
+			}
 		});
 	}
-// endregion
+	// endregion
 
 	// region helpers
 	private void removeUserIdentity(final String providerId) {
-		GetSocial.getCurrentUser().removeIdentity(providerId, new SafeCompletionCallback() {
+		GetSocial.User.removeAuthIdentity(providerId, new SafeCompletionCallback() {
 			@Override
 			public void onSafeSuccess() {
 				invalidateUi();
 				_log.logInfoAndToast(String.format("Successfully removed user identity '%s'", providerId));
 			}
-		}, error -> {
-			_log.logErrorAndToast(String.format("Failed to remove user identity '%s', error: %s", providerId,
-							error.getMessage()));
+
+			@Override
+			public void onSafeFailure(GetSocialException exception) {
+				_log.logErrorAndToast(String.format("Failed to remove user identity '%s', error: %s", providerId,
+								exception.getMessage()));
+			}
+
 		});
-	}
-
-	protected void removeTrustedUserIdentity() {
-		final LayoutInflater layoutInflater = LayoutInflater.from(getContext());
-		final View view = layoutInflater.inflate(R.layout.dialog_remove_trusted_identity, null, false);
-
-		final EditText providerIdEditText = view.findViewById(R.id.provider_id);
-
-		final AlertDialog.Builder builder = new AlertDialog.Builder(getContext())
-				.setView(view)
-				.setPositiveButton("Remove", (dialog, which) -> {
-							String providerId = providerIdEditText.getText().toString().trim();
-							removeUserIdentity(providerId);
-						}
-				)
-				.setNegativeButton("Cancel", (dialog, which) -> {
-				});
-		builder.show();
 	}
 
 	@Override

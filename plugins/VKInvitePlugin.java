@@ -26,35 +26,37 @@ import com.vk.sdk.api.photo.VKImageParameters;
 import com.vk.sdk.api.photo.VKUploadImage;
 import com.vk.sdk.dialogs.VKShareDialog;
 import com.vk.sdk.dialogs.VKShareDialogBuilder;
-import im.getsocial.sdk.Invites;
-import im.getsocial.sdk.invites.Invite;
+import im.getsocial.sdk.ErrorCode;
+import im.getsocial.sdk.GetSocial;
+import im.getsocial.sdk.GetSocialException;
 import im.getsocial.sdk.invites.InviteCallback;
 import im.getsocial.sdk.invites.InviteChannel;
 import im.getsocial.sdk.invites.InviteChannelPlugin;
+import im.getsocial.sdk.invites.InvitePackage;
 
 /**
  * Invite Channel Plugin for GetSocial SDK.
- * Register plugin via {@link Invites#registerPlugin(InviteChannelPlugin, String)}.
+ * Register plugin via {@link GetSocial#registerInviteChannelPlugin(String pluginId, InviteChannelPlugin plugin)}.
  */
 public class VKInvitePlugin extends InviteChannelPlugin implements VKCallback<VKAccessToken> {
 
-	private final Activity _activity;
+	private Activity _activity;
 	private InviteCallback _inviteCallback;
-	private Invite _invite;
+	private InvitePackage _invitePackage;
 
-	public VKInvitePlugin(final Activity activity) {
+	public VKInvitePlugin(Activity activity) {
 		_activity = activity;
 	}
 
 	@Override
-	public boolean isAvailableForDevice(final InviteChannel inviteChannel) {
+	public boolean isAvailableForDevice(InviteChannel inviteChannel) {
 		return true;
 	}
 
 	@Override
-	public void presentChannelInterface(final InviteChannel inviteChannel, final Invite invite, final InviteCallback callback) {
+	public void presentChannelInterface(InviteChannel inviteChannel, InvitePackage invitePackage, final InviteCallback callback) {
 		_inviteCallback = callback;
-		_invite = invite;
+		_invitePackage = invitePackage;
 		if (!VKSdk.isLoggedIn()) {
 			VKSdk.login(_activity, VKScope.PHOTOS, VKScope.WALL);
 		} else {
@@ -63,16 +65,16 @@ public class VKInvitePlugin extends InviteChannelPlugin implements VKCallback<VK
 	}
 
 	private void openShareDialog() {
-		final VKShareDialogBuilder shareDialogBuilder = new VKShareDialogBuilder();
-		shareDialogBuilder.setText(_invite.getText());
-		if (_invite.getImage() != null) {
-			final VKUploadImage uploadImage = new VKUploadImage(_invite.getImage(), VKImageParameters.pngImage());
-			final VKUploadImage[] uploadImages = new VKUploadImage[] {uploadImage};
+		VKShareDialogBuilder shareDialogBuilder = new VKShareDialogBuilder();
+		shareDialogBuilder.setText(_invitePackage.getText());
+		if (_invitePackage.getImage() != null) {
+			VKUploadImage uploadImage = new VKUploadImage(_invitePackage.getImage(), VKImageParameters.pngImage());
+			VKUploadImage[] uploadImages = new VKUploadImage[] { uploadImage };
 			shareDialogBuilder.setAttachmentImages(uploadImages);
 		}
 		shareDialogBuilder.setShareDialogListener(new VKShareDialog.VKShareDialogListener() {
 			@Override
-			public void onVkShareComplete(final int result) {
+			public void onVkShareComplete(int result) {
 				_inviteCallback.onComplete();
 			}
 
@@ -82,8 +84,8 @@ public class VKInvitePlugin extends InviteChannelPlugin implements VKCallback<VK
 			}
 
 			@Override
-			public void onVkShareError(final VKError vkError) {
-				_inviteCallback.onError(new Exception(vkError.errorMessage));
+			public void onVkShareError(VKError vkError) {
+				_inviteCallback.onError(new GetSocialException(ErrorCode.UNKNOWN, vkError.errorMessage));
 			}
 		});
 		shareDialogBuilder.show(_activity.getFragmentManager(), "VK_SHARE");
@@ -91,12 +93,12 @@ public class VKInvitePlugin extends InviteChannelPlugin implements VKCallback<VK
 
 	// VKCallback
 	@Override
-	public void onResult(final VKAccessToken vkAccessToken) {
+	public void onResult(VKAccessToken vkAccessToken) {
 		openShareDialog();
 	}
 
 	@Override
-	public void onError(final VKError vkError) {
-		_inviteCallback.onError(new Exception(vkError == null ? "Can not sent VK invite" : vkError.errorMessage));
+	public void onError(VKError vkError) {
+		_inviteCallback.onError(new GetSocialException(ErrorCode.UNKNOWN, vkError == null ? "Can not sent VK invite" : vkError.errorMessage));
 	}
 }

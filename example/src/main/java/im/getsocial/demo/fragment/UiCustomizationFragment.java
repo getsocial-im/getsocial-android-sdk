@@ -1,18 +1,18 @@
 /*
- *    	Copyright 2015-2017 GetSocial B.V.
- *
- *	Licensed under the Apache License, Version 2.0 (the "License");
- *	you may not use this file except in compliance with the License.
- *	You may obtain a copy of the License at
- *
- *    	http://www.apache.org/licenses/LICENSE-2.0
- *
- *	Unless required by applicable law or agreed to in writing, software
- *	distributed under the License is distributed on an "AS IS" BASIS,
- *	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *	See the License for the specific language governing permissions and
- *	limitations under the License.
- */
+*    	Copyright 2015-2017 GetSocial B.V.
+*
+*	Licensed under the Apache License, Version 2.0 (the "License");
+*	you may not use this file except in compliance with the License.
+*	You may obtain a copy of the License at
+*
+*    	http://www.apache.org/licenses/LICENSE-2.0
+*
+*	Unless required by applicable law or agreed to in writing, software
+*	distributed under the License is distributed on an "AS IS" BASIS,
+*	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+*	See the License for the specific language governing permissions and
+*	limitations under the License.
+*/
 
 package im.getsocial.demo.fragment;
 
@@ -33,34 +33,64 @@ public class UiCustomizationFragment extends BaseListFragment {
 	protected List<MenuItem> createListData() {
 		return Arrays.asList(
 				new MenuItem.Builder("Default UI")
-						.withAction(this::loadDefaultConfiguration).build(),
+						.withAction(new MenuItem.Action() {
+							@Override
+							public void execute() {
+								loadDefaultConfiguration();
+							}
+						}).build(),
 				new MenuItem.Builder("Default UI Landscape")
-						.withAction(() -> loadConfiguration("getsocial-default-landscape/ui-config.json",
-								"Default Landscape", ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE)).build(),
+						.withAction(new MenuItem.Action() {
+							@Override
+							public void execute() {
+								loadConfiguration("getsocial-default-landscape/ui-config.json",
+										"Default Landscape", ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+							}
+						}).build(),
 				new MenuItem.Builder("Light UI - Portrait")
-						.withAction(() -> loadConfiguration("getsocial-light/ui-config.json",
-								"Light UI - Portrait", ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)).build(),
+						.withAction(new MenuItem.Action() {
+							@Override
+							public void execute() {
+								loadConfiguration("getsocial-light/ui-config.json",
+										"Light UI - Portrait", ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+							}
+						}).build(),
 				new MenuItem.Builder("Light UI - Landscape")
-						.withAction(() -> loadConfiguration("getsocial-light-landscape/ui-config.json",
-								"Light UI - Landscape", ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE)).build(),
+						.withAction(new MenuItem.Action() {
+							@Override
+							public void execute() {
+								loadConfiguration("getsocial-light-landscape/ui-config.json",
+										"Light UI - Landscape", ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+							}
+						}).build(),
 				new MenuItem.Builder("Dark UI - Portrait")
-						.withAction(() -> loadConfiguration("getsocial-dark/ui-config.json",
-								"Dark UI - Portrait", ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)).build(),
+						.withAction(new MenuItem.Action() {
+							@Override
+							public void execute() {
+								loadConfiguration("getsocial-dark/ui-config.json",
+										"Dark UI - Portrait", ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+							}
+						}).build(),
 				new MenuItem.Builder("Dark UI - Landscape")
-						.withAction(() -> loadConfiguration("getsocial-dark-landscape/ui-config.json",
-								"Dark UI - Landscape", ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE)).build()
+						.withAction(new MenuItem.Action() {
+							@Override
+							public void execute() {
+								loadConfiguration("getsocial-dark-landscape/ui-config.json",
+										"Dark UI - Landscape", ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+							}
+						}).build()
 		);
 	}
 
-	protected void loadConfiguration(final String configurationPath, final String configurationName, final int screenOrientation) {
-		if (GetSocialUi.loadConfiguration(configurationPath)) {
+	protected void loadConfiguration(final String configurationPath, final String configurationName, final int screenOrientation ) {
+		if (GetSocialUi.loadConfiguration(getContext(), configurationPath)) {
 			getActivity().setRequestedOrientation(screenOrientation);
 			updateUiConfigurationName(configurationName);
 		}
 	}
 
 	private void loadDefaultConfiguration() {
-		if (GetSocialUi.loadDefaultConfiguration()) {
+		if (GetSocialUi.loadDefaultConfiguration(getContext())) {
 			getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 			updateUiConfigurationName(null);
 		}

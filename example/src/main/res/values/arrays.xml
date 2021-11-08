@@ -6,4 +6,8 @@
 		<!--<item>@string/main_menu_global_feed</item>-->
 		<item>@string/main_menu_ui_customisation</item>
 	</string-array>
+	<string-array name="activityFeedsItems">
+		<item>Global Feed</item>
+		<item>Custom Feed</item>
+	</string-array>
 </resources>
