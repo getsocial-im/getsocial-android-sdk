@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+		android:orientation="vertical"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content">
+
+	<LinearLayout
+			android:orientation="horizontal"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content">
+
+		<ImageView
+				android:id="@+id/user_avatar"
+				android:src="@drawable/avatar_default"
+				android:layout_margin="5dp"
+				android:layout_width="60dp"
+				android:layout_height="60dp" />
+
+		<LinearLayout
+				android:layout_margin="5dp"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:orientation="vertical">
+
+			<TextView
+					android:id="@+id/user_title"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:maxLines="1"
+					android:textSize="24sp"
+					android:textStyle="bold"
+					android:text="Topic" />
+
+			<TextView
+					android:id="@+id/user_id"
+					android:text="15:04 11/22/2020 (Upd. 19:94 12/22/2020)"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content" />
+		</LinearLayout>
+	</LinearLayout>
+
+	<TextView
+			android:layout_marginTop="8dp"
+			android:layout_marginLeft="8dp"
+			android:layout_marginRight="8dp"
+			android:id="@+id/user_description"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:maxLines="3"
+			android:text="This is a topic about something important. I will tell you later exactly about what." />
+
+	<LinearLayout
+			android:orientation="horizontal"
+			android:layout_marginTop="8dp"
+			android:layout_marginLeft="8dp"
+			android:layout_marginRight="8dp"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content">
+
+		<Button
+				android:id="@+id/actions"
+				style="@style/Widget.AppCompat.Button.Borderless"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:text="Actions" />
+
+	</LinearLayout>
+</LinearLayout>
