@@ -170,9 +170,9 @@ public class CreateGroupFragment extends BaseFragment {
 				break;
 			}
 		}
-		String searchText = _viewContainer._labels.getText().toString();
-		if (!searchText.isEmpty()) {
-			content = content.withLabels(Arrays.asList(searchText.split(",")));
+		String labelsText = _viewContainer._labels.getText().toString();
+		if (!labelsText.isEmpty()) {
+			content = content.withLabels(Arrays.asList(labelsText.split(",")));
 		}
 
 		if (_groupId == null) {

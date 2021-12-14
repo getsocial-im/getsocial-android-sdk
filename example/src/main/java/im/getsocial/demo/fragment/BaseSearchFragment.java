@@ -176,7 +176,7 @@ public abstract class BaseSearchFragment<Query, Item> extends BaseFragment {
 		String[] entries = searchText.split(",");
 		Map<String, String> result = new HashMap<>();
 		for(String entry: entries) {
-			String[] elements = entry.split(":");
+			String[] elements = entry.split("=");
 			if (elements.length == 2) {
 				String key = elements[0];
 				String value = elements[1];

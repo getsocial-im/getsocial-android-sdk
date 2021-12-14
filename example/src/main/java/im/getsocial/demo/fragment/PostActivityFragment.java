@@ -59,6 +59,7 @@ import im.getsocial.sdk.ui.communities.ActivityFeedViewBuilder;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -184,6 +185,10 @@ public class PostActivityFragment extends BaseFragment implements Callback<GetSo
 		for (final DynamicUi.DynamicInputHolder property : _propertiesHolder) {
 			builder.addProperty(property.getText(0), property.getText(1));
 		}
+		String labelsText = _viewContainer._labels.getText().toString();
+		if (!labelsText.isEmpty()) {
+			builder.addLabels(Arrays.asList(labelsText.split(",")));
+		}
 
 		if (_activityId != null) {
 			showLoading("Updating activity", "Wait...");
@@ -304,6 +309,8 @@ public class PostActivityFragment extends BaseFragment implements Callback<GetSo
 		LinearLayout _properties;
 		@BindView(R.id.select_video)
 		Button _selectVideo;
+		@BindView(R.id.post_activity_labels)
+		EditText _labels;
 
 		ViewContainer(final View view) {
 			ButterKnife.bind(this, view);
@@ -387,6 +394,7 @@ public class PostActivityFragment extends BaseFragment implements Callback<GetSo
 			for (final Map.Entry<String, String> property : post.getProperties().entrySet()) {
 				createRow(property.getKey(), property.getValue());
 			}
+			_labels.setText(TextUtils.join(",", post.getLabels()));
 		}
 	}
 }

@@ -17,16 +17,17 @@ public class UsersSearchFragment extends BaseUsersListFragment<UsersQuery> {
 
 	@Override
 	protected UsersQuery createQuery(final SearchObject searchObject) {
-		return UsersQuery.find(searchObject.searchTerm);
+		if (searchObject.searchTerm.length()==0) {
+			return UsersQuery.suggested();
+		} else {
+			return UsersQuery.find(searchObject.searchTerm);
+		}
 	}
 
 	@Override
 	protected String validate(final CharSequence newText) {
-		if (newText.length() < 3) {
+		if (newText.length()>0 && newText.length()< 3) {
 			return "Query length should have at least three symbols";
-		}
-		if (newText.length() > 24) {
-			return "Query should be no longer than 24 symbols";
 		}
 		return super.validate(newText);
 	}

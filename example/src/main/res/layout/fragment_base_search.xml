@@ -23,7 +23,7 @@
 
 	<EditText
 		android:padding="5dp"
-		android:hint="key:value,key1:value1"
+		android:hint="key=value,key1=value1"
 		android:background="#aaaaaaaa"
 		android:id="@+id/search_properties"
 		android:layout_width="match_parent"

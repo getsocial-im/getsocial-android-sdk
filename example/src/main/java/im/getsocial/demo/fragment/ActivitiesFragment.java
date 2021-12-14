@@ -51,17 +51,21 @@ public class ActivitiesFragment extends BaseListFragment implements ActionListen
 						new MenuItem.Builder("Timeline with Handlers")
 										.withAction(new OpenTimelineWithHandlers())
 										.build(),
-						new MenuItem.Builder("My Activity Feed")
+						new MenuItem.Builder("My Feed")
 										.withAction(new OpenMyFeed())
-										.withSubtitle("Is not available in phase 1")
-										.withEnabledCheck(() -> false)
 										.build(),
+						new MenuItem.Builder("My Feed without UI")
+								.withAction(new OpenMyFeedWOUI())
+								.build(),
 						new MenuItem.Builder("Demo Feed")
 										.withAction(new OpenTopicFeedAction("DemoFeed"))
 										.build(),
 						new MenuItem.Builder("Timeline")
 										.withAction(new OpenTimeline())
 										.build(),
+						new MenuItem.Builder("Timeline without UI")
+								.withAction(new OpenTimelineWOUI())
+								.build(),
 						new MenuItem.Builder("Open Activity Details From Timeline")
 										.withAction(new OpenActivityDetailsAction(true))
 										.build(),
@@ -260,6 +264,22 @@ public class ActivitiesFragment extends BaseListFragment implements ActionListen
 		@Override
 		public void execute() {
 			showCurrentUserFeed();
+		}
+	}
+
+	private class OpenMyFeedWOUI implements MenuItem.Action {
+
+		@Override
+		public void execute() {
+			addContentFragment(ActivitiesListFragment.currentUserFeed());
+		}
+	}
+
+	private class OpenTimelineWOUI implements MenuItem.Action {
+
+		@Override
+		public void execute() {
+			addContentFragment(ActivitiesListFragment.timeline());
 		}
 	}
 

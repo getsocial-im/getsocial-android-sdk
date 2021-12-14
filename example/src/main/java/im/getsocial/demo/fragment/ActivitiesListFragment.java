@@ -30,14 +30,34 @@ import im.getsocial.sdk.common.PagingQuery;
 import im.getsocial.sdk.common.PagingResult;
 import im.getsocial.sdk.communities.ActivitiesQuery;
 import im.getsocial.sdk.communities.GetSocialActivity;
+import im.getsocial.sdk.communities.GroupsQuery;
+import im.getsocial.sdk.communities.UserId;
 
 public class ActivitiesListFragment extends BaseSearchFragment<ActivitiesQuery, GetSocialActivity> {
 
     String _topicId;
     String _groupId;
+    boolean _timeline = false;
+    boolean _currentUserFeed = false;
     private boolean _isTrending = false;
     private String _sortKey;
     private String _sortDirection;
+
+    public static Fragment currentUserFeed() {
+        final ActivitiesListFragment fragment = new ActivitiesListFragment();
+        final Bundle args = new Bundle();
+        args.putBoolean("currentuserfeed", true);
+        fragment.setArguments(args);
+        return fragment;
+    }
+
+    public static Fragment timeline() {
+        final ActivitiesListFragment fragment = new ActivitiesListFragment();
+        final Bundle args = new Bundle();
+        args.putBoolean("timeline", true);
+        fragment.setArguments(args);
+        return fragment;
+    }
 
     public static Fragment inTopic(final String topicId) {
         final ActivitiesListFragment fragment = new ActivitiesListFragment();
@@ -63,6 +83,8 @@ public class ActivitiesListFragment extends BaseSearchFragment<ActivitiesQuery, 
         }
         _topicId = getArguments().getString("topicId");
         _groupId = getArguments().getString("groupId");
+        _timeline = getArguments().getBoolean("timeline", false);
+        _currentUserFeed = getArguments().getBoolean("currentuserfeed", false);
     }
 
 
@@ -111,7 +133,7 @@ public class ActivitiesListFragment extends BaseSearchFragment<ActivitiesQuery, 
     @Override
     public void onViewCreated(final View view, @Nullable final Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        _query.setVisibility(View.GONE);
+        super.showAdvancedSearch();
     }
 
     @Override
@@ -133,8 +155,27 @@ public class ActivitiesListFragment extends BaseSearchFragment<ActivitiesQuery, 
 
     @Override
     protected ActivitiesQuery createQuery(final SearchObject searchObject) {
-        ActivitiesQuery query = _topicId == null ? ActivitiesQuery.activitiesInGroup(_groupId) : ActivitiesQuery.activitiesInTopic(_topicId);
+        ActivitiesQuery query = null;
+        if (_timeline) {
+            query = ActivitiesQuery.timeline();
+        } else if (_currentUserFeed) {
+            query = ActivitiesQuery.feedOf(UserId.currentUser());
+        } else if (_groupId != null) {
+            query = ActivitiesQuery.activitiesInGroup(_groupId);
+        } else if (_topicId != null) {
+            query = ActivitiesQuery.activitiesInTopic(_topicId);
+        }
         query = query.onlyTrending(_isTrending);
+        if (searchObject.searchTerm != null) {
+            query = query.withText(searchObject.searchTerm);
+        }
+        if (searchObject.labels != null) {
+            query = query.withLabels(searchObject.labels);
+        }
+        if (searchObject.properties != null) {
+            query = query.withProperties(searchObject.properties);
+        }
+
         return query;
     }
 
@@ -161,6 +202,12 @@ public class ActivitiesListFragment extends BaseSearchFragment<ActivitiesQuery, 
         @BindView(R.id.activity_score)
         TextView _score;
 
+        @BindView(R.id.activity_labels)
+        TextView _labels;
+
+        @BindView(R.id.activity_properties)
+        TextView _properties;
+
         ActivityListItemHolder(final View view) {
             super(view);
         }
@@ -179,6 +226,8 @@ public class ActivitiesListFragment extends BaseSearchFragment<ActivitiesQuery, 
 
             _createdAt.setText("Created: " + date);
             _score.setText("Popularity:" + _item.getPopularity());
+            _labels.setText("Labels: " + joinElements(_item.getLabels()));
+            _properties.setText("Properties: " + joinElements(_item.getProperties()));
         }
 
     }
