@@ -91,6 +91,7 @@ public class RootFragment extends BaseListFragment implements NotificationsManag
 						navigationListItem("Activities", ActivitiesFragment.class),
 						navigationListItem("Topics", TopicsSearchFragment.class),
 						navigationListItem("Tags", TagsListFragment.class),
+						navigationListItem("Labels", LabelsListFragment.class),
 						navigationListItem("Groups", GroupsFragment.class),
 						navigationListItem("Chats", ChatsFragment.class),
 						navigationListItem("Users", UsersSearchFragment.class),

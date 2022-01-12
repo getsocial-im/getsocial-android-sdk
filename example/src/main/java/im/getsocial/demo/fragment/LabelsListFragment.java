@@ -10,12 +10,19 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -31,17 +38,12 @@ import im.getsocial.sdk.common.PagingQuery;
 import im.getsocial.sdk.common.PagingResult;
 import im.getsocial.sdk.communities.ActivitiesQuery;
 import im.getsocial.sdk.communities.FollowQuery;
-import im.getsocial.sdk.communities.Tag;
-import im.getsocial.sdk.communities.TagsQuery;
+import im.getsocial.sdk.communities.Label;
+import im.getsocial.sdk.communities.LabelsQuery;
 import im.getsocial.sdk.communities.UserId;
 import im.getsocial.sdk.ui.communities.ActivityFeedViewBuilder;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
-
-public class TagsListFragment extends BaseFragment {
+public class LabelsListFragment extends BaseFragment {
 
 	private final Timer _timer = new Timer();
 	private TimerTask _pendingTask;
@@ -60,7 +62,7 @@ public class TagsListFragment extends BaseFragment {
 
 	private StringAdapter _adapter;
 
-	private boolean _myTagsOnly;
+	private boolean _myLabelsOnly;
 	private boolean _isTrending = false;
 	private String _sortKey;
 	private String _sortDirection;
@@ -89,7 +91,7 @@ public class TagsListFragment extends BaseFragment {
 
 	@Override
 	public void onCreateOptionsMenu(final Menu menu, final MenuInflater inflater) {
-		menu.add(Menu.NONE, 0x42, Menu.NONE, _myTagsOnly ? "Show all" : "Followed by me");
+		menu.add(Menu.NONE, 0x42, Menu.NONE, _myLabelsOnly ? "Show all" : "Followed by me");
 		menu.add(Menu.NONE, 0x43, Menu.NONE, _isTrending ? "All" : "Trending");
 		super.onCreateOptionsMenu(menu, inflater);
 	}
@@ -135,31 +137,31 @@ public class TagsListFragment extends BaseFragment {
 	}
 
 	private void filter() {
-		_myTagsOnly = !_myTagsOnly;
+		_myLabelsOnly = !_myLabelsOnly;
 		getActivity().invalidateOptionsMenu();
-		_query.setVisibility(_myTagsOnly ? View.GONE : View.VISIBLE);
+		_query.setVisibility(_myLabelsOnly ? View.GONE : View.VISIBLE);
 		loadItems();
 	}
 
 
 	protected void loadItems() {
 		_swipeRefreshLayout.setRefreshing(true);
-		TagsQuery query = null;
-		if (_myTagsOnly) {
-			query = TagsQuery.followedByUser(UserId.currentUser());
+		LabelsQuery query = null;
+		if (_myLabelsOnly) {
+			query = LabelsQuery.followedByUser(UserId.currentUser());
 		} else {
-			query = TagsQuery.find(query());
+			query = LabelsQuery.find(query());
 		}
 		query = query.onlyTrending(_isTrending);
 
-		Communities.getTags(new PagingQuery<>(query), this::saveResult, this::onError);
+		Communities.getLabels(new PagingQuery<>(query), this::saveResult, this::onError);
 	}
 
 	protected void onError(final GetSocialError error) {
 		Toast.makeText(getContext(), error.toString(), Toast.LENGTH_SHORT).show();
 	}
 
-	private void saveResult(final PagingResult<Tag> result) {
+	private void saveResult(final PagingResult<Label> result) {
 		_swipeRefreshLayout.setRefreshing(false);
 		_adapter._items.clear();
 		_adapter._items.addAll(result.getEntries());
@@ -197,12 +199,12 @@ public class TagsListFragment extends BaseFragment {
 
 	protected class StringAdapter extends RecyclerView.Adapter<StringViewHolder> {
 
-		private final List<Tag> _items = new ArrayList<>();
+		private final List<Label> _items = new ArrayList<>();
 
 		@NonNull
 		@Override
 		public StringViewHolder onCreateViewHolder(@NonNull final ViewGroup parent, final int viewType) {
-			final View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_item_tag, parent, false);
+			final View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_item_label, parent, false);
 			return new StringViewHolder(view);
 		}
 
@@ -222,13 +224,13 @@ public class TagsListFragment extends BaseFragment {
 		@BindView(R.id.name)
 		TextView _name;
 
-		@BindView(R.id.tag_score)
+		@BindView(R.id.label_score)
 		TextView _score;
 
-		@BindView(R.id.tag_activityCount)
+		@BindView(R.id.label_activityCount)
 		TextView _activityCount;
 
-		@BindView(R.id.tag_followersCount)
+		@BindView(R.id.label_followersCount)
 		TextView _followersCount;
 
 		boolean _isFollowing;
@@ -269,7 +271,7 @@ public class TagsListFragment extends BaseFragment {
 			dialog.addAction(new ActionDialog.Action(_isFollowing ? "Unfollow" : "Follow") {
 				@Override
 				public void execute() {
-					followTag();
+					followLabel();
 				}
 			});
 			dialog.addAction(new ActionDialog.Action("Followers") {
@@ -282,21 +284,23 @@ public class TagsListFragment extends BaseFragment {
 		}
 
 		void openFeed() {
-			ActivitiesQuery query = ActivitiesQuery.everywhere().withTag(_item.getName());
+			List<String> labels = new ArrayList<>();
+			labels.add(_item.getName());
+			ActivitiesQuery query = ActivitiesQuery.everywhere().withLabels(labels);
 			ActivityFeedViewBuilder builder = ActivityFeedViewBuilder.create(query);
 			builder.show();
 		}
-		void followTag() {
+		void followLabel() {
 			final String tag = _item.getName();
 
 			if (_isFollowing) {
-				Communities.unfollow(FollowQuery.tags(tag), result -> {
+				Communities.unfollow(FollowQuery.labels(tag), result -> {
 					if (_item.getName().equals(tag)) {
 						_isFollowing = false;
 					}
 				}, error -> Toast.makeText(getContext(), error.toString(), Toast.LENGTH_SHORT).show());
 			} else {
-				Communities.follow(FollowQuery.tags(tag), result -> {
+				Communities.follow(FollowQuery.labels(tag), result -> {
 					if (_item.getName().equals(tag)) {
 						_isFollowing = true;
 					}
@@ -305,7 +309,7 @@ public class TagsListFragment extends BaseFragment {
 		}
 
 		void openFollowers() {
-			final TagFollowersFragment fragment = TagFollowersFragment.create(_item.getName());
+			final LabelFollowersFragment fragment = LabelFollowersFragment.create(_item.getName());
 			addContentFragment(fragment);
 		}
 
@@ -314,7 +318,7 @@ public class TagsListFragment extends BaseFragment {
 	protected abstract class ViewHolder extends RecyclerView.ViewHolder {
 
 		protected final View _parent;
-		protected Tag _item;
+		protected Label _item;
 
 		public ViewHolder(@NonNull final View itemView) {
 			super(itemView);
@@ -333,7 +337,7 @@ public class TagsListFragment extends BaseFragment {
 
 		protected abstract void bind(View itemView);
 
-		public void set(final Tag item) {
+		public void set(final Label item) {
 			_item = item;
 			invalidate();
 		}
@@ -343,11 +347,11 @@ public class TagsListFragment extends BaseFragment {
 
 	@Override
 	public String getFragmentTag() {
-		return "tags";
+		return "labels";
 	}
 
 	@Override
 	public String getTitle() {
-		return "Tags";
+		return "Labels";
 	}
 }
