@@ -9,6 +9,11 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+
+import com.google.android.gms.common.util.Strings;
+
+import java.util.Collections;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -28,11 +33,52 @@ import im.getsocial.sdk.communities.GetSocialActivity;
 
 public class FeedFragment extends BaseSearchFragment<ActivitiesQuery, GetSocialActivity> {
 
+    String _reaction;
+    String _reactionGroup;
+
+    public static FeedFragment bookmarkedActivities() {
+        final FeedFragment fragment = new FeedFragment();
+        final Bundle args = new Bundle();
+        args.putString("reactionGroup", "bookmarks");
+        fragment.setArguments(args);
+        return fragment;
+    }
+
+    public static FeedFragment reactedActivities(String reaction) {
+        final FeedFragment fragment = new FeedFragment();
+        final Bundle args = new Bundle();
+        args.putString("reactionGroup", "reactions");
+        args.putString("reaction", reaction);
+        fragment.setArguments(args);
+        return fragment;
+    }
+
+    public static FeedFragment votedActivities() {
+        final FeedFragment fragment = new FeedFragment();
+        final Bundle args = new Bundle();
+        args.putString("reactionGroup", "votes");
+        fragment.setArguments(args);
+        return fragment;
+    }
+
     @Override
     public void onViewCreated(final View view, @Nullable final Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         _query.setVisibility(View.GONE);
     }
+
+    @Override
+    public void onCreate(@Nullable final Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        if (savedInstanceState != null) {
+            setArguments(savedInstanceState);
+        }
+        if  (getArguments()!=null) {
+            _reaction = getArguments().getString("reaction", "");
+            _reactionGroup = getArguments().getString("reactionGroup", "");
+        }
+    }
+
 
     @Override
     protected BaseSearchAdapter<? extends ViewHolder> createAdapter() {
@@ -53,6 +99,17 @@ public class FeedFragment extends BaseSearchFragment<ActivitiesQuery, GetSocialA
 
     @Override
     protected ActivitiesQuery createQuery(final SearchObject searchObject) {
+        if (!Strings.isEmptyOrWhitespace(_reactionGroup)) {
+
+            switch (_reactionGroup) {
+                case "votes":
+                    return ActivitiesQuery.votedActivities(null);
+                case "bookmarks":
+                    return ActivitiesQuery.bookmarkedActivities();
+                case "reactions":
+                    return ActivitiesQuery.reactedActivities(!Strings.isEmptyOrWhitespace(_reaction) ? Collections.singletonList(_reaction) : null);
+            }
+        }
         return ActivitiesQuery.activitiesInTopic("DemoFeed");
     }
 
@@ -63,6 +120,9 @@ public class FeedFragment extends BaseSearchFragment<ActivitiesQuery, GetSocialA
 
     @Override
     public String getTitle() {
+        if (!Strings.isEmptyOrWhitespace(_reactionGroup)) {
+            return _reactionGroup + (!Strings.isEmptyOrWhitespace(_reaction) ? ":" + _reaction : "");
+        }
         return "Feed";
     }
 
@@ -80,6 +140,12 @@ public class FeedFragment extends BaseSearchFragment<ActivitiesQuery, GetSocialA
 
         @BindView(R.id.activity_reactions)
         TextView _myReactions;
+
+        @BindView(R.id.activity_isBookmarked)
+        TextView _isbookmarked;
+
+        @BindView(R.id.activity_bookmarksCount)
+        TextView _bookmarksCount;
 
         ActivityViewHolder(final View view) {
             super(view);
@@ -101,7 +167,15 @@ public class FeedFragment extends BaseSearchFragment<ActivitiesQuery, GetSocialA
                     String reactions = _item.getReactions().toString();
                     String myReactions = _item.getMyReactions().toString();
                     String reactionsCount = _item.getReactionsCount().toString();
-                    showAlert("Details", String.format("Known reactors: %s, my reactions: %s, reactions count: %s", reactions, myReactions, reactionsCount));
+                    String isBookmarked = String.valueOf(_item.isBookmarked());
+                    String bookmarksCount = String.valueOf(_item.getBookmarksCount());
+                    showAlert("Details", String.format("Known reactors: %s, " +
+                            "my reactions: %s, " +
+                            "reactions count: %s, " +
+                            "isBookmarked: %s, " +
+                            "bookmarks count: %s",
+                            reactions, myReactions, reactionsCount, isBookmarked, bookmarksCount
+                    ));
                 }
             });
             dialog.addAction(new ActionDialog.Action("Comment Details") {
@@ -211,6 +285,41 @@ public class FeedFragment extends BaseSearchFragment<ActivitiesQuery, GetSocialA
                     });
                 }
             });
+
+            if (!_item.isBookmarked()) {
+                dialog.addAction(new ActionDialog.Action("Bookmark") {
+                    @Override
+                    public void execute() {
+                        FailureCallback failureCallback = error -> {
+                            hideLoading();
+                            _log.logErrorAndToast("Failed to add bookmark, error: " + error.getMessage());
+                        };
+
+                        Communities.bookmark(_item.getId(),
+                                () -> updateActivity(_item, () -> {
+                                    hideLoading();
+                                    showAlert("Success", "Bookmark added");
+                                }, failureCallback), failureCallback);
+                    }
+                });
+            } else {
+                dialog.addAction(new ActionDialog.Action("Remove bookmark") {
+                    @Override
+                    public void execute() {
+                        FailureCallback failureCallback = error -> {
+                            hideLoading();
+                            _log.logErrorAndToast("Failed to remove bookmark, error: " + error.getMessage());
+                        };
+
+                        Communities.removeBookmark(_item.getId(),
+                                () -> updateActivity(_item, () -> {
+                            hideLoading();
+                            showAlert("Success", "Bookmark removed");
+                        }, failureCallback), failureCallback);
+                    }
+                });
+            }
+
             dialog.show();
 
         }
@@ -238,9 +347,11 @@ public class FeedFragment extends BaseSearchFragment<ActivitiesQuery, GetSocialA
 
         @Override
         protected void invalidate() {
-            _authorName.setText(_item.getAuthor().getDisplayName());
-            _activityText.setText(_item.getText());
-            _myReactions.setText(_item.getMyReactions().toString());
+            _authorName.setText("Author: " + _item.getAuthor().getDisplayName());
+            _activityText.setText("Text: " + _item.getText());
+            _myReactions.setText("My reactions: [" + _item.getMyReactions().toString() + "]");
+            _bookmarksCount.setText("Bookmarks Count: " + String.valueOf(_item.getBookmarksCount()));
+            _isbookmarked.setText("Is bookmarked: " +String.valueOf(_item.isBookmarked()));
         }
 
         private void updateActivity(GetSocialActivity activity, CompletionCallback callback, FailureCallback failureCallback) {

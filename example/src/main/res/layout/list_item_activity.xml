@@ -31,6 +31,24 @@
 		android:layout_height="wrap_content"
 		android:maxLines="3"/>
 
+	<TextView
+		android:id="@+id/activity_isBookmarked"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:layout_marginLeft="8dp"
+		android:layout_marginTop="8dp"
+		android:layout_marginRight="8dp"
+		android:maxLines="3" />
+
+	<TextView
+		android:id="@+id/activity_bookmarksCount"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:layout_marginLeft="8dp"
+		android:layout_marginTop="8dp"
+		android:layout_marginRight="8dp"
+		android:maxLines="3" />
+
 	<LinearLayout
 			android:layout_marginTop="8dp"
 			android:layout_marginLeft="8dp"

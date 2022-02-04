@@ -254,6 +254,7 @@ public class MainActivity extends AppCompatActivity implements BaseFragment.Acti
 
 	@Override
 	public void onNotificationClicked(final Notification notification, final NotificationContext context) {
+		_log.logInfoAndToast("Notification clicked");
 		if (context.getActionButtonId() == null) {
 			if (ActionTypes.ADD_FRIEND.equals(notification.getAction().getType())) {
 				showAddFriendDialog(notification);

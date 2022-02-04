@@ -23,6 +23,7 @@ import im.getsocial.sdk.communities.UserIdList;
 import im.getsocial.sdk.ui.communities.ActivityFeedViewBuilder;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -152,6 +153,14 @@ public abstract class BaseUsersListFragment<Query> extends BaseSearchFragment<Qu
 									ActivitiesQuery.everywhere().byUser(
 													UserId.create(_item.getId())
 									)
+					).show();
+				}
+			});
+			dialog.addAction(new ActionDialog.Action("User's mentions") {
+				@Override
+				public void execute() {
+					ActivityFeedViewBuilder.create(
+							ActivitiesQuery.everywhere().withMentions(Collections.singletonList(UserId.create(_item.getId())))
 					).show();
 				}
 			});

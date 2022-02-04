@@ -43,6 +43,14 @@ public class ActivitiesListFragment extends BaseSearchFragment<ActivitiesQuery, 
     private String _sortKey;
     private String _sortDirection;
 
+    public static Fragment bookmarkedActivities() {
+        final ActivitiesListFragment fragment = new ActivitiesListFragment();
+        final Bundle args = new Bundle();
+        args.putBoolean("currentuserfeed", true);
+        fragment.setArguments(args);
+        return fragment;
+    }
+
     public static Fragment currentUserFeed() {
         final ActivitiesListFragment fragment = new ActivitiesListFragment();
         final Bundle args = new Bundle();
