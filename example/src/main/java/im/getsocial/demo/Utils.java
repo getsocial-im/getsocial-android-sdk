@@ -18,9 +18,10 @@ public final class Utils {
 	public static final String PROD = "Production";
 	public static final String TESTING_SSL = "Testing SSL";
 	public static final String TESTING = "Testing";
+	public static final String LOCAL = "Local";
 
 	// this should match what we have in HadesConfigurationProvider
-	public static final List<String> HADES_CONFIGS = Arrays.asList(PROD, TESTING_SSL, TESTING);
+	public static final List<String> HADES_CONFIGS = Arrays.asList(PROD, TESTING_SSL, TESTING, LOCAL);
 
 	private static final String KEY_HADES_CONFIGS = "hades_configuration";
 	private static final String KEY_CUSTOM_FB = "custom_fb";

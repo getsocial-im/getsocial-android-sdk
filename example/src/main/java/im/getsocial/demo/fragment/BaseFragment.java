@@ -69,6 +69,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 public abstract class BaseFragment extends Fragment implements HasTitle, HasFragmentTag {
 
@@ -599,5 +600,31 @@ public abstract class BaseFragment extends Fragment implements HasTitle, HasFrag
 		}
 
 		protected abstract void onSafeSuccess();
+	}
+
+	protected String joinElements(List<String> elements) {
+ 		StringBuilder elementsBuilder = new StringBuilder();
+		for(String str: elements) {
+			elementsBuilder.append(str);
+			elementsBuilder.append(",");
+		}
+		if (elementsBuilder.length() > 0) {
+			elementsBuilder.deleteCharAt(elementsBuilder.length() - 1);
+		}
+		return elementsBuilder.toString();
+	}
+
+	protected String joinElements(Map<String, String> elements) {
+		StringBuilder elementsBuilder = new StringBuilder();
+		for(Map.Entry<String, String> element: elements.entrySet()) {
+			elementsBuilder.append(element.getKey());
+			elementsBuilder.append("=");
+			elementsBuilder.append(element.getValue());
+			elementsBuilder.append(",");
+		}
+		if (elementsBuilder.length() > 0) {
+			elementsBuilder.deleteCharAt(elementsBuilder.length() - 1);
+		}
+		return elementsBuilder.toString();
 	}
 }

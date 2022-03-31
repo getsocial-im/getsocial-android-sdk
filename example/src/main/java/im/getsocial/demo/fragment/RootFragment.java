@@ -88,6 +88,7 @@ public class RootFragment extends BaseListFragment implements NotificationsManag
 							return "You have " + count + " friends";
 						})),
 						navigationListItem("Invites", InvitesFragment.class),
+						navigationListItem("Search", SearchFragment.class),
 						navigationListItem("Activities", ActivitiesFragment.class),
 						navigationListItem("Topics", TopicsSearchFragment.class),
 						navigationListItem("Tags", TagsListFragment.class),
