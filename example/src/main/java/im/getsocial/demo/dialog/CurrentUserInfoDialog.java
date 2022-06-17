@@ -64,32 +64,34 @@ public class CurrentUserInfoDialog extends DialogFragment {
 		userDetails.put("Identities", GetSocial.getCurrentUser().getIdentities());
 		userDetails.put("Public Properties", GetSocial.getCurrentUser().getPublicProperties());
 		userDetails.put("Private Properties", GetSocial.getCurrentUser().getPrivateProperties());
+		userDetails.put("Is Verified", GetSocial.getCurrentUser().isVerified());
 
 		final UserInfoBuilder sb = new UserInfoBuilder();
 		sb.append("Anonymous: ").append(GetSocial.getCurrentUser().isAnonymous())
 						.endLine()
 						.append("User ID: ").append(GetSocial.getCurrentUser().getId()).endLine()
-						.append("Avatar URL: ").append(GetSocial.getCurrentUser().getAvatarUrl()).endLine()
-						.endLine();
+						.append("Avatar URL: ").append(GetSocial.getCurrentUser().getAvatarUrl()).endLine();
 
 		if (!GetSocial.getCurrentUser().isAnonymous()) {
-			sb.append("IDENTITIES:").endLine()
+			sb.append("Identities:").endLine()
 							.append(GetSocial.getCurrentUser().getIdentities());
 		}
-		sb.append("PUBLIC PROPERTIES:").endLine()
+		sb.append("Public Properties:").endLine()
 						.append(GetSocial.getCurrentUser().getPublicProperties());
 
-		sb.append("PRIVATE PROPERTIES:").endLine()
+		sb.append("Private Properties:").endLine()
 						.append(GetSocial.getCurrentUser().getPrivateProperties());
 
-		sb.append("BAN INFO").endLine();
 		sb.append("Is banned: ").append(GetSocial.getCurrentUser().isBanned()).endLine();
+
 		if (GetSocial.getCurrentUser().isBanned()) {
 			sb.append("Expiry: ").append("" + GetSocial.getCurrentUser().getBanInfo().getExpiry()).endLine();
 			sb.append("Reason: ").append(GetSocial.getCurrentUser().getBanInfo().getReason()).endLine();
 		}
 
-		sb.append("JSON:").endLine()
+		sb.append("Verified: ").append(GetSocial.getCurrentUser().isVerified()).endLine();
+
+		sb.append("json:").endLine()
 						.append(toJson(userDetails));
 
 		return sb.toString();
