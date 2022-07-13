@@ -97,6 +97,7 @@ public class RootFragment extends BaseListFragment implements NotificationsManag
 						navigationListItem("Chats", ChatsFragment.class),
 						navigationListItem("Users", UsersSearchFragment.class),
 						navigationListItem("Users by IDs", TestUsersByIdFragment.class),
+						navigationListItem("Blocked Users", BlockedUsersFragment.class),
 						navigationListItem("Notifications", NotificationsFragment.class, builder -> builder.withSubtitle(() -> "You have " + _notificationsManager.getNewNotificationsCount() + " new notifications")),
 						navigationListItem("Promo Codes", PromoCodesFragment.class),
 						navigationListItem("UI Customization", UiCustomizationFragment.class, builder -> builder.withSubtitle(() -> {

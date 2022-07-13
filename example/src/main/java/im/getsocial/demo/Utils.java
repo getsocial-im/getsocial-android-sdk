@@ -43,7 +43,7 @@ public final class Utils {
 					if (startActivityIntent != null) {
 						startActivityIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 						final int mPendingIntentId = 424242;
-						final PendingIntent pendingIntent = PendingIntent.getActivity(context, mPendingIntentId, startActivityIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+						final PendingIntent pendingIntent = PendingIntent.getActivity(context, mPendingIntentId, startActivityIntent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 						final AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
 						alarmManager.set(AlarmManager.RTC, System.currentTimeMillis() + 100, pendingIntent);
 

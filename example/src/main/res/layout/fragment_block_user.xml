@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+		android:orientation="vertical"
+		android:gravity="center_horizontal"
+		android:layout_width="match_parent"
+		android:layout_height="match_parent">
+
+	<LinearLayout
+			android:orientation="vertical"
+			android:layout_width="match_parent"
+			android:layout_height="match_parent">
+
+		<EditText
+				android:id="@+id/addgroupmember_user_id"
+				android:hint="ID"
+				android:maxLines="1"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content" />
+
+		<EditText
+				android:id="@+id/addgroupmember_provider_id"
+				android:hint="Provider ID"
+				android:maxLines="1"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content" />
+
+		<Button
+			android:id="@+id/block_user"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:text="Block User" />
+	</LinearLayout>
+
+</ScrollView>
