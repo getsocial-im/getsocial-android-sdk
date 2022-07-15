@@ -28,11 +28,11 @@ import im.getsocial.sdk.Communities;
 import im.getsocial.sdk.FailureCallback;
 import im.getsocial.sdk.common.PagingQuery;
 import im.getsocial.sdk.common.PagingResult;
-import im.getsocial.sdk.communities.BlockedUsersQuery;
+import im.getsocial.sdk.common.SimplePagingQuery;
 import im.getsocial.sdk.communities.User;
 import im.getsocial.sdk.communities.UserIdList;
 
-public class BlockedUsersFragment extends BaseSearchFragment<BlockedUsersQuery, User> {
+public class BlockedUsersFragment extends BaseSearchFragment<SimplePagingQuery, User> {
 
     @Override
     public void onViewCreated(final View view, @Nullable final Bundle savedInstanceState) {
@@ -53,8 +53,8 @@ public class BlockedUsersFragment extends BaseSearchFragment<BlockedUsersQuery, 
     }
 
     @Override
-    protected void load(PagingQuery<BlockedUsersQuery> query, Callback<PagingResult<User>> success, FailureCallback failure) {
-        Communities.getBlockedUsers(query, success, failure);
+    protected void load(PagingQuery<SimplePagingQuery> query, Callback<PagingResult<User>> success, FailureCallback failure) {
+        Communities.getBlockedUsers(query.getQuery(), success, failure);
     }
 
     @Override
@@ -75,10 +75,9 @@ public class BlockedUsersFragment extends BaseSearchFragment<BlockedUsersQuery, 
     private void blockUsers() {
         addContentFragment(BlockUserFragment.create());
     }
-
-    @Override
-    protected BlockedUsersQuery createQuery(SearchObject searchObject) {
-        return null;
+    
+    protected SimplePagingQuery createQuery(final SearchObject searchObject) {
+        return SimplePagingQuery.simple(50);
     }
 
     @Override
