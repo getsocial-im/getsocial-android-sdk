@@ -2,7 +2,9 @@ package im.getsocial.demo.fragment;
 
 import android.os.Bundle;
 import android.view.View;
+
 import androidx.annotation.Nullable;
+
 import im.getsocial.sdk.Callback;
 import im.getsocial.sdk.Communities;
 import im.getsocial.sdk.FailureCallback;
@@ -18,7 +20,6 @@ public abstract class FollowersFragment extends BaseUsersListFragment<FollowersQ
 	@Override
 	public void onViewCreated(final View view, @Nullable final Bundle savedInstanceState) {
 		super.onViewCreated(view, savedInstanceState);
-		_query.setVisibility(View.GONE);
 		loadCount(createQuery(SearchObject.empty()), result -> {
 			_count = result;
 			_activityListener.invalidateUi();
@@ -34,5 +35,6 @@ public abstract class FollowersFragment extends BaseUsersListFragment<FollowersQ
 	protected void load(final PagingQuery<FollowersQuery> query, final Callback<PagingResult<User>> success, final FailureCallback failure) {
 		Communities.getFollowers(query, success, failure);
 	}
+
 
 }

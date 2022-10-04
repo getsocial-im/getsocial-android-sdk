@@ -86,15 +86,19 @@ public class AddGroupMemberFragment extends BaseFragment {
                 status = MemberStatus.MEMBER;
                 break;
             }
+            case 3: {
+                status = MemberStatus.REJECTED;
+                break;
+            }
         }
         Editable providerId = _viewContainer._providerId.getText();
         UserIdList memberId = providerId != null && providerId.length() > 0 ?
-            UserIdList.createWithProvider(providerId.toString(), userId.toString()) : UserIdList.create(userId.toString());
+                UserIdList.createWithProvider(providerId.toString(), userId.toString()) : UserIdList.create(userId.toString());
         AddGroupMembersQuery query = AddGroupMembersQuery.create(_groupId, memberId)
                 .withRole(role).withMemberStatus(status);
         Communities.addGroupMembers(query,
                 result -> Toast.makeText(getContext(), "Group member added", Toast.LENGTH_SHORT).show(),
-                error -> Toast.makeText(getContext(), error.toString(), Toast.LENGTH_SHORT).show() );
+                error -> Toast.makeText(getContext(), error.toString(), Toast.LENGTH_SHORT).show());
 
     }
 
